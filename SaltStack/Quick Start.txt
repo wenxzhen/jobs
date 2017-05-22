@@ -1,0 +1,41 @@
+chkconfig salt-minion on
+
+service salt-minion start
+service salt-master start
+service salt-master restart
+
+service salt-minion restart
+
+cat /etc/salt/minion | egrep ^[^#]
+
+cat /etc/salt/master | egrep ^[^#]
+cat /etc/salt/minion | egrep ^[^#]
+
+
+
+[root@salt00 ~]# salt-key -A
+The following keys are going to be accepted:
+Unaccepted Keys:
+salt01
+salt02
+salt03
+Proceed? [n/Y] Y
+Key for minion salt01 accepted.
+Key for minion salt02 accepted.
+Key for minion salt03 accepted.
+[root@salt00 ~]# salt-key 
+Accepted Keys:
+salt01
+salt02
+salt03
+Denied Keys:
+Unaccepted Keys:
+Rejected Keys:
+
+[root@salt00 ~]# cat /etc/salt/master | egrep ^[^#]
+interface: 0.0.0.0
+
+[root@salt01 ~]# cat /etc/salt/minion | egrep ^[^#]
+master: salt00
+id: salt01
+[root@salt01 ~]# 

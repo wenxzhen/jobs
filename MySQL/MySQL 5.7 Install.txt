@@ -1,0 +1,45 @@
+https://repo.mysql.com//mysql57-community-release-el7-9.noarch.rpm
+
+
+yum localinstall mysql57-community-release-el7-9.noarch.rpm
+
+
+yum repolist enabled | grep "mysql.*-community.*"
+
+
+yum install mysql-community-server
+
+
+systemctl enable mysqld.service
+
+systemctl start mysqld.service
+
+systemctl status mysqld.service
+
+
+grep 'temporary password' /var/log/mysqld.log
+
+
+
+ mysql -uroot -p
+
+
+
+[root@master02 hadoop]# systemctl enable mysqld.service
+[root@master02 hadoop]# grep 'temporary password' /var/log/mysqld.log
+2017-02-10T14:31:55.923411Z 1 [Note] A temporary password is generated for root@localhost: yh4jcMjLLo(S
+
+[root@master02 hadoop]# mysql -uroot -p
+Enter password: 
+
+
+
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'csdn.net';
+
+
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql57@csdn.net';
+ERROR 1819 (HY000): Your password does not satisfy the current policy requirements
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'MySQL57@csdn.net';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> 

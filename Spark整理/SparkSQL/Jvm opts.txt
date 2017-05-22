@@ -1,0 +1,23 @@
+spark-1.6.0-bin-cdh4]$ sbin/start-thriftserver.sh --master spark://hadoop001:7077  --driver-cores 4 --driver-memory 2G --executor-memory 4G
+spark-1.6.0-bin-cdh4]$ 
+
+!connect jdbc:hive2://hadoop001:10000
+
+
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/guava-11.0.2.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/ezmorph-1.0.4.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/commons-beanutils-1.7.0.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/json-lib-2.2.2-jdk15.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/logpig.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/hive_udf.jar;
+
+CREATE TEMPORARY FUNCTION expid AS 'net.csdn.hive.cf2.ExtractProduct2';  
+
+
+select pdate, expid(curl,'pid9.properties') as pid,  count(1) as pv  from file_pv_track where pdate >= '2016-01-21' and pdate <= '2016-01-23' 
+group by pdate, expid(curl,'pid9.properties') having pid = 'iteye' ;
+
+
+sbin/start-thriftserver.sh --master spark://hadoop001:7077  --executor-memory 6G --conf spark.executor.extraJavaOptions="-XX:MaxDirectMemorySize=256m -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCApplicationStoppedTime -XX:+PrintHeapAtGC -XX:+PrintGCApplicationConcurrentTime -Xloggc:/data/bigData/gc8.log"
+
+sbin/start-thriftserver.sh --master spark://hadoop001:7077  --executor-memory 8G --conf spark.executor.extraJavaOptions=" -Xmn6G -XX:MaxDirectMemorySize=256m -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -XX:+PrintGC -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data/bigData/exe.dump -Xloggc:/data/bigData/gc8.log"

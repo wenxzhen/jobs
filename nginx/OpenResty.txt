@@ -1,0 +1,4 @@
+https://www.gitbook.com/book/moonbingbing/openresty-best-practices/details
+
+
+https://github.com/openresty/lua-nginx-module

@@ -1,0 +1,12 @@
+mysqldump -uambari -p -S /tmp/mysql_3306.sock zeus > zeus.sql
+mysqldump -uroot -p -h localhost zeus > zeus.sql
+
+mysqldump -uambari -p -hcsdn-hdp-124.csdn zeus > zeus_bak.sql
+
+update zeus_host_relation set host='192.168.100.84';
+ source /tmp/zeus_bak.sql;
+ 
+ 
+
+http://www.cnblogs.com/VinCandy/articles/5660997.html
+http://www.111cn.net/database/mysql/33830.htm

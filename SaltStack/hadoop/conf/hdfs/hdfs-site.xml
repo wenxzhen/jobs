@@ -1,0 +1,193 @@
+{%- from 'hadoop/settings.sls' import hadoop with context %}
+{%- from 'hadoop/hdfs/settings.sls' import hdfs with context %}
+{%- set dyn_cfg = hdfs.get('config_hdfs_site', {}) %}
+{%- set major = hadoop.major_version|string() -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+{%- if hdfs.namenode_count == 2 %}
+{%- from 'zookeeper/settings.sls' import zk with context %}
+{%- else %}
+{%- set zk = {} %}
+{%- endif %}
+
+<configuration>
+    <property>
+{%- if major == '1' %}
+        <name>dfs.name.dir</name>
+{%- else %}
+        <name>dfs.namenode.name.dir</name>
+{%- endif %}
+        <value>
+{%- for d in hdfs.local_disks -%}
+{%- if loop.last -%}
+file://{{ d }}/hdfs/nn
+{%- else -%}
+file://{{ d }}/hdfs/nn,
+{%- endif -%}
+{%- endfor -%}</value>
+        <final>true</final>
+    </property>
+
+    <property>
+{%- if major == '1' %}
+        <name>dfs.data.dir</name>
+{%- else %}
+        <name>dfs.datanode.data.dir</name>
+{%- endif %}
+        <value>
+{%- for d in hdfs.local_disks -%}
+{%- if loop.last -%}
+file://{{ d }}/hdfs/dn
+{%- else -%}
+file://{{ d }}/hdfs/dn,
+{%- endif -%}
+{%- endfor -%}</value>
+        <final>true</final>
+    </property>
+
+{%- if major == '2' %}
+    <property>
+        <name>dfs.namenode.checkpoint.dir</name>
+        <value>
+{%- for d in hdfs.local_disks -%}
+{%- if loop.last -%}
+file://{{ d }}/hdfs/snn
+{%- else -%}
+file://{{ d }}/hdfs/snn,
+{%- endif -%}
+{%- endfor -%}</value>
+        <final>true</final>
+    </property>
+{%- endif %}
+
+{%- if hdfs.namenode_count == 1 %}
+    <property>
+{%- if major == '1' %}
+        <name>dfs.http-address</name>
+{%- else %}
+        <name>dfs.namenode.http-address</name>
+{%- endif %}
+        <value>{{ hdfs.namenode_host }}:{{ hdfs.namenode_http_port }}</value>
+        <final>true</final>
+    </property>
+
+    <property>
+{%- if major == '1' %}
+        <name>dfs.secondary.http-address</name>
+{%- else %}
+        <name>dfs.secondary.namenode.http-address</name>
+{%- endif %}
+        <value>{{ hdfs.namenode_host }}:{{ hdfs.secondarynamenode_http_port }}</value>
+        <final>true</final>
+    </property>
+{%- else %}
+    <!-- setting up namenode HA as two namenodes are configured in Salt -->
+    <property>
+        <name>dfs.nameservices</name>
+        <value>{{hdfs.ha_cluster_id}}</value>
+    </property>
+
+    <property>
+        <name>dfs.ha.namenodes.{{hdfs.ha_cluster_id}}</name>
+        <value>nn1,nn2</value>
+    </property>
+
+    <property>
+        <name>dfs.namenode.rpc-address.{{hdfs.ha_cluster_id}}.nn1</name>
+        <value>{{hdfs.namenode_hosts|first()}}:{{hdfs.namenode_port}}</value>
+    </property>
+
+    <property>
+        <name>dfs.namenode.rpc-address.{{hdfs.ha_cluster_id}}.nn2</name>
+        <value>{{hdfs.namenode_hosts|last()}}:{{hdfs.ha_namenode_port}}</value>
+    </property>
+
+    <property>
+        <name>dfs.namenode.http-address.{{hdfs.ha_cluster_id}}.nn1</name>
+        <value>{{hdfs.namenode_hosts|first()}}:{{hdfs.namenode_http_port}}</value>
+    </property>
+
+    <property>
+      <name>dfs.namenode.http-address.{{hdfs.ha_cluster_id}}.nn2</name>
+      <value>{{hdfs.namenode_hosts|last()}}:{{hdfs.ha_namenode_http_port}}</value>
+    </property>
+
+    <!-- todo: setup https? -->
+
+    <!-- doc says:
+         You may only use a single path for this configuration.
+         Redundancy for this data is provided by running multiple separate JournalNodes,
+         or by configuring this directory on a locally-attached RAID array
+
+         Also: (not quite documented) you cannot use a file:// url for this path 
+       -->
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>
+{%- for d in hdfs.local_disks -%}
+{%- if loop.first -%}
+{{ d }}/hdfs/journal
+{%- endif %}
+{%- endfor %}</value>
+        <final>true</final>
+    </property>
+
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://{{hdfs.quorum_connection_string}}/{{hdfs.ha_cluster_id}}</value>
+    </property>
+
+    <property>
+        <name>dfs.client.failover.proxy.provider.{{hdfs.ha_cluster_id}}</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+
+{%- if zk.items()|count() > 0 %}
+    <!-- zookeeper and fencing configuration -->
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>ha.zookeeper.quorum</name>
+        <value>{{ zk.connection_string }}</value>
+    </property>
+
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>sshfence</value>
+    </property>
+
+    <property>
+        <name>dfs.ha.fencing.ssh.private-key-files</name>
+        <value>/home/hdfs/.ssh/id_dsa</value>
+    </property>
+{%- endif %}
+    <!-- end of HA attributes section -->
+{%- endif %}
+
+    <property>
+        <name>dfs.hosts</name>
+        <value>{{ hadoop.alt_config }}/dfs.hosts</value>
+    </property>
+
+    <property>
+        <name>dfs.hosts.exclude</name>
+        <value>{{ hadoop.alt_config }}/dfs.hosts.exclude</value>
+    </property>
+
+    <property>
+        <name>dfs.replication</name>
+        <value>{{ hdfs.replicas }}</value>
+    </property>
+
+{%- for name, subdict in dyn_cfg.items() %}
+    <property>
+        <name>{{ name }}</name>
+{%- for k,v in subdict.items() %}
+        <{{k}}>{{ v }}</{{k}}>
+{%- endfor %}
+    </property>
+{%- endfor %}
+</configuration>

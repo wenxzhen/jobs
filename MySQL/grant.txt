@@ -1,0 +1,37 @@
+CREATE USER 'ambari'@'localhost' IDENTIFIED BY 'ambari';
+GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'localhost' WITH GRANT OPTION;
+
+CREATE USER 'ambari'@'%' IDENTIFIED BY 'ambari';
+GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'%' WITH GRANT OPTION;
+
+FLUSH PRIVILEGES;
+
+show grants for ambari;
+show grants for ambari@'%';
+show grants for ambari@'localhost';
+
+
+
+grant all privileges on *.* to 'root'@'%' identified by 'csdn.net' with grant option;
+
+
+grant all privileges on ambari.* to 'ambari'@'%' identified by 'ambaricsdnnet' with grant option;
+grant all privileges on hive.* to 'hive'@'%' identified by 'hive.csdn.net' with grant option;
+
+grant all privileges on oozie.* to 'oozie'@'%' identified by 'oozie.csdn.net' with grant option;
+
+grant all privileges on ranger.* to 'ranger'@'%' identified by 'ranger.csdn.net' with grant option;
+grant all privileges on *.* to 'ranger'@'%' identified by 'ranger.csdn.net' with grant option;
+
+grant all privileges on rangerkms.* to 'rangerkms'@'%' identified by 'rangerkms.csdn.net' with grant option;
+grant all privileges on *.* to 'rangerkms'@'%' identified by 'rangerkms.csdn.net' with grant option;
+
+
+REVOKE ALL PRIVILEGES on *.* FROM 'root'@'%';
+REVOKE GRANT OPTION on *.* FROM 'root'@'%';
+REVOKE USAGE on *.* FROM 'root'@'%';
+
+
+ GRANT USAGE ON *.* TO 'root'@'%' IDENTIFIED BY 'csdn.net'

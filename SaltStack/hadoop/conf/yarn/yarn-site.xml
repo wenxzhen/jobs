@@ -1,0 +1,82 @@
+{%- from 'hadoop/settings.sls' import hadoop with context %}
+{%- from 'hadoop/hdfs/settings.sls' import hdfs with context %}
+{%- from 'hadoop/mapred/settings.sls' import mapred with context %}
+{%- from 'hadoop/yarn/settings.sls' import yarn with context %}
+{%- set dyn_cfg = yarn.get('config_yarn_site', {}) %}
+{%- set major = hadoop.major_version|string() -%}<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+    <property>
+        <name>yarn.resourcemanager.scheduler.address</name>
+        <value>{{ yarn.resourcemanager_host }}:{{ yarn.scheduler_port }}</value>
+    </property>
+     
+    <property>
+        <name>yarn.resourcemanager.resource-tracker.address</name>
+        <value>{{ yarn.resourcemanager_host }}:{{ yarn.resourcetracker_port }}</value>
+    </property>
+     
+    <property>
+        <name>yarn.resourcemanager.address</name>
+        <value>{{ yarn.resourcemanager_host }}:{{ yarn.resourcemanager_port }}</value>
+    </property>
+     
+    <property>
+        <name>yarn.resourcemanager.admin.address</name>
+        <value>{{ yarn.resourcemanager_host }}:{{ yarn.resourcemanager_admin_port }}</value>
+    </property>
+     
+    <property>
+        <name>yarn.resourcemanager.webapp.address</name>
+        <value>{{ yarn.resourcemanager_host }}:{{ yarn.resourcemanager_webapp_port }}</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.address</name>
+        <value>0.0.0.0:{{ yarn.nodemanager_port }}</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.webapp.address</name>
+        <value>0.0.0.0:{{ yarn.nodemanager_webapp_port }}</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.localizer.address</name>
+        <value>0.0.0.0:{{ yarn.nodemanager_localizer_port }}</value>
+    </property>
+
+    <property>
+        <name>yarn.log.server.url</name>
+        <value>http://{{ mapred.jobtracker_host }}:{{ mapred.jobhistory_webapp_port }}/jobhistory/logs/</value>
+        <description>URL for job history server</description>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.local-dirs</name>
+        <value>
+{%- for d in yarn.local_disks -%}
+{%- if loop.last -%}
+{{ d }}/yarn/local
+{%- else -%}
+{{ d }}/yarn/local,
+{%- endif -%}
+{%- endfor -%}</value>
+   </property>
+
+    <property>
+        <name>yarn.nodemanager.log-dirs</name>
+        <value>{{ yarn.first_local_disk }}/yarn/logs</value>
+    </property>
+
+{%- for name, subdict in dyn_cfg.items() %}
+    <property>
+        <name>{{ name }}</name>
+{%- for k,v in subdict.items() %}
+        <{{k}}>{{ v }}</{{k}}>
+{%- endfor %}
+    </property>
+
+{%- endfor %}
+</configuration>

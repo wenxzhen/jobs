@@ -1,0 +1,27 @@
+修改根目录下的pom文件，添加 cdh repository 和 profile
+
+<repository>
+  <id>cloudera-repo</id>
+  <name>Cloudera Repository</name>
+  <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+  <releases>
+    <enabled>true</enabled>
+  </releases>
+  <snapshots>
+    <enabled>false</enabled>
+  </snapshots>
+</repository>
+
+
+
+<profile>
+  <id>cdh5.8.2</id>
+  <properties>
+    <hadoop.version>2.6.0-cdh5.8.2</hadoop.version>
+    <hbase.version>2.6.0-cdh5.8.2</hbase.version>
+    <zookeeper.version>2.6.0-cdh5.8.2</zookeeper.version>
+  </properties>
+</profile>
+
+
+./dev/make-distribution.sh --name custom-spark --tgz -Pcdh5.8.2 -Phive -Phive-thriftserver -Pyarn

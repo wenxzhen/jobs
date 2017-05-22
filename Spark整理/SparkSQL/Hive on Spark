@@ -1,0 +1,164 @@
+export HIVE_SERVER2_THRIFT_PORT=10000
+export HIVE_SERVER2_THRIFT_BIND_HOST=192.168.88.128
+
+启动Hive metastore
+bin/hive --service metastore &
+
+nohup bin/hive --service metastore > hive-console.log 2>&1 &
+
+1、配置（hive 和 spark相同）：
+conf/hive-site.xml
+<?xml version="1.0"?>  
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+<!--通过jdbc协议连接mysql的hive库-->
+  <property>  
+    <name>javax.jdo.option.ConnectionURL</name>  
+    <value>jdbc:mysql://localhost:3306/hive_spark?createDatabaseIfNotExist=true</value>  
+    <description>JDBC connect string for a JDBC metastore</description>  
+  </property>
+
+<!--jdbc的mysql驱动-->
+  <property>  
+    <name>javax.jdo.option.ConnectionDriverName</name>  
+    <value>com.mysql.jdbc.Driver</value>  
+    <description>Driver class name for a JDBC metastore</description>  
+  </property>
+
+<!--mysql用户名-->
+  <property>  
+    <name>javax.jdo.option.ConnectionUserName</name>  
+    <value>root</value>  
+    <description>username to use against metastore database</description>  
+  </property>  
+
+<!--mysql用户密码-->    
+  <property>  
+    <name>javax.jdo.option.ConnectionPassword</name>  
+    <value>root</value>  
+    <description>password to use against metastore database</description>  
+  </property>
+
+
+<!--指定hive元数据访问路径-->
+<property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://hostname:9083</value>
+</property>
+
+</configuration>
+
+2、启动thriftserver
+./sbin/start-thriftserver.sh --master yarn
+
+3、beeline
+[spark@sparkmaster spark-1.4.0]$ bin/beeline 
+Beeline version 1.4.0 by Apache Hive
+beeline> !connect jdbc:hive2://192.168.88.128:10000
+scan complete in 2ms
+Connecting to jdbc:hive2://192.168.88.128:10000
+Enter username for jdbc:hive2://192.168.88.128:10000: 
+Enter password for jdbc:hive2://192.168.88.128:10000: 
+Connected to: Spark SQL (version 1.4.0)
+Driver: Spark Project Core (version 1.4.0)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://192.168.88.128:10000> 
+  
+  
+  
+  1,user1,15200776350,凤凰县,25,女,普通用户,20101019
+  
+create table people (id int,name string,password string) row format delimited fields terminated by ',';
+
+
+create external table users (id int,name string,phoneNo String,address string,age int, sex string,role string,birthday string)
+ row format delimited fields terminated by ','
+ location '/user/input';
+
+load data inpath '/user/users.txt' into table people ;
+
+create table olders (id int,name string,phoneNo String,address string,age int, sex string,role string,birthday string)
+ row format delimited fields terminated by ','
+ 
+ create table olders as select * from users where age > 500;
+
+insert overwrite table olders select * from users where age > 500;
+
+insert overwrite local directory  '/tmp/out' 
+ select * from users where age > 110;
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ #
+0: jdbc:hive2://192.168.6.80:10000> desc users;
++-----------+------------+----------+--+
+| col_name  | data_type  | comment  |
++-----------+------------+----------+--+
+| id        | int        | NULL     |
+| name      | string     | NULL     |
+| phoneno   | string     | NULL     |
+| address   | string     | NULL     |
+| age       | int        | NULL     |
+| sex       | string     | NULL     |
+| role      | string     | NULL     |
+| birthday  | string     | NULL     |
++-----------+------------+----------+--+
+8 rows selected (0.226 seconds)
+0: jdbc:hive2://192.168.6.80:10000> 
+
+
+0: jdbc:hive2://192.168.6.80:10000> DESCRIBE FORMATTED users;
++------------------------------------------------------------------------------------+--+
+|                                       result                                       |
++------------------------------------------------------------------------------------+--+
+| # col_name            	data_type           	comment                                |
+| 	 	                                                                                |
+| id                  	int                 	                                         |
+| name                	string              	                                         |
+| phoneno             	string              	                                         |
+| address             	string              	                                         |
+| age                 	int                 	                                         |
+| sex                 	string              	                                         |
+| role                	string              	                                         |
+| birthday            	string              	                                         |
+| 	 	                                                                                |
+| # Detailed Table Information	 	                                                    |
+| Database:           	default             	                                         |
+| Owner:              	hadoop              	                                         |
+| CreateTime:         	Thu Jan 21 17:07:41 CST 2016	                                 |
+| LastAccessTime:     	UNKNOWN             	                                         |
+| Protect Mode:       	None                	                                         |
+| Retention:          	0                   	                                         |
+| Location:           	hdfs://API:9000/user/input	                                   |
+| Table Type:         	EXTERNAL_TABLE      	                                         |
+| Table Parameters:	 	                                                               |
+| 	COLUMN_STATS_ACCURATE	false                                                       |
+| 	EXTERNAL            	TRUE                                                         |
+| 	numFiles            	0                                                            |
+| 	numRows             	-1                                                           |
+| 	rawDataSize         	-1                                                           |
+| 	totalSize           	0                                                            |
+| 	transient_lastDdlTime	1453367261                                                  |
+| 	 	                                                                                |
+| # Storage Information	 	                                                           |
+| SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	           |
+| InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	                     |
+| OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	   |
+| Compressed:         	No                  	                                         |
+| Num Buckets:        	-1                  	                                         |
+| Bucket Columns:     	[]                  	                                         |
+| Sort Columns:       	[]                  	                                         |
+| Storage Desc Params:	 	                                                            |
+| 	field.delim         	,                                                            |
+| 	serialization.format	,                                                            |
++------------------------------------------------------------------------------------+--+
+40 rows selected (0.458 seconds)
+0: jdbc:hive2://192.168.6.80:10000> 
+  

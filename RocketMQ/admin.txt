@@ -1,0 +1,46 @@
+export NAMESRV_ADDR=192.168.88.135:9876
+
+screen bash mqbroker -n 192.168.88.135:9876
+
+sh mqadmin consumerProgress -n 192.168.88.135:9876
+sh mqadmin deleteSubGroup -n 192.168.88.135:9876
+
+test-consumer-group
+The most commonly used mqadmin commands are:
+   updateTopic          Update or create topic
+   deleteTopic          Delete topic from broker and NameServer.
+   updateSubGroup       Update or create subscription group
+   deleteSubGroup       Delete subscription group from broker.
+   updateBrokerConfig   Update broker's config
+   topicRoute           Examine topic route info
+   topicStatus          Examine topic Status info
+   brokerStatus         Fetch broker runtime status data
+   queryMsgById         Query Message by Id
+   queryMsgByKey        Query Message by Key
+   queryMsgByOffset     Query Message by offset
+   printMsg             Print Message Detail
+   producerConnection   Query producer's socket connection and client version
+   consumerConnection   Query consumer's socket connection, client version and subscription
+   consumerProgress     Query consumers's progress, speed
+   consumerStatus       Query consumer's internal data structure
+   cloneGroupOffset     clone offset from other group.
+   clusterList          List all of clusters
+   topicList            Fetch all topic list from name server
+   updateKvConfig       Create or update KV config.
+   deleteKvConfig       Delete KV config.
+   wipeWritePerm        Wipe write perm of broker in all name server
+   resetOffsetByTime    Reset consumer offset by timestamp(without client restart).
+   updateOrderConf      Create or update or delete order conf
+   cleanExpiredCQ       Clean expired ConsumeQueue on broker.
+   startMonitoring      Start Monitoring
+   checkMsg             Check Message Store
+   statsAll             Topic and Consumer tps stats
+   syncDocs             Synchronize wiki and issue to github.com
+
+See 'mqadmin help <command>' for more information on a specific command.
+
+
+
+[root@uc zabbix_agentd.d]# zabbix_agentd -t queu-len[test-consumer-group]
+[root@uc zabbix_agentd.d]# zabbix_agentd -t uc-403
+uc-403                                        [t|0]

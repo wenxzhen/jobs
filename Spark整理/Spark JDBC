@@ -1,0 +1,173 @@
+import java.text.SimpleDateFormat
+import java.util.{Date, Properties}
+val connectionProperties = new Properties()
+connectionProperties.put("user", "bi")
+connectionProperties.put("password", "bi@123abc")
+connectionProperties.put("driver", "com.mysql.jdbc.Driver")
+connectionProperties.put("fetchsize", "100")
+
+connectionProperties.put("partitionColumn", "id")
+connectionProperties.put("lowerBound", "1")
+connectionProperties.put("upperBound", "510003245")
+connectionProperties.put("numPartitions", "100")
+val jdbc_url="jdbc:mysql://rm-2zec526nd9v7a99n3o.mysql.rds.aliyuncs.com:3306/resource2?autoReconnect=true&failOverReadOnly=false&maxReconnects=10"
+val jdbcDF2 = spark.read.jdbc(jdbc_url, "resource2.res_image", connectionProperties)
+
+val mysqlIdDF = jdbcDF2.select("asset_family","asset_format","asset_type","brand_id","category","collection_id","credit_line","graphical_style","id","image_state","is_copyright","keywords","license_type","offline_time","one_category","online_time","PROVIDER_ID","provider_res_id","quality_rank","res_id");
+mysqlIdDF.write.mode("overwrite").saveAsTable("mini_res_image")
+
+bin/spark-shell --master yarn \
+--jars mysql-connector-java-5.1.26.jar \
+--driver-memory 4G \
+--executor-memory 20G \
+--num-executors 5 \
+--conf spark.hadoop.yarn.timeline-service.enabled=false 
+
+
+
+| res_image | CREATE TABLE `res_image` (
+  `id` bigint(11) NOT NULL COMMENT '???id',
+  `res_id` varchar(64) DEFAULT NULL COMMENT '????',
+  `provider_res_id` varchar(32) DEFAULT NULL COMMENT '??????',
+  `brand_id` int(8) DEFAULT NULL,
+  `provider_id` int(8) DEFAULT NULL COMMENT '???id',
+  `provider_agent_type` int(1) DEFAULT NULL COMMENT '?????1??2 ??',
+  `collection_id` int(8) DEFAULT NULL COMMENT '????id',
+  `cfp_gic_id` varchar(255) DEFAULT NULL COMMENT 'cfp?gic????',
+  `asset_family` int(1) DEFAULT NULL COMMENT '????1???2???',
+  `asset_type` int(2) DEFAULT NULL COMMENT '????1??2??3??',
+  `license_type` int(1) DEFAULT NULL COMMENT '???? 1RM 2RF 3RR',
+  `graphical_style` int(2) DEFAULT NULL COMMENT '?????1????2 ?? 3?? 4?? 5???',
+  `asset_format` varchar(8) DEFAULT NULL COMMENT '????JPG, JPEG, GIF?',
+  `title` varchar(1024) DEFAULT NULL COMMENT '??',
+  `caption` text COMMENT '??',
+  `one_category` int(11) DEFAULT NULL COMMENT '????',
+  `category` varchar(128) DEFAULT NULL COMMENT '??????',
+  `quality_rank` int(1) DEFAULT NULL COMMENT '???? 1A 2B 3C 4D 5E ',
+  `keywords` varchar(2048) DEFAULT NULL COMMENT '???',
+  `image_state` int(1) DEFAULT NULL COMMENT '1??? 2??? 3????? 4?????? 5??????',
+  `online_state` int(1) DEFAULT NULL COMMENT '1???2???3???',
+  `online_time` datetime DEFAULT NULL COMMENT '????',
+  `offline_time` datetime DEFAULT NULL COMMENT '????',
+  `offline_reason` varchar(1024) DEFAULT NULL COMMENT '????',
+  `offline_mark` int(2) DEFAULT NULL COMMENT '0:????1:???? 2:????',
+  `keywords_reject_reason` varchar(1024) DEFAULT NULL COMMENT '??????????',
+  `image_reject_reason` varchar(1024) DEFAULT NULL COMMENT '?????????(rest)',
+  `credit_line` varchar(256) DEFAULT NULL COMMENT '????',
+  `pic_width` int(8) DEFAULT NULL COMMENT '?',
+  `pic_height` int(8) DEFAULT NULL COMMENT '?',
+  `pic_size` int(11) DEFAULT NULL COMMENT '???',
+  `color_type` int(1) DEFAULT NULL COMMENT '1??2??',
+  `date_camera_shot` datetime DEFAULT NULL COMMENT '????',
+  `country` varchar(254) DEFAULT NULL,
+  `province` varchar(50) DEFAULT NULL COMMENT '?',
+  `city` varchar(254) DEFAULT NULL COMMENT '??',
+  `location` varchar(200) DEFAULT NULL COMMENT '????',
+  `people` varchar(200) DEFAULT NULL COMMENT '????',
+  `upload_time` datetime DEFAULT NULL COMMENT '????',
+  `oss_yuantu` varchar(100) DEFAULT NULL COMMENT '??',
+  `oss_176` varchar(100) DEFAULT NULL COMMENT '176',
+  `oss_800` varchar(100) DEFAULT NULL COMMENT '800????',
+  `oss_800_watermark` varchar(100) DEFAULT NULL COMMENT '800????',
+  `oss_400` varchar(100) DEFAULT NULL COMMENT '400????',
+  `oss_eps_jpg` varchar(100) DEFAULT NULL,
+  `oss_id7` varchar(100) DEFAULT NULL,
+  `edit_time` datetime DEFAULT NULL COMMENT '????',
+  `edit_user_id` int(11) DEFAULT NULL COMMENT '????id',
+  `is_postil` int(1) DEFAULT NULL COMMENT '????1?0???',
+  `postil_time` datetime DEFAULT NULL COMMENT '????',
+  `is_copyright` int(1) DEFAULT NULL COMMENT '?????1?0??',
+  `copyright` varchar(128) DEFAULT NULL COMMENT '????',
+  `maincolors` varchar(32) DEFAULT NULL COMMENT '??',
+  `orientation` int(1) DEFAULT NULL COMMENT '???1??2??3??',
+  `online_type` int(1) DEFAULT NULL COMMENT '1 ???? 2????',
+  `min_price` int(11) DEFAULT NULL,
+  `price` varchar(255) DEFAULT NULL,
+  `memo` varchar(3000) DEFAULT NULL COMMENT '??',
+  `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` varchar(36) DEFAULT NULL,
+  `updated_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` varchar(36) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `i_res_id` (`res_id`) USING BTREE,
+  KEY `i_provider_res_id` (`provider_res_id`) USING BTREE,
+  KEY `i_brand_id` (`brand_id`) USING BTREE,
+  KEY `i_collection_id` (`collection_id`) USING BTREE,
+  KEY `i_provider_id` (`provider_id`),
+  KEY `i_created_time` (`created_time`),
+  KEY `i_asset_family` (`asset_family`),
+  KEY `i_online_state` (`online_state`),
+  KEY `cfp_gic_id` (`cfp_gic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='?????' |
+
+mysql> select max(id),min(id) from res_image;
++-----------+---------+
+| max(id)   | min(id) |
++-----------+---------+
+| 510003245 |       1 |
++-----------+---------+
+1 row in set (0.01 sec)
+
+
+
+[spark@csdn-hdp-201 spark-2.0.2-bin-hadoop2.7]$ bin/spark-shell --master yarn --jars mysql-connector-java-5.1.26.jar --driver-memory 4G --executor-memory 20G --num-executors 5 --conf spark.hadoop.yarn.timeline-service.enabled=false 
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel).
+17/03/14 10:50:12 WARN yarn.Client: Neither spark.yarn.jars nor spark.yarn.archive is set, falling back to uploading libraries under SPARK_HOME.
+17/03/14 10:50:35 WARN spark.SparkContext: Use an existing SparkContext, some configuration may not take effect.
+Spark context Web UI available at http://192.168.100.201:4040
+Spark context available as 'sc' (master = yarn, app id = application_1489457375388_0050).
+Spark session available as 'spark'.
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 2.0.2
+      /_/
+         
+Using Scala version 2.11.8 (Java HotSpot(TM) 64-Bit Server VM, Java 1.7.0)
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> import java.text.SimpleDateFormat
+import java.text.SimpleDateFormat
+
+scala> import java.util.{Date, Properties}
+import java.util.{Date, Properties}
+
+scala> val connectionProperties = new Properties()
+connectionProperties: java.util.Properties = {}
+
+scala> connectionProperties.put("user", "bi")
+res0: Object = null
+
+scala> connectionProperties.put("password", "bi@123abc")
+res1: Object = null
+
+scala> connectionProperties.put("driver", "com.mysql.jdbc.Driver")
+res2: Object = null
+
+scala> connectionProperties.put("fetchsize", "100")
+res3: Object = null
+
+scala> 
+
+scala> connectionProperties.put("partitionColumn", "id")
+res4: Object = null
+
+scala> connectionProperties.put("lowerBound", "1")
+res5: Object = null
+
+scala> connectionProperties.put("upperBound", "510003245")
+res6: Object = null
+
+scala> connectionProperties.put("numPartitions", "100")
+res7: Object = null
+
+scala> val jdbcDF2 = spark.read.jdbc("jdbc:mysql://rm-2zec526nd9v7a99n3o.mysql.rds.aliyuncs.com:3306/resource2?autoReconnect=true&failOverReadOnly=false&maxReconnects=10", "resource2.res_image", connectionProperties)
+jdbcDF2: org.apache.spark.sql.DataFrame = [id: bigint, res_id: string ... 60 more fields]
+
+scala> val mysqlIdDF = jdbcDF2.select("asset_family","asset_format","asset_type","brand_id","category","collection_id","credit_line","graphical_style","id","image_state","is_copyright","keywords","license_type","offline_time","one_category","online_time","PROVIDER_ID","provider_res_id","quality_rank","res_id");
+mysqlIdDF: org.apache.spark.sql.DataFrame = [asset_family: int, asset_format: string ... 18 more fields]
+
+scala> mysqlIdDF.write.mode("overwrite").saveAsTable("mini_res_image")

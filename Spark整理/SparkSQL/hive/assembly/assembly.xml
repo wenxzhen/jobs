@@ -1,0 +1,34 @@
+<assembly>
+    <id>assembly-jar</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>jar</format>
+    </formats>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>NOTICE</exclude>
+                    <exclude>LICENSE</exclude>
+                    <exclude>rootdoc.txt</exclude>
+                    <exclude>*.jar</exclude>
+                    <exclude>*.html</exclude>
+                    <exclude>*.xml</exclude>
+                    <exclude>*.properties</exclude>
+                </excludes>
+            </unpackOptions>
+            <excludes>
+                <exclude>org.scala-lang:*</exclude>
+                <exclude>org.apache.spark:*</exclude>
+            </excludes>
+            <scope>compile</scope>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>

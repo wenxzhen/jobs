@@ -1,0 +1,65 @@
+通常，mysql的最大连接数默认是100, 最大可以达到16384。
+1、查看最大连接数:
+show variables like '%max_connections%';
+2、修改最大连接数
+方法一：修改配置文件。推荐方法一
+进入MySQL安装目录 打开MySQL配置文件 my.ini 或 my.cnf查找 max_connections=100 修改为 max_connections=1000 服务里重起MySQL即可.
+方法二：命令行修改。不推荐方法二
+命令行登录MySQL后。设置新的MySQL最大连接数为200：
+MySQL> set global max_connections=200。
+这种方式有个问题，就是设置的最大连接数只在mysql当前服务进程有效，一旦mysql重启，又会恢复到初始状态。因为mysql启动后的初始化工作是从其配置文件中读取数据的，而这种方式没有对其配置文件做更改。
+
+
+1.show status
+
+   Threads_connected  当前的连接数
+   Connections  试图连接到(不管是否成功)MySQL服务器的连接数。
+   Max_used_connections  服务器启动后已经同时使用的连接的最大数量。
+
+
+2.set GLOBAL max_connections=连接数; 
+   flush privileges
+
+ 
+
+3.修改/etc/my.cnf中的max_connections
+
+
+4.show processlist   显示当前正在执行的mysql连接
+
+ 
+
+5.mysqladmin -u<user> -p<pwd> -h<host> status
+
+   显示当前mysql状态
+
+   Uptime: 13131  Threads: 1  Questions: 22  Slow queries: 0  Opens: 16  Flush tables: 1  Open tables: 1  Queries per second avg: 0.1
+
+
+   mysqladmin -u<user> -p<pwd> -h<host> extended-status
+
+   显示mysql的其他状态
+
++-----------------------------------+----------+
+| Variable_name                     | Value    |
++-----------------------------------+----------+
+| Aborted_clients                   | 0        |
+| Aborted_connects               | 1        |
+| Binlog_cache_disk_use       | 0        |
+| Binlog_cache_use               | 0        |
+| Bytes_received                   | 1152   |
+| Bytes_sent                         | 10400 |
+| Com_admin_commands      | 0        |
+| Com_assign_to_keycache  | 0        |
+
+.............................................................
+
+.............................................................
+
+| Threads_cached                 | 2        |
+| Threads_connected            | 1        |
+| Threads_created                | 3        |
+| Threads_running                | 1        |
+| Uptime                                | 13509    |
+| Uptime_since_flush_status | 13509    |
++-----------------------------------+----------+

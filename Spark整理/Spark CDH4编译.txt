@@ -1,0 +1,32 @@
+https://repository.cloudera.com/cloudera/cloudera-repos/org/apache/hadoop/hadoop-core/
+
+
+mvn -Pyarn -Phadoop-1 -Dhadoop.version=2.0.0-mr1-cdh4.2.0 -Phive -Phive-thriftserver -DskipTests clean package
+
+You can enable the “yarn” profile and optionally set the “yarn.version” property if it is different from “hadoop.version”.
+Spark only supports YARN versions 2.2.0 and later.
+
+mvn -Pyarn -Phadoop-2.6 -Dhadoop.version=2.6.0-mr1-cdh5.4.2 -Phive -Phive-thriftserver -DskipTests clean package
+
+build/mvn -Pyarn -Phadoop-2.6 -Dhadoop.version=2.6.0 -Phive -Phive-thriftserver -DskipTests clean package
+
+
+
+
+./make-distribution.sh --name spark1.6.0-cdh5.4.2 --tgz -Psparkr -Phadoop-1 -Dhadoop.version=2.6.0-mr1-cdh5.4.2 -Phive -Phive-thriftserver -Pyarn
+
+
+[hadoop@hadoop001 ~]$ cd /data/bigData/spark-1.6.0-bin-cdh4
+[hadoop@hadoop001 spark-1.6.0-bin-cdh4]$ cat RELEASE 
+Spark 1.6.0 built for Hadoop 2.0.0-mr1-cdh4.2.0
+Build flags: -Psparkr -Phadoop-1 -Phive -Phive-thriftserver -Dhadoop.version=2.0.0-mr1-cdh4.2.0 -DzincPort=3032
+
+
+
+==========================编译成功==============================
+mvn -Pyarn -Phadoop-2.4 -Dhadoop.version=2.4.0 -Phive -Phive-thriftserver -DskipTests clean package
+
+mvn -Pyarn -Phadoop-2.6 -Dhadoop.version=2.6.0-cdh5.4.2 -Dyarn.version=2.6.0-cdh5.4.2 -Phive -Phive-thriftserver -DskipTests clean package
+
+
+./make-distribution.sh --name spark1.6.0-cdh5.4.2 -Pyarn -Phadoop-2.6 -Dhadoop.version=2.6.0-cdh5.4.2 -Dyarn.version=2.6.0-cdh5.4.2 -Phive -Phive-thriftserver -DskipTests clean package

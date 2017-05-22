@@ -1,0 +1,174 @@
+Master节点
+
+#yum install  mariadb*
+[root@ipa02 ~]# systemctl start mariadb.service
+[root@ipa02 ~]# systemctl status mariadb.service
+● mariadb.service - MariaDB database server
+   Loaded: loaded (/usr/lib/systemd/system/mariadb.service; disabled; vendor preset: disabled)
+   Active: active (running) since Fri 2016-09-02 13:31:25 CST; 6s ago
+  Process: 19844 ExecStartPost=/usr/libexec/mariadb-wait-ready $MAINPID (code=exited, status=0/SUCCESS)
+  Process: 19763 ExecStartPre=/usr/libexec/mariadb-prepare-db-dir %n (code=exited, status=0/SUCCESS)
+ Main PID: 19843 (mysqld_safe)
+   CGroup: /system.slice/mariadb.service
+           ├─19843 /bin/sh /usr/bin/mysqld_safe --basedir=/usr
+           └─19999 /usr/libexec/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib64/mysql/plu...
+
+Sep 02 13:31:23 ipa02.example.com mariadb-prepare-db-dir[19763]: The latest information about MariaDB is avail.../.
+Sep 02 13:31:23 ipa02.example.com mariadb-prepare-db-dir[19763]: You can find additional information about the...t:
+Sep 02 13:31:23 ipa02.example.com mariadb-prepare-db-dir[19763]: http://dev.mysql.com
+Sep 02 13:31:23 ipa02.example.com mariadb-prepare-db-dir[19763]: Support MariaDB development by buying support...DB
+Sep 02 13:31:23 ipa02.example.com mariadb-prepare-db-dir[19763]: Corporation Ab. You can contact us about this...m.
+Sep 02 13:31:23 ipa02.example.com mariadb-prepare-db-dir[19763]: Alternatively consider joining our community ...t:
+Sep 02 13:31:23 ipa02.example.com mariadb-prepare-db-dir[19763]: http://mariadb.com/kb/en/contributing-to-the-...t/
+Sep 02 13:31:23 ipa02.example.com mysqld_safe[19843]: 160902 13:31:23 mysqld_safe Logging to '/var/log/maria...og'.
+Sep 02 13:31:23 ipa02.example.com mysqld_safe[19843]: 160902 13:31:23 mysqld_safe Starting mysqld daemon wit...ysql
+Sep 02 13:31:25 ipa02.example.com systemd[1]: Started MariaDB database server.
+Hint: Some lines were ellipsized, use -l to show in full.
+[root@ipa02 ~]# mysql -u root -p
+Enter password: (首次登录密码为空)
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 2
+Server version: 5.5.50-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2016, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> use mysql;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+MariaDB [mysql]> update user set password=password('csdn.net') where user='root';
+Query OK, 4 rows affected (0.00 sec)
+Rows matched: 4  Changed: 4  Warnings: 0
+
+MariaDB [mysql]> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [mysql]> 
+
+1、打开bin-log
+#vi /etc/my.cnf.d/server.cnf
+server_id=1 
+log-bin=mysql-bin
+binlog-format=MIXED
+expire_logs_days=30
+
+
+show variables like '%log_bin%';
+
+
+
+2、创建复制用户
+CREATE USER repl IDENTIFIED BY 'csdn.net';  
+GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'192.168.25.21';
+GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'ipa01.example.com' IDENTIFIED BY 'csdn.net';
+GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'192.168.25.21' IDENTIFIED BY 'csdn.net';
+
+FLUSH PRIVILEGES;
+
+MariaDB [(none)]> CREATE USER repl IDENTIFIED BY 'csdn.net';  
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [(none)]> GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'192.168.25.21';
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [(none)]> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [(none)]> flush tables with read lock;
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [(none)]> show master status; 
++------------------+----------+--------------+------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |
++------------------+----------+--------------+------------------+
+| mysql-bin.000002 |      579 |              |                  |
++------------------+----------+--------------+------------------+
+1 row in set (0.00 sec)
+
+MariaDB [(none)]> 
+
+
+Slave节点
+
+3、修改server_id
+#vi /etc/my.cnf.d/server.cnf
+server_id=2 #不能和master的相同
+
+4、重启服务
+#systemctl restart mariadb
+
+
+
+5、启动复制
+slave stop;
+change master to master_host='192.168.25.22', master_port=3306,master_user='repl', master_password='csdn.net',master_log_file='mysql-bin.000002', master_log_pos=579;
+slave start;
+
+MariaDB [(none)]> slave stop;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+MariaDB [(none)]> change master to master_host='192.168.25.22', master_port=3306,master_user='repl', master_password='csdn.net',master_log_file='mysql-bin.000002', master_log_pos=579;
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [(none)]> slave start;
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [(none)]> show slave status\G;
+*************************** 1. row ***************************
+               Slave_IO_State: Waiting for master to send event
+                  Master_Host: 192.168.25.22
+                  Master_User: repl
+                  Master_Port: 3306
+                Connect_Retry: 60
+              Master_Log_File: mysql-bin.000002
+          Read_Master_Log_Pos: 1339
+               Relay_Log_File: mariadb-relay-bin.000002
+                Relay_Log_Pos: 529
+        Relay_Master_Log_File: mysql-bin.000002
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB: 
+          Replicate_Ignore_DB: 
+           Replicate_Do_Table: 
+       Replicate_Ignore_Table: 
+      Replicate_Wild_Do_Table: 
+  Replicate_Wild_Ignore_Table: 
+                   Last_Errno: 0
+                   Last_Error: 
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 1339
+              Relay_Log_Space: 825
+              Until_Condition: None
+               Until_Log_File: 
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File: 
+           Master_SSL_CA_Path: 
+              Master_SSL_Cert: 
+            Master_SSL_Cipher: 
+               Master_SSL_Key: 
+        Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error: 
+               Last_SQL_Errno: 0
+               Last_SQL_Error: 
+  Replicate_Ignore_Server_Ids: 
+             Master_Server_Id: 1
+1 row in set (0.00 sec)
+
+ERROR: No query specified
+
+确认以下两项参数都为yes:
+
+Slave_IO_Running: Yes
+Slave_SQL_Running: Yes
+
+6、主服务解锁
+MariaDB [(none)]> unlock tables;
+Query OK, 0 rows affected (0.00 sec)
+
+

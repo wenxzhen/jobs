@@ -1,0 +1,72 @@
+{%- from 'hadoop/settings.sls' import hadoop with context %}
+{%- from 'hadoop/hdfs/settings.sls' import hdfs with context %}
+{%- from 'hadoop/mapred/settings.sls' import mapred with context %}
+{%- set dyn_cfg = mapred.get('config_mapred_site', {}) %}
+{%- set major = hadoop.major_version|string() -%}
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+{%- if major == '1' %}
+    <property>
+        <name>mapred.job.tracker</name>
+        <value>{{ mapred.jobtracker_host }}:{{ mapred.jobtracker_port }}</value>
+    </property>
+
+    <property>
+        <name>mapred.job.tracker.http.address</name>
+        <value>{{ mapred.jobtracker_host }}:{{ mapred.jobtracker_http_port }}</value>
+    </property>
+
+    <property>
+        <name>mapreduce.tasktracker.group</name>
+        <value>hadoop</value>
+    </property>
+
+    <property>
+        <name>mapreduce.history.server.http.address</name>
+        <value>{{ mapred.jobtracker_host }}:{{ mapred.jobhistory_port }}</value>
+    </property>
+
+    <property>
+        <name>mapred.submit.replication</name>
+        <value>{{ hdfs.datanode_count }}</value>
+    </property>
+{%- else %}
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>{{ mapred.jobtracker_host }}:{{ mapred.jobhistory_port }}</value>
+    </property>
+
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>{{ mapred.jobtracker_host }}:{{ mapred.jobhistory_webapp_port }}</value>
+    </property>
+
+    <property>
+        <name>mapreduce.jobhistory.intermediate-done-dir</name>
+        <value>{{ mapred.history_intermediate_done_dir }}</value>
+    </property>
+
+    <property>
+        <name>mapreduce.jobhistory.done-dir</name>
+        <value>{{ mapred.history_done_dir }}</value>
+    </property>
+
+    <property>
+        <name>mapreduce.client.submit.file.replication</name>
+        <value>{{ hdfs.datanode_count }}</value>
+    </property>
+{%- endif %}
+
+{%- for name, subdict in dyn_cfg.items() %}
+    <property>
+        <name>{{ name }}</name>
+{%- for k,v in subdict.items() %}
+        <{{k}}>{{ v }}</{{k}}>
+{%- endfor %}
+    </property>
+
+{%- endfor %}
+</configuration>

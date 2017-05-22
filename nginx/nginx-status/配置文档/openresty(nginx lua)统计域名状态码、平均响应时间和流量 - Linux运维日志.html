@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<!-- saved from url=(0086)https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#???? -->
+<html class=" js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>openresty(nginx lua)统计域名状态码、平均响应时间和流量 - Linux运维日志</title> 
+<meta name="description" content=" ">
+<meta name="keywords" content="nginx,OpenResty">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="./openresty(nginx lua)统计域名状态码、平均响应时间和流量 - Linux运维日志_files/saved_resource" type="text/css" media="screen">
+<link rel="shortcut icon" href="https://www.centos.bz/wp-content/themes/TangStyle/images/favicon.ico" type="image/x-icon">
+<script src="./openresty(nginx lua)统计域名状态码、平均响应时间和流量 - Linux运维日志_files/hm.js"></script><script src="./openresty(nginx lua)统计域名状态码、平均响应时间和流量 - Linux运维日志_files/saved_resource(1)"></script>
+
+<script src="./openresty(nginx lua)统计域名状态码、平均响应时间和流量 - Linux运维日志_files/saved_resource(2)"></script>
+
+<link rel="alternate" type="application/rss+xml" title="Linux运维日志 RSS Feed" href="https://www.centos.bz/feed/">
+<link rel="pingback" href="https://www.centos.bz/xmlrpc.php">
+<link rel="alternate" type="application/rss+xml" title="Linux运维日志 » openresty(nginx lua)统计域名状态码、平均响应时间和流量评论Feed" href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/feed/">
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"https:\/\/www.centos.bz\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.4"}};
+			!function(a,b,c){function d(a){var c=b.createElement("canvas"),d=c.getContext&&c.getContext("2d");return d&&d.fillText?(d.textBaseline="top",d.font="600 32px Arial","flag"===a?(d.fillText(String.fromCharCode(55356,56806,55356,56826),0,0),c.toDataURL().length>3e3):("simple"===a?d.fillText(String.fromCharCode(55357,56835),0,0):d.fillText(String.fromCharCode(55356,57135),0,0),0!==d.getImageData(16,16,1,1).data[0])):!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g;c.supports={simple:d("simple"),flag:d("flag"),unicode8:d("unicode8")},c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.simple&&c.supports.flag&&c.supports.unicode8||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><script src="./openresty(nginx lua)统计域名状态码、平均响应时间和流量 - Linux运维日志_files/wp-emoji-release.min.js" type="text/javascript"></script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel="https://api.w.org/" href="https://www.centos.bz/wp-json/">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.centos.bz/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://www.centos.bz/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="SaltStack源码解析 — salt ‘*’ test.ping执行过程" href="https://www.centos.bz/2015/08/saltstack-analysis-salt-test-ping/">
+<link rel="next" title="nginx-upload-module模块实现文件上传(multipart/form-data和断点续传)" href="https://www.centos.bz/2015/09/nginx-upload-module-multipart-form-data-resumable/">
+
+<link rel="canonical" href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/">
+<link rel="shortlink" href="https://www.centos.bz/?p=5473">
+<link rel="alternate" type="application/json+oembed" href="https://www.centos.bz/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.centos.bz%2F2015%2F09%2Fopenresty-nginx-lua-count-status-flow-request-time%2F">
+<link rel="alternate" type="text/xml+oembed" href="https://www.centos.bz/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.centos.bz%2F2015%2F09%2Fopenresty-nginx-lua-count-status-flow-request-time%2F&amp;format=xml">
+</head>
+
+<body class="single single-post postid-5473 single-format-standard">
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://www.centos.bz/">Linux运维日志</a><p>关于CentOS和Ubuntu等系统的运维</p></div>
+    <div id="navigation">
+    <ul id="nav"><li id="menu-item-4642" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-4642"><a href="http://www.centos.bz/">首页</a></li><li id="menu-item-3598" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3598"><a href="https://www.centos.bz/category/sysadmin/">系统管理</a></li><li id="menu-item-4018" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-4018"><a href="https://www.centos.bz/category/networking-basics/">网络基础</a></li><li id="menu-item-780" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-780"><a href="https://www.centos.bz/category/web-server/">WWW</a>
+<ul class="sub-menu">
+	<li id="menu-item-3366" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3366"><a href="https://www.centos.bz/category/web-server/apache/">Apache</a></li>	<li id="menu-item-3438" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3438"><a href="https://www.centos.bz/category/web-server/nginx/">Nginx</a></li>	<li id="menu-item-3384" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3384"><a href="https://www.centos.bz/category/web-server/lighttpd/">Lighttpd</a></li>	<li id="menu-item-2459" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-2459"><a href="https://www.centos.bz/category/web-server/cherokee/">Cherokee</a></li>	<li id="menu-item-3442" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3442"><a href="https://www.centos.bz/category/web-server/tomcat/">tomcat</a></li></ul>
+</li><li id="menu-item-782" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-782"><a href="https://www.centos.bz/category/server-security/">安全</a></li><li id="menu-item-2874" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-2874"><a href="https://www.centos.bz/category/monitor/">监控</a></li><li id="menu-item-3824" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3824"><a href="https://www.centos.bz/category/shell/">Shell</a></li><li id="menu-item-974" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-974"><a href="https://www.centos.bz/category/email/">Email</a>
+<ul class="sub-menu">
+	<li id="menu-item-1601" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1601"><a href="https://www.centos.bz/category/email/postfix/">Postfix</a></li>	<li id="menu-item-1598" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1598"><a href="https://www.centos.bz/category/email/sendmail/">Sendmail</a></li></ul>
+</li><li id="menu-item-5401" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-5401"><a href="https://www.centos.bz/category/%e6%ba%90%e7%a0%81%e8%a7%a3%e6%9e%90/">源码解析</a></li><li id="menu-item-5450" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-5450"><a href="https://www.centos.bz/about/">关于本站</a></li><li id="menu-item-3174" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-3174"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#">更多</a>
+<ul class="sub-menu">
+	<li id="menu-item-3409" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3409"><a href="https://www.centos.bz/category/mysql/">MySQL</a></li>	<li id="menu-item-975" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-975"><a href="https://www.centos.bz/category/ftp/">FTP</a>
+	<ul class="sub-menu">
+		<li id="menu-item-996" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-996"><a href="https://www.centos.bz/category/ftp/pureftpd-ftp/">PureFTPd</a></li>		<li id="menu-item-997" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-997"><a href="https://www.centos.bz/category/ftp/vsftpd-ftp/">vsFTPd</a></li>		<li id="menu-item-3439" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3439"><a href="https://www.centos.bz/category/ftp/proftpd/">ProFTPd</a></li>	</ul>
+</li>	<li id="menu-item-2963" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-2963"><a href="https://www.centos.bz/category/high-availability/">集群</a></li>	<li id="menu-item-2889" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-2889"><a href="https://www.centos.bz/category/file-storage/">存储</a></li>	<li id="menu-item-973" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-973"><a href="https://www.centos.bz/category/dns/">DNS</a></li>	<li id="menu-item-781" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-781"><a href="https://www.centos.bz/category/control-panels/">控制面板</a></li>	<li id="menu-item-4267" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-4267"><a href="https://www.centos.bz/category/other-system/">其它系统</a></li>	<li id="menu-item-4110" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-4110"><a href="https://www.centos.bz/category/python/">Python</a></li>	<li id="menu-item-979" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-979"><a href="https://www.centos.bz/category/backup/">备份</a></li>	<li id="menu-item-3175" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3175"><a href="https://www.centos.bz/category/virtualization/">虚拟化技术</a></li></ul>
+</li></ul><select class="selectnav" id="selectnav1"><option value="">[选择频道]</option><option value="http://www.centos.bz/">首页</option><option value="https://www.centos.bz/category/sysadmin/">系统管理</option><option value="https://www.centos.bz/category/networking-basics/">网络基础</option><option value="https://www.centos.bz/category/web-server/">WWW</option><option value="https://www.centos.bz/category/web-server/apache/">- Apache</option><option value="https://www.centos.bz/category/web-server/nginx/">- Nginx</option><option value="https://www.centos.bz/category/web-server/lighttpd/">- Lighttpd</option><option value="https://www.centos.bz/category/web-server/cherokee/">- Cherokee</option><option value="https://www.centos.bz/category/web-server/tomcat/">- tomcat</option><option value="https://www.centos.bz/category/server-security/">安全</option><option value="https://www.centos.bz/category/monitor/">监控</option><option value="https://www.centos.bz/category/shell/">Shell</option><option value="https://www.centos.bz/category/email/">Email</option><option value="https://www.centos.bz/category/email/postfix/">- Postfix</option><option value="https://www.centos.bz/category/email/sendmail/">- Sendmail</option><option value="https://www.centos.bz/category/%e6%ba%90%e7%a0%81%e8%a7%a3%e6%9e%90/">源码解析</option><option value="https://www.centos.bz/about/">关于本站</option><option value="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#">更多</option><option value="https://www.centos.bz/category/mysql/">- MySQL</option><option value="https://www.centos.bz/category/ftp/">- FTP</option><option value="https://www.centos.bz/category/ftp/pureftpd-ftp/">-- PureFTPd</option><option value="https://www.centos.bz/category/ftp/vsftpd-ftp/">-- vsFTPd</option><option value="https://www.centos.bz/category/ftp/proftpd/">-- ProFTPd</option><option value="https://www.centos.bz/category/high-availability/">- 集群</option><option value="https://www.centos.bz/category/file-storage/">- 存储</option><option value="https://www.centos.bz/category/dns/">- DNS</option><option value="https://www.centos.bz/category/control-panels/">- 控制面板</option><option value="https://www.centos.bz/category/other-system/">- 其它系统</option><option value="https://www.centos.bz/category/python/">- Python</option><option value="https://www.centos.bz/category/backup/">- 备份</option><option value="https://www.centos.bz/category/virtualization/">- 虚拟化技术</option></select>    <ul class="my">
+        <li><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#"><i class="iconfont">Ą</i>关注我</a>
+            <ul>
+                <li><a href="https://www.centos.bz/feed/" rel="external nofollow" target="_blank"><i class="iconfont">ǣ</i>RSS订阅</a>
+                    <ul>
+                    <li><a href="https://www.centos.bz/feed/" rel="external nofollow" target="_blank">RSS Feed</a></li>
+                    <li><a href="http://9.douban.com/reader/subscribe?url=https://www.centos.bz/feed/" target="_blank">订阅到 豆瓣九点</a></li>
+                    <li><a href="http://reader.youdao.com/b.do?keyfrom=bookmarklet&amp;url=https://www.centos.bz/feed/" rel="nofollow" target="_blank">订阅到 有道阅读</a></li>
+                    <li><a href="http://mail.qq.com/cgi-bin/feed?u=https://www.centos.bz/feed/" rel="nofollow" target="_blank">订阅到 QQ邮箱</a></li>
+                    <li><a href="http://www.zhuaxia.com/add_channel.php?sourceid=102&amp;url=https://www.centos.bz/feed/" rel="nofollow" target="_blank">订阅到 抓虾</a></li>
+                    <li><a href="http://xianguo.com/subscribe?url=https://www.centos.bz/feed/" rel="nofollow" target="_blank">订阅到 鲜果</a></li>
+                    </ul>
+                </li>
+                				            </ul>
+        </li>
+    </ul>
+    </div>
+</div>
+<div id="content">	<div id="main">
+				<div id="article">
+			<h1><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/" title="openresty(nginx lua)统计域名状态码、平均响应时间和流量">openresty(nginx lua)统计域名状态码、平均响应时间和流量</a></h1>
+			<div class="info">
+            	<span class="meat_span">作者: 朱 茂海</span>
+                <span class="meat_span">分类: <a href="https://www.centos.bz/category/monitor/" rel="category tag">监控</a></span>
+                <span class="meat_span">发布时间: 2015-09-14 16:48</span>
+                <span class="meat_span"><i class="iconfont">ė</i><span class="wppvp_tv_5473"></span> views</span>
+                <span class="meat_span"><i class="iconfont">6</i><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#respond">没有评论</a></span>
+                            </div>
+			<div class="text"><div id="content-index" class="content-index" style="margin:0 0 10px 10px;float:right;"><div class="content-index-title">文章目录</div><span class="content-index-toctoggle">[<a id="content-index-togglelink" href="javascript:content_index_toggleToc()">显示</a>]</span>
+<script type="text/javascript" language="javascript">
+window.content_index_showTocToggle=true;function content_index_toggleToc(){var tts="显示";var tth="隐藏";if(window.content_index_showTocToggle){window.content_index_showTocToggle=false;document.getElementById("content-index-contents").style.display="none";document.getElementById("content-index-togglelink").innerHTML=tts}else{window.content_index_showTocToggle=true;document.getElementById("content-index-contents").style.display="block";document.getElementById("content-index-togglelink").innerHTML=tth}}
+</script>
+<ul id="content-index-contents" style="display: none;"><li class="content-index-level-1"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#背景" title="背景"><span>背景</span></a></li><li class="content-index-level-1"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#方法介绍" title="方法介绍"><span>方法介绍</span></a></li><li class="content-index-level-1"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#方法实现" title="方法实现"><span>方法实现</span></a><ul class="children"><li class="content-index-level-2"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#nginx.conf设置" title="nginx.conf设置"><span>nginx.conf设置</span></a></li><li class="content-index-level-2"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#log_access.lua" title="log_access.lua"><span>log_access.lua</span></a></li><li class="content-index-level-2"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#domain_status.lua" title="domain_status.lua"><span>domain_status.lua</span></a></li><li class="content-index-level-2"><a href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#使用说明" title="使用说明"><span>使用说明</span></a></li></ul></li></ul></div>
+<h2 id="背景">背景</h2>
+<p>&nbsp;</p>
+<p>之前我们<a href="https://www.centos.bz/2015/07/zabbix-monitor-multiple-line-log/">统计域名状态码、平均响应时间和流量</a>的方法是：在每台机器添加一个定时脚本，来获取每个域名最近一分钟的访问日志到临时文件。然后zabbix再对这个一分钟日志临时文件作相关统计。一直运行良好，最近发现某台服务器突然负载增高。使用iotop查看发现获取最近一分钟日志的脚本占用的IO特别高。停止这个定时任务之后恢复正常。于是就打算使用nginx lua来替换目前的方法。新的方法具有统计时占用资源少，实时的特点。</p>
+<p>&nbsp;</p>
+<h2 id="方法介绍">方法介绍</h2>
+<p>&nbsp;</p>
+<p>使用nginx lua统计网站相关数据的方法为（我们以统计www.centos.bz 404状态码为例）：<br>
+<strong>记录过程：</strong></p>
+<ul>
+<li>1、定义了一个共享词典access，获取当前时间戳，获取当前域名，如www.centos.bz;</li>
+<li>2、我们定义用来存储状态码的词典key为，www.centos.bz-404-当前时间戳;</li>
+<li>3、自增1 key(www.centos.bz-404-当前时间戳)的值;</li>
+<li>4、循环2,3步。</li>
+</ul>
+<p>&nbsp;</p>
+<p><strong>查询过程：</strong><br>
+提供一个接口，来累加key为www.centos.bz-404-(前60秒时间戳-当前时间戳)的值，返回结果。</p>
+<p>&nbsp;</p>
+<h2 id="方法实现">方法实现</h2>
+<p>&nbsp;</p>
+<h3 id="nginx.conf设置">nginx.conf设置</h3>
+<div class="hl-surround"><ol class="hl-main ln-show" title="Double click to hide line number." ondblclick="linenumber(this)"><li class="hl-firstline">http {</li>
+<li>[...]</li>
+<li>lua_shared_dict access 10m;</li>
+<li>log_by_lua_file conf/log_acesss.lua;</li>
+<li>server {</li>
+<li>[...]</li>
+<li>&nbsp;&nbsp; location /domain_status {</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;default_type text/plain;</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;content_by_lua_file "conf/domain_status.lua";</li>
+<li>&nbsp;&nbsp; &nbsp;}</li>
+<li>[...]</li>
+<li>}</li>
+<li>[...]</li>
+<li>}</li></ol></div>
+<p>&nbsp;</p>
+<h3 id="log_access.lua">log_access.lua</h3>
+<div class="hl-surround"><ol class="hl-main ln-show" title="Double click to hide line number." ondblclick="linenumber(this)"><li class="hl-firstline">local access = ngx.shared.access</li>
+<li>local host = ngx.var.host</li>
+<li>local status = ngx.var.status</li>
+<li>local body_bytes_sent = ngx.var.body_bytes_sent</li>
+<li>local request_time = ngx.var.request_time</li>
+<li>local timestamp = os.date("%s")</li>
+<li>local expire_time = 70</li>
+<li>&nbsp;</li>
+<li>local status_key = table.concat({host,"-",status,"-",timestamp})</li>
+<li>local flow_key = table.concat({host,"-flow-",timestamp})</li>
+<li>local req_time_key = table.concat({host,"-reqt-",timestamp})</li>
+<li>local total_req_key = table.concat({host,"-total_req-",timestamp})</li>
+<li>&nbsp;</li>
+<li>-- count total req</li>
+<li>local total_req_sum = access:get(total_req_key) or 0</li>
+<li>total_req_sum = total_req_sum + 1</li>
+<li>access:set(total_req_key, total_req_sum, expire_time)</li>
+<li>&nbsp;</li>
+<li>-- count status</li>
+<li>local status_sum = access:get(status_key) or 0</li>
+<li>status_sum = status_sum + 1</li>
+<li>access:set(status_key, status_sum, expire_time)</li>
+<li>&nbsp;</li>
+<li>-- count flow</li>
+<li>local flow_sum = access:get(flow_key) or 0</li>
+<li>flow_sum = flow_sum + body_bytes_sent</li>
+<li>access:set(flow_key, flow_sum, expire_time)</li>
+<li>&nbsp;</li>
+<li>-- count request time</li>
+<li>local req_sum = access:get(req_time_key) or 0</li>
+<li>req_sum = req_sum + request_time</li>
+<li>access:set(req_time_key, req_sum, expire_time)</li></ol></div>
+<h3 id="domain_status.lua">domain_status.lua</h3>
+<p>&nbsp;</p>
+<div class="hl-surround"><ol class="hl-main ln-show" title="Double click to hide line number." ondblclick="linenumber(this)"><li class="hl-firstline">local access = ngx.shared.access</li>
+<li>local args = ngx.req.get_uri_args()</li>
+<li>local count = args["count"]</li>
+<li>local host = args["host"]</li>
+<li>local status = args["status"]</li>
+<li>local one_minute_ago = tonumber(os.date("%s")) - 60</li>
+<li>local now = tonumber(os.date("%s"))</li>
+<li>&nbsp;</li>
+<li>local status_total = 0</li>
+<li>local flow_total = 0</li>
+<li>local reqt_total = 0</li>
+<li>local req_total = 0</li>
+<li>&nbsp;</li>
+<li>if not host then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.print("host arg not found.")</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.exit(ngx.HTTP_OK)</li>
+<li>end</li>
+<li>&nbsp;</li>
+<li>if count == "status" and not status then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.print("status arg not found.")</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.exit(ngx.HTTP_OK)</li>
+<li>end</li>
+<li>&nbsp;</li>
+<li>if not (count == "status" or count == "flow" or count == "reqt") then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.print("count arg invalid.")</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.exit(ngx.HTTP_OK)</li>
+<li>end</li>
+<li>&nbsp;</li>
+<li>for second_num=one_minute_ago,now do</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;local flow_key = table.concat({host,"-flow-",second_num})</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;local req_time_key = table.concat({host,"-reqt-",second_num})</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;local total_req_key = table.concat({host,"-total_req-",second_num})</li>
+<li>&nbsp;</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;if count == "status" then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;local status_key = table.concat({host,"-",status,"-",second_num})</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;local status_sum = access:get(status_key) or 0</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;status_total = status_total + status_sum</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;elseif count == "flow" then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;local flow_sum = access:get(flow_key) or 0</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;flow_total = flow_total + flow_sum</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;elseif count == "reqt" then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;local req_sum = access:get(total_req_key) or 0</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;local req_time_sum = access:get(req_time_key) or 0</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;reqt_total = reqt_total + req_time_sum</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;req_total = req_total + req_sum</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;end</li>
+<li>end</li>
+<li>&nbsp;</li>
+<li>if count == "status" then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.print(status_total)</li>
+<li>elseif count == "flow" then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.print(flow_total)</li>
+<li>elseif count == "reqt" then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;if req_total == 0 then</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;reqt_avg = 0</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;else</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;reqt_avg = reqt_total/req_total</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;end</li>
+<li>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;ngx.print(reqt_avg)</li>
+<li>end</li></ol></div>
+<h3 id="使用说明">使用说明</h3>
+<p><strong>1、获取域名状态码</strong><br>
+如请求www.centos.bz一分钟内404状态码数量<br>
+请求接口http://$host/domain_status?count=status&amp;host=www.centos.bz&amp;status=404<br>
+<strong>2、获取域名流量</strong><br>
+请求接口http://$host/domain_status?count=flow&amp;host=www.centos.bz<br>
+<strong>3、获取域名一分钟内平均响应时间</strong><br>
+请求接口http://$host/domain_status?count=reqt&amp;host=www.centos.bz</p>
+</div>
+            <div class="text_add">
+                <div class="copy"><p style="color:#F00;">本文出自 Linux运维日志，转载时请注明出处及相应链接。</p><p style="color:#777;font-size:12px;">本文永久链接: https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/</p></div>
+                <div class="share"></div>
+                </div>
+			<div class="meta"><i class="iconfont">0</i><a href="https://www.centos.bz/tag/openresty/" rel="tag">OpenResty</a>, <a href="https://www.centos.bz/tag/nginx-2/" rel="tag">nginx</a></div>
+		</div>
+		        <div class="post_link">
+			<div class="prev">« <a href="https://www.centos.bz/2015/08/saltstack-analysis-salt-test-ping/" rel="prev">SaltStack源码解析 — salt ‘*’ test.ping执行过程</a></div>
+			<div class="next"><a href="https://www.centos.bz/2015/09/nginx-upload-module-multipart-form-data-resumable/" rel="next">nginx-upload-module模块实现文件上传(multipart/form-data和断点续传)</a> »</div>
+        </div>
+        
+        <div id="comments">	
+					<div id="respond" class="comment-respond">
+			<h3 id="reply-title" class="comment-reply-title">发表评论 <small><a rel="nofollow" id="cancel-comment-reply-link" href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/#respond" style="display:none;">取消回复</a></small></h3>				<form action="https://www.centos.bz/wp-comments-post.php" method="post" id="commentform" class="comment-form">
+					<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-required="true" required="required"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input id="author" name="author" type="text" value="" size="30" aria-required="true" required="required"></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input id="email" name="email" type="text" value="" size="30" aria-describedby="email-notes" aria-required="true" required="required"></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" name="url" type="text" value="" size="30"></p>
+<p class="form-submit"><input name="submit" type="submit" id="submit" class="submit" value="发表评论"> <input type="hidden" name="comment_post_ID" value="5473" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p>				</form>
+					</div><!-- #respond -->
+		</div>
+	</div>
+	<div id="sidebar">
+    <div id="search">
+	    <form id="searchform" method="get" action="https://www.centos.bz/">
+		    <input type="text" value="" name="s" id="s" size="30" x-webkit-speech="">
+			<button type="submit" id="searchsubmit"><i class="iconfont">ő</i></button>
+		</form>
+    </div>
+    <div class="sidebar">
+	<div id="text-3" class="widget widget_text"><h3>页面推荐</h3>			<div class="textwidget"><p><a href="https://www.lxconfig.com/thread-69-1-1.html">EZHTTP -- LAMP,LNMP,LNAMP一键安装</a><br>
+<a href="https://www.lxconfig.com/thread-119-1-1.html">HttpGuard -- 高性能防CC攻击</a></p>
+</div>
+		</div><div class="widget">
+<ul id="tags_related">
+<h3>相关文章</h3>  
+  
+    <li><a href="https://www.centos.bz/2015/04/handle-nginx-write-io-problem/" title="Nginx写IO占用高故障处理">Nginx写IO占用高故障处理</a></li>
+
+    <li><a href="https://www.centos.bz/2015/01/zabbix-monitor-memcached-php-fpm-tomcat-mysql-nginx-log/" title="Zabbix监控Memcached PHP-FPM Tomcat Nginx MySQL 网站日志">Zabbix监控Memcached PHP-FPM Tomcat Nginx MySQL 网站日志</a></li>
+
+    <li><a href="https://www.centos.bz/2013/08/nginx-proxy-pass-cache-config/" title="nginx反向代理缓存配置">nginx反向代理缓存配置</a></li>
+
+    <li><a href="https://www.centos.bz/2013/04/joomla1-5-nginx-url-rewrite-rule/" title="joomla1.5 nginx url重写规则">joomla1.5 nginx url重写规则</a></li>
+</ul>
+</div>
+  
+	<div id="related_post" class="widget">
+		<h3>监控 下的最新文章</h3>
+		<ul><li><a title="openresty(nginx lua)统计域名状态码、平均响应时间和流量" href="https://www.centos.bz/2015/09/openresty-nginx-lua-count-status-flow-request-time/">openresty(nginx lua)统计域名状态码、平均响应时间和流量</a></li><li><a title="使用zabbix根据时间监控多行格式的日志" href="https://www.centos.bz/2015/07/zabbix-monitor-multiple-line-log/">使用zabbix根据时间监控多行格式的日志</a></li><li><a title="Zabbix监控Memcached PHP-FPM Tomcat Nginx MySQL 网站日志" href="https://www.centos.bz/2015/01/zabbix-monitor-memcached-php-fpm-tomcat-mysql-nginx-log/">Zabbix监控Memcached PHP-FPM Tomcat Nginx MySQL 网站日志</a></li><li><a title="使用监控宝监控php-fpm状态" href="https://www.centos.bz/2013/09/monitor-fpm-status-with-jiankongbao/">使用监控宝监控php-fpm状态</a></li><li><a title="使用rrdtool统计网站PV和IP" href="https://www.centos.bz/2013/03/count-pv-ip-with-rrdtool/">使用rrdtool统计网站PV和IP</a></li><li><a title="监控mysql主从健康状态shell脚本" href="https://www.centos.bz/2012/11/monitor-mysql-slave-status-shell/">监控mysql主从健康状态shell脚本</a></li><li><a title="nagios监控mysql主从状态" href="https://www.centos.bz/2012/10/nagios-monitor-mysql-salve-status/">nagios监控mysql主从状态</a></li><li><a title="nagios snmp监控服务常用command定义" href="https://www.centos.bz/2012/10/nagios-snmp-command-define/">nagios snmp监控服务常用command定义</a></li><li><a title="cacti监控磁盘IO" href="https://www.centos.bz/2012/09/cacti-monitor-disk-io/">cacti监控磁盘IO</a></li><li><a title="使用nagios nrpe监控远程Linux主机" href="https://www.centos.bz/2012/08/monitor-remote-linux-host-with-nagios-nrpe/">使用nagios nrpe监控远程Linux主机</a></li></ul>	</div>
+<div id="tag_cloud-4" class="widget widget_tag_cloud"><h3>标签</h3><div class="tagcloud"><a href="https://www.centos.bz/tag/cacti/" class="tag-link-112" title="3个话题" style="color:#c4287e;font-size: 11.414634146341pt;;">cacti</a>
+<a href="https://www.centos.bz/tag/crontab/" class="tag-link-64" title="3个话题" style="color:#4ed43e;font-size: 11.414634146341pt;;">crontab</a>
+<a href="https://www.centos.bz/tag/dovecot/" class="tag-link-129" title="2个话题" style="color:#b51f11;font-size: 10.048780487805pt;;">dovecot</a>
+<a href="https://www.centos.bz/tag/drbd/" class="tag-link-120" title="4个话题" style="color:#2d5261;font-size: 12.552845528455pt;;">DRBD</a>
+<a href="https://www.centos.bz/tag/expect/" class="tag-link-145" title="3个话题" style="color:#3c733d;font-size: 11.414634146341pt;;">expect</a>
+<a href="https://www.centos.bz/tag/fail2ban/" class="tag-link-132" title="2个话题" style="color:#c242d0;font-size: 10.048780487805pt;;">fail2ban</a>
+<a href="https://www.centos.bz/tag/grub/" class="tag-link-137" title="3个话题" style="color:#36c0ea;font-size: 11.414634146341pt;;">grub</a>
+<a href="https://www.centos.bz/tag/heartbeat/" class="tag-link-118" title="6个话题" style="color:#9ca148;font-size: 14.260162601626pt;;">heartbeat</a>
+<a href="https://www.centos.bz/tag/iptables/" class="tag-link-58" title="6个话题" style="color:#4c7cf0;font-size: 14.260162601626pt;;">Iptables</a>
+<a href="https://www.centos.bz/tag/keepalived/" class="tag-link-114" title="3个话题" style="color:#1cdaf5;font-size: 11.414634146341pt;;">keepalived</a>
+<a href="https://www.centos.bz/tag/lamp/" class="tag-link-32" title="2个话题" style="color:#43e901;font-size: 10.048780487805pt;;">LAMP</a>
+<a href="https://www.centos.bz/tag/lftp/" class="tag-link-42" title="1个话题" style="color:#fd42a7;font-size: 8pt;;">lftp</a>
+<a href="https://www.centos.bz/tag/linux/" class="tag-link-63" title="33个话题" style="color:#c3abb6;font-size: 22pt;;">Linux</a>
+<a href="https://www.centos.bz/tag/lnamp/" class="tag-link-30" title="1个话题" style="color:#dd0759;font-size: 8pt;;">LNAMP</a>
+<a href="https://www.centos.bz/tag/lnmp/" class="tag-link-4" title="6个话题" style="color:#d4c176;font-size: 14.260162601626pt;;">LNMP</a>
+<a href="https://www.centos.bz/tag/logrotate/" class="tag-link-107" title="2个话题" style="color:#de9190;font-size: 10.048780487805pt;;">logrotate</a>
+<a href="https://www.centos.bz/tag/memcached/" class="tag-link-101" title="3个话题" style="color:#54440d;font-size: 11.414634146341pt;;">memcached</a>
+<a href="https://www.centos.bz/tag/nagios/" class="tag-link-117" title="5个话题" style="color:#f38d11;font-size: 13.463414634146pt;;">Nagios</a>
+<a href="https://www.centos.bz/tag/nfs/" class="tag-link-116" title="3个话题" style="color:#b60856;font-size: 11.414634146341pt;;">NFS</a>
+<a href="https://www.centos.bz/tag/nginx-2/" class="tag-link-156" title="5个话题" style="color:#27ed68;font-size: 13.463414634146pt;;">nginx</a>
+<a href="https://www.centos.bz/tag/openresty/" class="tag-link-153" title="2个话题" style="color:#c159d8;font-size: 10.048780487805pt;;">OpenResty</a>
+<a href="https://www.centos.bz/tag/openvpn/" class="tag-link-23" title="1个话题" style="color:#d2fb36;font-size: 8pt;;">openvpn</a>
+<a href="https://www.centos.bz/tag/openvz/" class="tag-link-27" title="2个话题" style="color:#bb7d69;font-size: 10.048780487805pt;;">openvz</a>
+<a href="https://www.centos.bz/tag/oracle/" class="tag-link-128" title="2个话题" style="color:#6dffaf;font-size: 10.048780487805pt;;">oracle</a>
+<a href="https://www.centos.bz/tag/php/" class="tag-link-67" title="15个话题" style="color:#7ced9d;font-size: 18.243902439024pt;;">PHP</a>
+<a href="https://www.centos.bz/tag/phpmyadmin/" class="tag-link-34" title="3个话题" style="color:#2a7d82;font-size: 11.414634146341pt;;">phpMyAdmin</a>
+<a href="https://www.centos.bz/tag/postfixadmin/" class="tag-link-130" title="1个话题" style="color:#4ca2d5;font-size: 8pt;;">postfixadmin</a>
+<a href="https://www.centos.bz/tag/pptp/" class="tag-link-40" title="1个话题" style="color:#dda6dc;font-size: 8pt;;">PPTP</a>
+<a href="https://www.centos.bz/tag/putty/" class="tag-link-26" title="3个话题" style="color:#84c2db;font-size: 11.414634146341pt;;">Putty</a>
+<a href="https://www.centos.bz/tag/rsync/" class="tag-link-41" title="8个话题" style="color:#951c0a;font-size: 15.39837398374pt;;">rsync</a>
+<a href="https://www.centos.bz/tag/saltstack/" class="tag-link-177" title="4个话题" style="color:#9e40e2;font-size: 12.552845528455pt;;">saltstack</a>
+<a href="https://www.centos.bz/tag/scp/" class="tag-link-43" title="2个话题" style="color:#48eb5a;font-size: 10.048780487805pt;;">scp</a>
+<a href="https://www.centos.bz/tag/screen/" class="tag-link-61" title="2个话题" style="color:#e3f049;font-size: 10.048780487805pt;;">screen</a>
+<a href="https://www.centos.bz/tag/sed/" class="tag-link-160" title="2个话题" style="color:#535ff4;font-size: 10.048780487805pt;;">sed</a>
+<a href="https://www.centos.bz/tag/squid/" class="tag-link-19" title="1个话题" style="color:#763dbc;font-size: 8pt;;">Squid</a>
+<a href="https://www.centos.bz/tag/ssh/" class="tag-link-3" title="7个话题" style="color:#206386;font-size: 14.829268292683pt;;">SSH</a>
+<a href="https://www.centos.bz/tag/swap/" class="tag-link-31" title="1个话题" style="color:#15a2c4;font-size: 8pt;;">swap</a>
+<a href="https://www.centos.bz/tag/varnish/" class="tag-link-99" title="7个话题" style="color:#acfea6;font-size: 14.829268292683pt;;">varnish</a>
+<a href="https://www.centos.bz/tag/virtualbox/" class="tag-link-133" title="2个话题" style="color:#bd04cf;font-size: 10.048780487805pt;;">virtualbox</a>
+<a href="https://www.centos.bz/tag/winscp/" class="tag-link-29" title="1个话题" style="color:#621fb4;font-size: 8pt;;">WinSCP</a>
+<a href="https://www.centos.bz/tag/xen/" class="tag-link-28" title="5个话题" style="color:#c9d99b;font-size: 13.463414634146pt;;">xen</a>
+<a href="https://www.centos.bz/tag/xtrabackup/" class="tag-link-161" title="2个话题" style="color:#edd0;font-size: 10.048780487805pt;;">Xtrabackup</a>
+<a href="https://www.centos.bz/tag/zabbix/" class="tag-link-173" title="2个话题" style="color:#5f625c;font-size: 10.048780487805pt;;">zabbix</a>
+<a href="https://www.centos.bz/tag/zpanel/" class="tag-link-59" title="2个话题" style="color:#8d8552;font-size: 10.048780487805pt;;">ZPanel</a>
+<a href="https://www.centos.bz/tag/%e7%9b%91%e6%8e%a7%e5%ae%9d/" class="tag-link-24" title="2个话题" style="color:#ddf52a;font-size: 10.048780487805pt;;">监控宝</a></div>
+</div>    </div>
+</div></div>
+<div id="totop" class="totop" style="display: block;"><i class="iconfont">Ɣ</i>回顶部</div>
+<script type="text/javascript">
+	$(window).scroll(function () {
+        var dt = $(document).scrollTop();
+        var wt = $(window).height();
+        if (dt <= 0) {
+            $("#totop").hide();
+            return;
+        }
+        $("#totop").show();
+        if ($.browser.msie && $.browser.version == 6.0) {//IE6返回顶部
+            $("#totop").css("top", wt + dt - 110 + "px");
+        }
+    });
+    $("#totop").click(function () { $("html,body").animate({ scrollTop: 0 }, 200) });
+</script>
+</div>
+<div id="footer">
+	© 2011 Linux运维日志.
+	Powered by <a href="http://wordpress.org/" rel="external nofollow" target="_blank">WordPress</a>.
+                <script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?245337fe2a5eec764f81f87e3d0180a7";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</div>
+<!-- Start Generated By WP-PostViews Plus -->
+<script>
+jQuery(document).ready(function($) {
+	jQuery.get(
+		'https://www.centos.bz/wp-admin/admin-ajax.php',
+		{action: 'wp_pvp_count', post_id: 5473, count_id: 'de5f7f8cece49b6c602db22822145292'},
+		function(Jdata){if(Object.keys(Jdata).length>0){for(key in Jdata){jQuery('.'+key).text(Jdata[key]);}}},
+		'json'
+	);
+});
+</script>
+<!-- End Generated WP-PostViews Plus -->
+			
+
+
+<!-- Dynamic page generated in 0.150 seconds. -->
+<!-- Cached page generated by WP-Super-Cache on 2015-12-13 08:26:46 -->
+
+<!-- Compression = gzip --></body></html>
