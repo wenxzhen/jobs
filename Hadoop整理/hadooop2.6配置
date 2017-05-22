@@ -1,0 +1,124 @@
+hadoop-env.sh
+		export HADOOP_PID_DIR=/data/bigData/hadoop-2.6.4/pid/
+		export JAVA_HOME=/opt/jdk1.7.0_79
+
+core-site.xml
+       <property>
+                <name>fs.defaultFS</name>
+                <value>hdfs://hadoop001:9000</value>
+       </property>
+
+        <property>
+                <name>hadoop.tmp.dir</name>
+                <value>/data/bigData/hadoop-2.6.4/tmp</value>
+        </property>
+		
+hdfs-site.xml		
+		
+        <property>
+                <name>dfs.namenode.name.dir</name>
+                <value>/data/bigData/hadoop-2.6.4/dfs/name</value>
+        </property>		
+        <property>
+                <name>dfs.datanode.data.dir</name>
+                <value>/data/bigData/hadoop-2.6.4/dfs/data</value>
+        </property>
+        <property>
+                <name>dfs.replication</name>
+                <value>2</value>
+        </property>
+		
+mapred-site.xml		
+		
+		<property>
+			  <name>mapreduce.framework.name</name>
+			  <value>yarn</value>
+			  <description>The runtime framework for executing MapReduce jobs.
+			  Can be one of local, classic or yarn.
+			  </description>
+		</property>
+		
+yarn-site.xml	 		
+		
+	  <property>
+			<description>The hostname of the RM.</description>
+			<name>yarn.resourcemanager.hostname</name>
+			<value>hadoop001</value>
+	  </property> 
+	  
+
+	  <property>
+		<name>yarn.nodemanager.resource.memory-mb</name>
+		<value>10240</value> 
+	  </property>
+	  
+	    <!--日志聚合功能--> 
+	  <property>
+		 <name>yarn.log-aggregation-enable</name>
+		 <value>true</value>
+	  </property>
+
+	  <!--在HDFS上聚合的日志最长保留多少秒。3天--> 
+	  <property>
+		 <name>yarn.log-aggregation.retain-seconds</name>
+		 <value>259200</value>
+	  </property>
+	  
+	  
+slaves
+	hadoop001
+	hadoop002
+	hadoop003
+	
+	
+	
+	
+	
+# yum install ntp
+
+vi /etc/ntp.conf
+server 192.168.6.80 prefer
+#允许访问的网段
+restrict 192.168.6.0 mask 255.255.255.0 nomodify notrap
+
+
+完成后，都需要配置NTP服务为自启动
+# chkconfig ntpd on
+# chkconfig --list ntpd
+ntpd           0:关闭 1:关闭 2:启用 3:启用 4:启用 5:启用 6:关闭
+service ntpd start 
+ 
+在配置前，先使用ntpdate手动同步下时间，免得本机与外部时间服务器时间差距太大，让ntpd不能正常同步。
+# ntpdate -u 192.168.6.80
+22 Dec 16:52:38 ntpdate[6400]: adjust time server 192.168.6.80 offset 0.012135 sec	
+
+将ntpdate命令放入crontab中，定期执行
+crontab -e
+
+添加一条，如
+* 1 * * * * ntpdate -u 192.168.6.80  >> ./ntpdata.log  #每天1点执行ntpdate命令进行同步
+保存即可	
+
+HBase	
+
+hbase-env.sh
+export HBASE_MANAGES_ZK=false
+
+hbase-site.xml
+	
+<configuration>
+  <property>
+    <name>hbase.rootdir</name>
+    <value>hdfs://hadoop001:9000/user/hbase</value>
+  </property>
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>hadoop001</value>
+  </property>
+</configuration>
+bin/start-hbase.sh
+http://hadoop001:16010/master-status

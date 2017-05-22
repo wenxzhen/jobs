@@ -1,0 +1,53 @@
+
+https://github.com/cloudera/hue
+
+yum install mysql mysql-devel ant asciidoc cyrus-sasl-devel cyrus-sasl-gssapi cyrus-sasl-plain gcc gcc-c++ krb5-devel libffi-devel libtidy libxml2-devel libxslt-devel make openldap-devel python-devel sqlite-devel openssl-devel gmp-devel -y
+
+wget http://archive.cloudera.com/cdh5/cdh/5/hue-3.9.0-cdh5.10.1.tar.gz
+
+tar hue-3.9.0-cdh5.10.1.tar.gz -C /usr/local
+
+cd /usr/local/hue-3.9.0-cdh5.10.1
+
+$ make apps
+
+$ build/env/bin/hue runserver 0.0.0.0:8888
+
+http://huehost:8888
+
+admin
+admin
+
+hue.ini
+  server_user=hadoop
+  server_group=hadoop
+
+  # This should be the Hue admin and proxy user
+  default_user=hadoop
+
+  # This should be the hadoop cluster admin
+  default_hdfs_superuser=hadoop
+
+
+Hue Mysql DB 
+
+build/env/bin/hue syncdb
+build/env/bin/hue migrate
+
+
+
+1、开启 webhdfs
+httpfs-site.xml
+<property>
+  <name>httpfs.proxyuser.hadoop.hosts</name>
+  <value>*</value>
+</property>
+<property>
+  <name>httpfs.proxyuser.hadoop.groups</name>
+  <value>*</value>
+</property>
+
+httpfs.sh start
+
+2、hbase启动thrift
+hbase-daemon.sh start thrift

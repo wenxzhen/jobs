@@ -1,0 +1,23 @@
+
+Hive Web UI
+http://csdn-hdp-151:10002/
+
+JobTracker Web UI
+http://csdn-hdp-152:50030/
+
+
+Spark History Server
+http://csdn-hdp-153:18088/
+
+Yarn History Server
+http://csdn-hdp-153:19888/
+
+NodeManager HTTP Address 
+http://csdn-hdp-151:8042/
+http://csdn-hdp-152:8042/
+http://csdn-hdp-153:8042/
+http://csdn-hdp-154:8042/
+
+
+Resource Manager
+http://csdn-hdp-154:8088

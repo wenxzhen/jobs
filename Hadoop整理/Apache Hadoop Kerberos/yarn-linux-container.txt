@@ -1,0 +1,63 @@
+
+<property>
+<name>yarn.nodemanager.container-executor.class</name>
+<value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+</property>
+
+<property>
+<name>yarn.nodemanager.linux-container-executor.group</name>
+<value>hadoop</value>
+</property>
+
+<property>
+<name>yarn.nodemanager.linux-container-executor.path</name>
+<value>/opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor</value>
+</property>
+
+
+
+chown root:hadoop container-executor.cfg
+chmod 0400  container-executor.cfg
+
+[root@sparkmaster hadoop]# chown root:hadoop container-executor.cfg
+[root@sparkmaster hadoop]# chmod 0400  container-executor.cfg
+[root@sparkmaster hadoop]# ll container-executor.cfg 
+-r--------. 1 root hadoop 351 Nov  8 11:27 container-executor.cfg
+[root@sparkmaster hadoop]# pwd
+/home/yarn/hadoop/etc/hadoop
+
+chown root:hadoop /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+chmod 6050 /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+
+[root@sparkmaster hadoop]# chown root:hadoop /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+[root@sparkmaster hadoop]# chmod 6050 /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+[root@sparkmaster hadoop]# ll /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+---Sr-s---. 1 root hadoop 108893 Nov  7 16:25 /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+[root@sparkmaster hadoop]# 
+
+
+
+bin/container-executor --checksetup
+
+[root@sparkmaster hadoop]# chown root:hadoop /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+[root@sparkmaster hadoop]# chmod 6050 /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+[root@sparkmaster hadoop]# ll /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+---Sr-s---. 1 root hadoop 108893 Nov  7 16:25 /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+
+[root@sparkmaster hadoop]# bin/container-executor --checksetup
+File /opt/hadoop-2.6.0-cdh5.8.2/etc/hadoop must be owned by root, but is owned by 502
+[root@sparkmaster hadoop]# chown root:hadoop -R /opt/hadoop-2.6.0-cdh5.8.2/
+[root@sparkmaster hadoop]# ll /opt/
+total 12
+drwxrwxr-x. 13 root hadoop 4096 Nov  7 16:45 hadoop-2.6.0-cdh5.8.2
+drwxr-xr-x.  2 root root   4096 Mar 26  2015 rh
+drwxrwxrwx.  7 root root   4096 Jul  8 17:39 tools
+[root@sparkmaster hadoop]# bin/container-executor --checksetup
+File /opt/hadoop-2.6.0-cdh5.8.2/etc/hadoop must not be world or group writable, but is 775
+[root@sparkmaster hadoop]# ll /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor^C
+[root@sparkmaster hadoop]# chmod 755 -R /opt/hadoop-2.6.0-cdh5.8.2/
+[root@sparkmaster hadoop]# bin/container-executor --checksetup
+The container-executor binary should not have write or execute for others.
+Invalid permissions on container-executor binary.
+[root@sparkmaster hadoop]# chmod 6050 /opt/hadoop-2.6.0-cdh5.8.2/bin/container-executor
+[root@sparkmaster hadoop]# bin/container-executor --checksetup

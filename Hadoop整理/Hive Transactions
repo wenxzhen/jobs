@@ -1,0 +1,21 @@
+hive.support.concurrency: true
+hive.enforce.bucketing: true
+hive.exec.dynamic.partition.mode: nonstrict
+hive.txn.manager: org.apache.hadoop.hive.ql.lockmgr.DbTxnManager
+hive.compactor.initiator.on: true
+hive.compactor.worker.threads: 1
+
+
+create table test_trancaction
+(seller_id Int,user_id String) 
+clustered by (user_id) into 3 buckets 
+stored as orc TBLPROPERTIES ('transactional'='true');
+
+insert into test_trancaction select seller_id,user_id from kylin_sales;
+
+update test_trancaction set user_id=yangxy where user_id='ANALYST';
+
+
+
+https://cwiki.apache.org/confluence/display/Hive/Hive+Transactions#HiveTransactions-Limitations
+https://my.oschina.net/wangjiankui/blog/711942

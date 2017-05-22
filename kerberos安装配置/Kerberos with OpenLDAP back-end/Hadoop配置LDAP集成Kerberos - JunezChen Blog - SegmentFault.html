@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)https://segmentfault.com/a/1190000002532332 -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"><meta name="renderer" content="webkit"><meta property="qc:admins" content="15317273575564615446375"><meta property="og:image" content="https://sf-static.b0.upaiyun.com/v-57a9800b/global/img/touch-icon.png"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><meta name="alexaVerifyID" content="LkzCRJ7rPEUwt6fVey2vhxiw1vQ"><meta name="apple-itunes-app" content="app-id=958101793, app-argument="><title>Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault</title><meta name="description" content="本文主要记录 cdh hadoop 集群集成 ldap 的过程，这里 ldap 安装的是 OpenLDAP 。LDAP 用来做账号管理，Kerberos作为认证。授权一般来说是由应用来决定的，通过在 LDAP 数据库中配置一些属性可以让应用程序来进行..."><meta name="keywords" content="hadoop,ldap,kerberos,cdh5"><link rel="search" type="application/opensearchdescription+xml" href="https://segmentfault.com/opensearch.xml" title="SegmentFault"><link rel="shortcut icon" href="https://sf-static.b0.upaiyun.com/v-57a9800b/global/img/favicon.ico"><link rel="apple-touch-icon" href="https://sf-static.b0.upaiyun.com/v-57a9800b/global/img/touch-icon.png"><meta name="msapplication-TileColor" content="#009a61"><meta name="msapplication-square150x150logo" content="https://sf-static.b0.upaiyun.com/v-57a9800b/global/img/touch-icon.png"><link rel="alternate" type="application/atom+xml" title="SegmentFault 最新问题" href="https://segmentfault.com/feeds/questions"><link rel="alternate" type="application/atom+xml" title="SegmentFault 最新文章" href="https://segmentfault.com/feeds/blogs"><link rel="stylesheet" href="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/global.css"><link rel="stylesheet" href="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/blog.css"><link rel="stylesheet" href="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/responsive.css"><!--[if lt IE 9]><link rel="stylesheet" href="https://sf-static.b0.upaiyun.com/v-57a9800b/global/css/ie.css"/><script src="https://sf-static.b0.upaiyun.com/v-57a9800b/global/script/html5shiv.js"></script><script src="https://sf-static.b0.upaiyun.com/v-57a9800b/global/script/respond.js"></script><![endif]--><script src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/hm.js"></script><script type="text/javascript" async="" src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/vds.js"></script><script async="" src="https://www.google-analytics.com/analytics.js"></script><script src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/debug.js"></script></head><body data-mod="blog" class="blog-post "><!--[if lt IE 9]><div class="alert alert-danger topframe" role="alert">你的浏览器实在<strong>太太太太太太旧了</strong>，放学别走，升级完浏览器再说 <a target="_blank" class="alert-link" href="http://browsehappy.com">立即升级</a></div><![endif]--><img id="icon4weChat" style="height: 0;width: 0;" data-src="https://sf-static.b0.upaiyun.com/v-57a9800b/global/img/touch-icon-512.png"><img id="icon4weChat" data-src="https://sf-static.b0.upaiyun.com/v-57a9800b/global/img/touch-icon-512.png"><div class="global-nav sf-header"><nav class="container nav"><div class="hidden-sm hidden-lg hidden-md"><div class="sf-header__logo sf-header__logo--response"><h1><a></a></h1></div><div class="dropdown m-menu"><a href="javascript:void(0);" id="dLabel" class="visible-xs-block m-toptools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-align-justify"></span><span class="mobile-menu__unreadpoint"></span></a><ul class="dropdown-menu" role="menu" aria-labelledby="dLabel"><li class="mobile-menu__item"><a href="https://segmentfault.com/questions/newest">问答</a></li><li class="mobile-menu__item"><a href="https://segmentfault.com/blogs">文章</a></li><li class="mobile-menu__item"><a href="https://segmentfault.com/user/note">笔记</a></li><li class="mobile-menu__item"><a href="https://segmentfault.com/jobs">职位</a></li><li class="mobile-menu__item"><a href="https://segmentfault.com/events">活动</a></li><li class="mobile-menu__item"><a href="https://segmentfault.com/tags">标签</a></li><li class="mobile-menu__item"><a href="https://segmentfault.com/users">榜单</a></li><li class="mobile-menu__item"><a href="https://segmentfault.com/sites">子站</a></li></ul></div><a href="https://segmentfault.com/user/login" class="visible-xs-block pull-right m-ask m-toptools"><span class="glyphicon glyphicon-log-in"></span></a></div><div class="row hidden-xs"><div class="col-sm-9 col-md-7 col-lg-6"><div class="sf-header__logo"><h1><a href="https://segmentfault.com/">SegmentFault</a></h1></div><ul class="menu list-inline pull-left hidden-xs"><li class="menu__item"><a href="https://segmentfault.com/questions">问答</a></li><li class="menu__item"><a href="https://segmentfault.com/blogs">文章</a></li><li class="menu__item"><a href="https://segmentfault.com/notes">笔记</a></li><li class="menu__item"><a href="https://segmentfault.com/jobs">职位</a></li><li class="menu__item"><a href="https://segmentfault.com/events">活动</a></li></ul></div><div class="col-sm-3 col-md-5 col-lg-6 text-right"><form action="https://segmentfault.com/search" class="header-search  hidden-sm hidden-xs mr20"><button class="btn btn-link"><span class="sr-only">搜索</span><span class="glyphicon glyphicon-search"></span></button><input id="searchBox" name="q" type="text" placeholder="输入关键字搜索" class="form-control" value=""></form><ul class="opts list-inline hidden-xs"><li class="opts__item message has-unread"><a target="_blank" href="https://segmentfault.com/tour"><span class="sr-only">消息</span><span id="messageCount" class="fa fa-hand-peace-o"></span></a></li><li class="opts__item"><a href="https://segmentfault.com/user/login" class="SFLogin em ml10" onclick="_gaq.push([&#39;_trackEvent&#39;, &#39;Button&#39;, &#39;Click&#39;, &#39;Login&#39;]);">注册 ·
+                                        登录</a></li></ul></div></div></nav></div><div class="global-navTags"><div class="container"><nav class=" nav"><ul class="nav__list"><li class="nav__item"><a href="https://segmentfault.com/"><i class="fa fa-home"></i>home
+                            </a></li><li class="nav__item"><a href="https://segmentfault.com/timeline"><i class="fa fa-list-alt"></i>feed
+                            </a></li><li class="nav__item nav__item--split"><a><span class="split"></span></a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/javascript">javascript</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/php">php</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/python">python</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/java">java</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/mysql">mysql</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/ios">ios</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/android">android</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/node.js">node.js</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/html5">html5</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/linux">linux</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/c%2B%2B">c++</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/css3">css3</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/git">git</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/golang">golang</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/ruby">ruby</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/vim">vim</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/docker">docker</a></li><li class="nav__item tag-nav__item"><a href="https://segmentfault.com/t/mongodb">mongodb</a></li><li class="nav__item nav__item--more" data-open="0"><a class="nav__item--more-link" href="https://segmentfault.com/tags"><div class="tag__more"><i class="tag__more--icon"></i><i class="tag__more--icon"></i><i class="tag__more--icon"></i></div></a></li></ul><div class="tag-mgr__box hide"><input class="tag-mgr__query" type="text" placeholder="搜索关注的标签" data-tags="null"><div class="mCustomScrollbar _mCS_1 mCS-autoHide mCS_no_scrollbar" data-mcs-theme="minimal-dark" style="position: relative; overflow: visible;"><div id="mCSB_1" class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" style="max-height: 0px;" tabindex="0"><div id="mCSB_1_container" class="mCSB_container mCS_y_hidden mCS_no_scrollbar_y" style="position:relative; top:0; left:0;" dir="ltr"><ul class="tag-mgr__list"></ul></div></div><div id="mCSB_1_scrollbar_vertical" class="mCSB_scrollTools mCSB_1_scrollbar mCS-minimal-dark mCSB_scrollTools_vertical" style="display: none;"><div class="mCSB_draggerContainer"><div id="mCSB_1_dragger_vertical" class="mCSB_dragger" style="position: absolute; min-height: 50px; top: 0px;" oncontextmenu="return false;"><div class="mCSB_dragger_bar" style="line-height: 50px;"></div></div><div class="mCSB_draggerRail"></div></div></div></div><a href="https://segmentfault.com/tags" class="btn btn-primary btn-sm tag-mgr__btn">标签管理</a></div></nav></div></div>
+    <div class="wrap">
+    <div class="post-topheader custom-">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-9 col-sm-8 col-xs-12">
+                    <span class="post-topheader__title--icon-symbol">文</span>
+
+                    <div class="post-topheader__info" data-username="JavaChen" data-userslug="javachen" data-useravatar="https://sfault-avatar.b0.upaiyun.com/125/138/1251383722-1030000000374689_big64">
+
+                        <h1 class="h3 post-topheader__info--title" id="articleTitle" data-id="1190000002532332">
+
+                                                <a href="https://segmentfault.com/a/1190000002532332"> Hadoop配置LDAP集成Kerberos</a>
+                                            </h1>
+
+                        <ul class="taglist--inline inline-block article__title--tag mr10">
+                                                            <li class="tagPopup mb5"><a class="tag" href="https://segmentfault.com/t/hadoop/blogs" data-toggle="popover" data-img="https://sfault-avatar.b0.upaiyun.com/268/541/268541175-1040000000089648_huge256" data-placement="top" data-original-title="hadoop" data-id="1040000000089648">hadoop</a></li>
+                                                            <li class="tagPopup mb5"><a class="tag" href="https://segmentfault.com/t/ldap/blogs" data-toggle="popover" data-img="" data-placement="top" data-original-title="ldap" data-id="1040000000150925">ldap</a></li>
+                                                            <li class="tagPopup mb5"><a class="tag" href="https://segmentfault.com/t/kerberos/blogs" data-toggle="popover" data-img="" data-placement="top" data-original-title="kerberos" data-id="1040000002532305">kerberos</a></li>
+                                                            <li class="tagPopup mb5"><a class="tag" href="https://segmentfault.com/t/cdh5/blogs" data-toggle="popover" data-img="" data-placement="top" data-original-title="cdh5" data-id="1040000000603641">cdh5</a></li>
+                                                    </ul>
+
+                        <div class="article__author">
+                        <a href="https://segmentfault.com/u/javachen" class="mr5 "><strong>JavaChen</strong></a>
+                        2015年02月03日发布
+                                                                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-4 hidden-xs">
+                    <ul class="post-topheader__side list-unstyled">
+                        <li>
+                                                                                                <button type="button" class="btn btn-success btn-sm" data-id="1190000002532332" id="sideLike">推荐
+                                    </button>
+                                                                                        <strong id="sideLiked">1</strong> 推荐
+                        </li>
+                        <li>
+                                                                                                <button type="button" id="sideBookmark" class="btn btn-default btn-sm" data-id="1190000002532332" data-type="article">收藏
+                                    </button>
+                                                                                        <strong id="sideBookmarked">5</strong> 收藏，<strong class="no-stress">4.7k</strong> 浏览
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div><!-- end .post-topheader -->
+
+    <div class="container mt30">
+        <div class="row">
+            <div class="col-xs-12 col-md-9 main ">
+
+                                                <div class="article fmt article__content" data-id="1190000002532332" data-license="cc">
+                    
+<p>本文主要记录 cdh hadoop 集群集成 ldap 的过程，这里 ldap 安装的是 <a rel="nofollow" href="http://www.openldap..org/" target="_blank">OpenLDAP</a> 。LDAP 用来做账号管理，Kerberos作为认证。授权一般来说是由应用来决定的，通过在 LDAP 数据库中配置一些属性可以让应用程序来进行授权判断。</p>
+
+<p>关于 Kerberos 的安装和 HDFS 配置 kerberos 认证，请参考 <a rel="nofollow" href="http://blog.javachen.com/2014/11/04/config-kerberos-in-cdh-hdfs/" target="_blank">HDFS配置kerberos认证</a>。</p>
+
+<p>参考 <a rel="nofollow" href="http://blog.javachen.com/2013/04/06/install-cloudera-cdh-by-yum/" target="_blank">使用yum安装CDH Hadoop集群</a> 安装 hadoop 集群，集群包括三个节点，每个节点的ip、主机名和部署的组件分配如下：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="192.168.56.121        cdh1     Kerberos KDC 、OpenLDAP
+192.168.56.122        cdh2     kerberos client、ldap client
+192.168.56.123        cdh3     kerberos client、ldap client
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre class="hljs"><code>192.168.56.121        cdh1     Kerberos KDC 、OpenLDAP
+192.168.56.122        cdh2     kerberos client、ldap client
+192.168.56.123        cdh3     kerberos client、ldap client
+</code></pre>
+
+<blockquote>
+  <p>注意：hostname 请使用小写，要不然在集成 kerberos 时会出现一些错误。</p>
+</blockquote>
+
+<p>环境说明：</p>
+
+<ul>
+<li>操作系统：Centos6.6</li>
+<li>OpenLDAP 版本：2.4.39</li>
+<li>Kerberos 版本：1.10.3</li>
+<li>CDH 版本：cdh-5.2.0</li>
+</ul>
+<h1 id="articleHeader0">1. 安装服务端</h1>
+
+<h2 id="articleHeader1">1.1 安装</h2>
+
+<p>同安装 kerberos 一样，这里使用 cdh1 作为服务端安装 openldap。</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ yum install db4 db4-utils db4-devel cyrus-sasl* krb5-server-ldap -y
+$ yum install openldap openldap-servers openldap-clients openldap-devel compat-openldap -y
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ yum install db4 db4-utils db4-devel cyrus-sasl* krb5-server-ldap -y
+$ yum install openldap openldap-servers openldap-clients openldap-devel compat-openldap -y
+</code></pre>
+
+<p>查看安装的版本：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ rpm -qa openldap
+openldap-2.4.39-8.el6.x86_64
+
+$ rpm -qa krb5-server-ldap
+krb5-server-ldap-1.10.3-33.el6.x86_64
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ rpm -qa openldap
+openldap-<span class="hljs-number">2.4</span>.<span class="hljs-number">39</span>-<span class="hljs-number">8</span>.el6.x86_64
+
+$ rpm -qa krb5-server-ldap
+krb5-server-ldap-<span class="hljs-number">1.10</span>.<span class="hljs-number">3</span>-<span class="hljs-number">33</span>.el6.x86_64
+</code></pre>
+
+<h2 id="articleHeader2">1.2 OpenSSL</h2>
+
+<blockquote>
+  <p>如果，你不配置ssl，这部分内容可以略过，实际安装过程中，我也没有详细去操作这部分内容。</p>
+</blockquote>
+
+<p>OpenLDAP 默认使用 Mozilla NSS，安装后已经生成了一份证书，可使用 <code>certutil -d /etc/openldap/certs/ -L -n 'OpenLDAP Server'</code> 命令查看。使用如下命令生成RFC格式CA证书并分发到客户机待用。</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ certutil -d /etc/openldap/certs/ -L -a -n &#39;OpenLDAP Server&#39; -f /etc/openldap/certs/password &gt; /etc/openldap/ldapCA.rfc
+
+# 拷贝到其他节点
+$ scp /etc/openldap/ldapCA.rfc cdh2:/tmp
+$ scp /etc/openldap/ldapCA.rfc cdh3:/tmp
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ certutil <span class="hljs-operator">-d</span> /etc/openldap/certs/ -L <span class="hljs-operator">-a</span> -n <span class="hljs-string">'OpenLDAP Server'</span> <span class="hljs-operator">-f</span> /etc/openldap/certs/password &gt; /etc/openldap/ldapCA.rfc
+
+<span class="hljs-comment"># 拷贝到其他节点</span>
+$ scp /etc/openldap/ldapCA.rfc cdh2:/tmp
+$ scp /etc/openldap/ldapCA.rfc cdh3:/tmp
+</code></pre>
+
+<p>附，生成自签名证书的命令供参考：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ certutil -d /etc/openldap/certs -S -n &#39;test cert&#39; -x -t &#39;u,u,u&#39; -s &#39;C=XX, ST=Default Province, L=Default City, O=Default Company Ltd, OU=Default Unit, CN=cdh1&#39; -k rsa -v 120 -f /etc/openldap/certs/password
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ certutil <span class="hljs-operator">-d</span> /etc/openldap/certs -S -n <span class="hljs-string">'test cert'</span> -x -t <span class="hljs-string">'u,u,u'</span> <span class="hljs-operator">-s</span> <span class="hljs-string">'C=XX, ST=Default Province, L=Default City, O=Default Company Ltd, OU=Default Unit, CN=cdh1'</span> -k rsa -v <span class="hljs-number">120</span> <span class="hljs-operator">-f</span> /etc/openldap/certs/password
+</code></pre>
+
+<p>修改 <code>/etc/sysconfig/ldap</code>，开启 ldaps：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="# Run slapd with -h &quot;... ldaps:/// ...&quot;
+#   yes/no, default: no
+SLAPD_LDAPS=yes
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash"><span class="hljs-comment"># Run slapd with -h "... ldaps:/// ..."</span>
+<span class="hljs-comment">#   yes/no, default: no</span>
+SLAPD_LDAPS=yes
+</code></pre>
+
+<h2 id="articleHeader3">1.3 LDAP 服务端配置</h2>
+
+<p>更新配置库：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="rm -rf /var/lib/ldap/*
+cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+chown -R ldap.ldap /var/lib/ldap
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">rm -rf /var/lib/ldap/*
+cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+chown -R ldap.ldap /var/lib/ldap
+</code></pre>
+
+<p>在2.4以前的版本中，OpenLDAP 使用 slapd.conf 配置文件来进行服务器的配置，而2.4开始则使用 <code>slapd.d</code> 目录保存细分后的各种配置，这一点需要注意，其数据存储位置即目录 <code>/etc/openldap/slapd.d</code> 。尽管该系统的数据文件是透明格式的，还是建议使用 ldapadd, ldapdelete, ldapmodify 等命令来修改而不是直接编辑。</p>
+
+<p>默认配置文件保存在 /etc/openldap/slapd.d，将其备份：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="cp -rf /etc/openldap/slapd.d /etc/openldap/slapd.d.bak
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">cp -rf /etc/openldap/slapd.d /etc/openldap/slapd.d.bak
+</code></pre>
+
+<p>添加一些基本配置，并引入 kerberos 和 openldap 的 schema：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ cp /usr/share/doc/krb5-server-ldap-1.10.3/kerberos.schema /etc/openldap/schema/
+
+$ touch /etc/openldap/slapd.conf
+
+$ echo &quot;include /etc/openldap/schema/corba.schema
+include /etc/openldap/schema/core.schema
+include /etc/openldap/schema/cosine.schema
+include /etc/openldap/schema/duaconf.schema
+include /etc/openldap/schema/dyngroup.schema
+include /etc/openldap/schema/inetorgperson.schema
+include /etc/openldap/schema/java.schema
+include /etc/openldap/schema/misc.schema
+include /etc/openldap/schema/nis.schema
+include /etc/openldap/schema/openldap.schema
+include /etc/openldap/schema/ppolicy.schema
+include /etc/openldap/schema/collective.schema
+include /etc/openldap/schema/kerberos.schema&quot; &gt; /etc/openldap/slapd.conf
+$ echo -e &quot;pidfile /var/run/openldap/slapd.pid\nargsfile /var/run/openldap/slapd.args&quot; &gt;&gt; /etc/openldap/slapd.conf
+
+#更新slapd.d
+$ slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d
+
+$ chown -R ldap:ldap /etc/openldap/slapd.d &amp;&amp; chmod -R 700 /etc/openldap/slapd.d
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ cp /usr/share/doc/krb5-server-ldap-<span class="hljs-number">1.10</span>.<span class="hljs-number">3</span>/kerberos.schema /etc/openldap/schema/
+
+$ touch /etc/openldap/slapd.conf
+
+$ <span class="hljs-built_in">echo</span> <span class="hljs-string">"include /etc/openldap/schema/corba.schema
+include /etc/openldap/schema/core.schema
+include /etc/openldap/schema/cosine.schema
+include /etc/openldap/schema/duaconf.schema
+include /etc/openldap/schema/dyngroup.schema
+include /etc/openldap/schema/inetorgperson.schema
+include /etc/openldap/schema/java.schema
+include /etc/openldap/schema/misc.schema
+include /etc/openldap/schema/nis.schema
+include /etc/openldap/schema/openldap.schema
+include /etc/openldap/schema/ppolicy.schema
+include /etc/openldap/schema/collective.schema
+include /etc/openldap/schema/kerberos.schema"</span> &gt; /etc/openldap/slapd.conf
+$ <span class="hljs-built_in">echo</span> <span class="hljs-operator">-e</span> <span class="hljs-string">"pidfile /var/run/openldap/slapd.pid\nargsfile /var/run/openldap/slapd.args"</span> &gt;&gt; /etc/openldap/slapd.conf
+
+<span class="hljs-comment">#更新slapd.d</span>
+$ slaptest <span class="hljs-operator">-f</span> /etc/openldap/slapd.conf -F /etc/openldap/slapd.d
+
+$ chown -R ldap:ldap /etc/openldap/slapd.d &amp;&amp; chmod -R <span class="hljs-number">700</span> /etc/openldap/slapd.d
+</code></pre>
+
+<h2 id="articleHeader4">1.4 启动服务</h2>
+
+<p>启动 LDAP 服务：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="chkconfig --add slapd
+chkconfig --level 345 slapd on
+
+/etc/init.d/slapd start
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">chkconfig --add slapd
+chkconfig --level <span class="hljs-number">345</span> slapd on
+
+/etc/init.d/slapd start
+</code></pre>
+
+<p>查看状态，验证服务端口：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ ps aux | grep slapd | grep -v grep
+  ldap      9225  0.0  0.2 581188 44576 ?        Ssl  15:13   0:00 /usr/sbin/slapd -h ldap:/// -u ldap
+
+$ netstat -tunlp  | grep :389
+  tcp        0      0 0.0.0.0:389                 0.0.0.0:*                   LISTEN      8510/slapd
+  tcp        0      0 :::389                      :::*                        LISTEN      8510/slapd
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ ps aux | grep slapd | grep -v grep
+  ldap      <span class="hljs-number">9225</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.2</span> <span class="hljs-number">581188</span> <span class="hljs-number">44576</span> ?        Ssl  <span class="hljs-number">15</span>:<span class="hljs-number">13</span>   <span class="hljs-number">0</span>:<span class="hljs-number">00</span> /usr/sbin/slapd -h ldap:/// -u ldap
+
+$ netstat -tunlp  | grep :<span class="hljs-number">389</span>
+  tcp        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>:<span class="hljs-number">389</span>                 <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>:*                   LISTEN      <span class="hljs-number">8510</span>/slapd
+  tcp        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> :::<span class="hljs-number">389</span>                      :::*                        LISTEN      <span class="hljs-number">8510</span>/slapd
+</code></pre>
+
+<p>如果启动失败，则运行下面命令来启动 slapd 服务并查看日志：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ slapd -h ldap://127.0.0.1 -d 481
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ slapd -h ldap://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span> <span class="hljs-operator">-d</span> <span class="hljs-number">481</span>
+</code></pre>
+
+<p>待查明原因之后，停止该进程使用正常方式启动 slapd 服务。</p>
+
+<h2 id="articleHeader5">1.5 LDAP 和 Kerberos</h2>
+
+<p>在Kerberos安全机制里，一个principal就是realm里的一个对象，一个principal总是和一个密钥（secret key）成对出现的。</p>
+
+<p>这个principal的对应物可以是service，可以是host，也可以是user，对于Kerberos来说，都没有区别。</p>
+
+<p>Kdc(Key distribute center)知道所有principal的secret key，但每个principal对应的对象只知道自己的那个secret key。这也是 "共享密钥" 的由来。</p>
+
+<p>为了使 Kerberos 能够绑定到 OpenLDAP 服务器，请创建一个管理员用户和一个 principal，并生成 keytab 文件，设置该文件的权限为 LDAP 服务运行用户可读（ LDAP 服务运行用户一般为 ldap）：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ kadmin.local -q &quot;addprinc ldapadmin@JAVACHEN.COM&quot;
+$ kadmin.local -q &quot;addprinc -randkey ldap/cdh1@JAVACHEN.COM&quot;
+$ kadmin.local -q &quot;ktadd -k /etc/openldap/ldap.keytab ldap/cdh1@JAVACHEN.COM&quot;
+
+$ chown ldap:ldap /etc/openldap/ldap.keytab &amp;&amp; chmod 640 /etc/openldap/ldap.keytab
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ kadmin.local -q <span class="hljs-string">"addprinc ldapadmin@JAVACHEN.COM"</span>
+$ kadmin.local -q <span class="hljs-string">"addprinc -randkey ldap/cdh1@JAVACHEN.COM"</span>
+$ kadmin.local -q <span class="hljs-string">"ktadd -k /etc/openldap/ldap.keytab ldap/cdh1@JAVACHEN.COM"</span>
+
+$ chown ldap:ldap /etc/openldap/ldap.keytab &amp;&amp; chmod <span class="hljs-number">640</span> /etc/openldap/ldap.keytab
+</code></pre>
+
+<p>ktadd 后面的<code>-k</code> 指定把 key 存放在一个本地文件中。</p>
+
+<p>使用 ldapadmin 用户测试：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="kinit ldapadmin
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">kinit ldapadmin
+</code></pre>
+
+<p>系统会提示输入密码，如果一切正常，那么会安静的返回。实际上，你已经通过了kerberos的身份验证，且获得了一个Service TGT(Ticket-Granting Ticket). Service TGT的意义是， 在一段时间内，你都可以用此TGT去请求某些service，比如ldap service，而不需要再次通过kerberos的认证。</p>
+
+<p>确保 LDAP 启动时使用上一步中创建的keytab文件，在 <code>/etc/sysconfig/ldap</code> 增加 <code>KRB5_KTNAME</code> 配置：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="export KRB5_KTNAME=/etc/openldap/ldap.keytab
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash"><span class="hljs-built_in">export</span> KRB5_KTNAME=/etc/openldap/ldap.keytab
+</code></pre>
+
+<p>然后，重启 slapd 服务。</p>
+
+<h2 id="articleHeader6">1.6 创建数据库</h2>
+
+<p>进入到 /etc/openldap/slapd.d 目录，查看 <code>etc/openldap/slapd.d/cn\=config/olcDatabase={2}bdb.ldif</code> 可以看到一些默认的配置，例如：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="olcRootDN: cn=Manager,dc=my-domain,dc=com  
+olcRootPW: secret  
+olcSuffix: dc=my-domain,dc=com
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre class="hljs http"><code><span class="hljs-attribute">olcRootDN</span>: <span class="hljs-string">cn=Manager,dc=my-domain,dc=com  </span>
+<span class="hljs-attribute">olcRootPW</span>: <span class="hljs-string">secret  </span>
+<span class="hljs-attribute">olcSuffix</span>: <span class="hljs-string">dc=my-domain,dc=com</span>
+</code></pre>
+
+<p>接下来更新这三个配置，建立 modify.ldif 文件，内容如下：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="dn: olcDatabase={2}bdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=javachen,dc=com
+
+dn: olcDatabase={2}bdb,cn=config
+changetype: modify
+replace: olcRootDN
+# Temporary lines to allow initial setup
+olcRootDN: uid=ldapadmin,ou=people,dc=javachen,dc=com
+
+dn: olcDatabase={2}bdb,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: secret
+
+dn: cn=config
+changetype: modify
+add: olcAuthzRegexp
+olcAuthzRegexp: uid=([^,]*),cn=GSSAPI,cn=auth uid=$1,ou=people,dc=javachen,dc=com
+
+dn: olcDatabase={2}bdb,cn=config
+changetype: modify
+add: olcAccess
+# Everyone can read everything
+olcAccess: {0}to dn.base=&quot;&quot; by * read
+# The ldapadm dn has full write access
+olcAccess: {1}to * by dn=&quot;uid=ldapadmin,ou=people,dc=javachen,dc=com&quot; write by * read
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">dn: olcDatabase={<span class="hljs-number">2</span>}bdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=javachen,dc=com
+
+dn: olcDatabase={<span class="hljs-number">2</span>}bdb,cn=config
+changetype: modify
+replace: olcRootDN
+<span class="hljs-comment"># Temporary lines to allow initial setup</span>
+olcRootDN: uid=ldapadmin,ou=people,dc=javachen,dc=com
+
+dn: olcDatabase={<span class="hljs-number">2</span>}bdb,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: secret
+
+dn: cn=config
+changetype: modify
+add: olcAuthzRegexp
+olcAuthzRegexp: uid=([^,]*),cn=GSSAPI,cn=auth uid=<span class="hljs-variable">$1</span>,ou=people,dc=javachen,dc=com
+
+dn: olcDatabase={<span class="hljs-number">2</span>}bdb,cn=config
+changetype: modify
+add: olcAccess
+<span class="hljs-comment"># Everyone can read everything</span>
+olcAccess: {<span class="hljs-number">0</span>}to dn.base=<span class="hljs-string">""</span> by * <span class="hljs-built_in">read</span>
+<span class="hljs-comment"># The ldapadm dn has full write access</span>
+olcAccess: {<span class="hljs-number">1</span>}to * by dn=<span class="hljs-string">"uid=ldapadmin,ou=people,dc=javachen,dc=com"</span> write by * <span class="hljs-built_in">read</span>
+</code></pre>
+
+<p>说明：</p>
+
+<ul>
+<li>上面的密码使用的是明文密码 secret ，你也可以使用 <code>slappasswd -s secret</code> 生成的字符串作为密码。</li>
+<li>上面的权限中指明了只有用户 <code>uid=ldapadmin,ou=people,dc=javachen,dc=com</code> 有写权限。</li>
+</ul>
+<p>使用下面命令导入更新配置：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ ldapmodify -Y EXTERNAL -H ldapi:/// -f modify.ldif
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ ldapmodify -Y EXTERNAL -H ldapi:/// <span class="hljs-operator">-f</span> modify.ldif
+</code></pre>
+
+<p>这时候数据库没有数据，需要添加数据，你可以手动编写 ldif 文件来导入一些用户和组，或者使用 migrationtools 工具来生成 ldif 模板。创建 setup.ldif 文件如下：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="dn: dc=javachen,dc=com
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+o: javachen com
+dc: javachen
+
+dn: ou=people,dc=javachen,dc=com
+objectclass: organizationalUnit
+ou: people
+description: Users
+
+dn: ou=group,dc=javachen,dc=com
+objectClass: organizationalUnit
+ou: group
+
+dn: uid=ldapadmin,ou=people,dc=javachen,dc=com
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: LDAP admin account
+uid: ldapadmin
+sn: ldapadmin
+uidNumber: 1001
+gidNumber: 100
+homeDirectory: /home/ldap
+loginShell: /bin/bash
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre class="hljs http"><code><span class="hljs-attribute">dn</span>: <span class="hljs-string">dc=javachen,dc=com</span>
+<span class="hljs-attribute">objectClass</span>: <span class="hljs-string">top</span>
+<span class="hljs-attribute">objectClass</span>: <span class="hljs-string">dcObject</span>
+<span class="hljs-attribute">objectclass</span>: <span class="hljs-string">organization</span>
+<span class="hljs-attribute">o</span>: <span class="hljs-string">javachen com</span>
+<span class="hljs-attribute">dc</span>: <span class="hljs-string">javachen</span>
+
+<span class="http"><span class="hljs-attribute">dn</span>: <span class="hljs-string">ou=people,dc=javachen,dc=com</span>
+<span class="hljs-attribute">objectclass</span>: <span class="hljs-string">organizationalUnit</span>
+<span class="hljs-attribute">ou</span>: <span class="hljs-string">people</span>
+<span class="hljs-attribute">description</span>: <span class="hljs-string">Users</span>
+
+<span class="http"><span class="hljs-attribute">dn</span>: <span class="hljs-string">ou=group,dc=javachen,dc=com</span>
+<span class="hljs-attribute">objectClass</span>: <span class="hljs-string">organizationalUnit</span>
+<span class="hljs-attribute">ou</span>: <span class="hljs-string">group</span>
+
+<span class="http"><span class="hljs-attribute">dn</span>: <span class="hljs-string">uid=ldapadmin,ou=people,dc=javachen,dc=com</span>
+<span class="hljs-attribute">objectClass</span>: <span class="hljs-string">inetOrgPerson</span>
+<span class="hljs-attribute">objectClass</span>: <span class="hljs-string">posixAccount</span>
+<span class="hljs-attribute">objectClass</span>: <span class="hljs-string">shadowAccount</span>
+<span class="hljs-attribute">cn</span>: <span class="hljs-string">LDAP admin account</span>
+<span class="hljs-attribute">uid</span>: <span class="hljs-string">ldapadmin</span>
+<span class="hljs-attribute">sn</span>: <span class="hljs-string">ldapadmin</span>
+<span class="hljs-attribute">uidNumber</span>: <span class="hljs-string">1001</span>
+<span class="hljs-attribute">gidNumber</span>: <span class="hljs-string">100</span>
+<span class="hljs-attribute">homeDirectory</span>: <span class="hljs-string">/home/ldap</span>
+<span class="hljs-attribute">loginShell</span>: <span class="hljs-string">/bin/bash</span>
+</span></span></span></code></pre>
+
+<p>使用下面命令导入数据，密码是前面设置的 secret 。</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ ldapadd -x -D &quot;uid=ldapadmin,ou=people,dc=javachen,dc=com&quot; -w secret -f setup.ldif
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ ldapadd -x -D <span class="hljs-string">"uid=ldapadmin,ou=people,dc=javachen,dc=com"</span> -w secret <span class="hljs-operator">-f</span> setup.ldif
+</code></pre>
+
+<p>参数说明：</p>
+
+<ul>
+<li>
+<code>-w</code> 指定密码</li>
+<li>
+<code>-x</code> 是使用一个匿名的绑定</li>
+</ul>
+<h2 id="articleHeader7">1.7 LDAP 的使用</h2>
+
+<h3 id="articleHeader8">添加</h3>
+
+<p>如上面示例</p>
+
+<h2 id="articleHeader9">导入系统用户</h2>
+
+<p>接下来你可以从 /etc/passwd, /etc/shadow, /etc/groups 中生成 ldif 更新 ldap 数据库，这需要用到 migrationtools 工具。</p>
+
+<p>安装：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ yum install migrationtools -y
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ yum install migrationtools -y
+</code></pre>
+
+<p>利用迁移工具生成模板，先修改默认的配置：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ vim /usr/share/migrationtools/migrate_common.ph
+
+#line 71 defalut DNS domain
+$DEFAULT_MAIL_DOMAIN = &quot;javachen.com&quot;;
+#line 74 defalut base
+$DEFAULT_BASE = &quot;dc=javachen,dc=com&quot;;
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ vim /usr/share/migrationtools/migrate_common.ph
+
+<span class="hljs-comment">#line 71 defalut DNS domain</span>
+<span class="hljs-variable">$DEFAULT_MAIL_DOMAIN</span> = <span class="hljs-string">"javachen.com"</span>;
+<span class="hljs-comment">#line 74 defalut base</span>
+<span class="hljs-variable">$DEFAULT_BASE</span> = <span class="hljs-string">"dc=javachen,dc=com"</span>;
+</code></pre>
+
+<p>生成模板文件：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="/usr/share/migrationtools/migrate_base.pl &gt; /opt/base.ldif
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">/usr/share/migrationtools/migrate_base.pl &gt; /opt/base.ldif
+</code></pre>
+
+<p>然后，可以修改该文件，然后执行导入命令：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ ldapadd -x -D &quot;uid=ldapadmin,ou=people,dc=javachen,dc=com&quot; -w secret -f /opt/base.ldif
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ ldapadd -x -D <span class="hljs-string">"uid=ldapadmin,ou=people,dc=javachen,dc=com"</span> -w secret <span class="hljs-operator">-f</span> /opt/base.ldif
+</code></pre>
+
+<p>将当前节点上的用户导入到 ldap 中，可以有选择的导入指定的用户：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="# 先添加用户
+$ useradd test hive
+# 查找系统上的 test、hive 等用户
+$ grep -E &quot;test|hive&quot; /etc/passwd  &gt;/opt/passwd.txt
+$ /usr/share/migrationtools/migrate_passwd.pl /opt/passwd.txt /opt/passwd.ldif
+$ ldapadd -x -D &quot;uid=ldapadmin,ou=people,dc=javachen,dc=com&quot; -w secret -f /opt/passwd.ldif
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash"><span class="hljs-comment"># 先添加用户</span>
+$ useradd <span class="hljs-built_in">test</span> hive
+<span class="hljs-comment"># 查找系统上的 test、hive 等用户</span>
+$ grep -E <span class="hljs-string">"test|hive"</span> /etc/passwd  &gt;/opt/passwd.txt
+$ /usr/share/migrationtools/migrate_passwd.pl /opt/passwd.txt /opt/passwd.ldif
+$ ldapadd -x -D <span class="hljs-string">"uid=ldapadmin,ou=people,dc=javachen,dc=com"</span> -w secret <span class="hljs-operator">-f</span> /opt/passwd.ldif
+</code></pre>
+
+<p>将用户组导入到 ldap 中：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="# 生成用户组的 ldif 文件，然后导入到 ldap
+$ grep -E &quot;test|hive&quot; /etc/group  &gt;/opt/group.txt
+$ /usr/share/migrationtools/migrate_group.pl /opt/group.txt /opt/group.ldif
+$ ldapadd -x -D &quot;uid=ldapadmin,ou=people,dc=javachen,dc=com&quot; -w secret -f /opt/group.ldif
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash"><span class="hljs-comment"># 生成用户组的 ldif 文件，然后导入到 ldap</span>
+$ grep -E <span class="hljs-string">"test|hive"</span> /etc/group  &gt;/opt/group.txt
+$ /usr/share/migrationtools/migrate_group.pl /opt/group.txt /opt/group.ldif
+$ ldapadd -x -D <span class="hljs-string">"uid=ldapadmin,ou=people,dc=javachen,dc=com"</span> -w secret <span class="hljs-operator">-f</span> /opt/group.ldif
+</code></pre>
+
+<h3 id="articleHeader10">查询</h3>
+
+<p>查询新添加的 test 用户：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ ldapsearch -LLL -x -D &#39;uid=ldapadmin,ou=people,dc=javachen,dc=com&#39; -w secret -b &#39;dc=javachen,dc=com&#39; &#39;uid=test&#39;
+  dn: uid=test,ou=people,dc=javachen,dc=com
+  objectClass: inetOrgPerson
+  objectClass: posixAccount
+  objectClass: shadowAccount
+  cn: test account
+  sn: test
+  uid: test
+  uidNumber: 1001
+  gidNumber: 100
+  homeDirectory: /home/test
+  loginShell: /bin/bash
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ ldapsearch -LLL -x -D <span class="hljs-string">'uid=ldapadmin,ou=people,dc=javachen,dc=com'</span> -w secret -b <span class="hljs-string">'dc=javachen,dc=com'</span> <span class="hljs-string">'uid=test'</span>
+  dn: uid=<span class="hljs-built_in">test</span>,ou=people,dc=javachen,dc=com
+  objectClass: inetOrgPerson
+  objectClass: posixAccount
+  objectClass: shadowAccount
+  cn: <span class="hljs-built_in">test</span> account
+  sn: <span class="hljs-built_in">test</span>
+  uid: <span class="hljs-built_in">test</span>
+  uidNumber: <span class="hljs-number">1001</span>
+  gidNumber: <span class="hljs-number">100</span>
+  homeDirectory: /home/<span class="hljs-built_in">test</span>
+  loginShell: /bin/bash
+</code></pre>
+
+<p>可以看到，通过指定 'uid=test'，我们只查询这个用户的数据，这个查询条件叫做filter。有关 filter 的使用可以查看 ldapsearch 的 manpage。</p>
+
+<h3 id="articleHeader11">修改</h3>
+
+<p>用户添加好以后，需要给其设定初始密码，运行命令如下：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ ldappasswd -x -D &#39;uid=ldapadmin,ou=people,dc=javachen,dc=com&#39; -w secret &quot;uid=test,ou=people,dc=javachen,dc=com&quot; -S
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ ldappasswd -x -D <span class="hljs-string">'uid=ldapadmin,ou=people,dc=javachen,dc=com'</span> -w secret <span class="hljs-string">"uid=test,ou=people,dc=javachen,dc=com"</span> -S
+</code></pre>
+
+<h3 id="articleHeader12">删除</h3>
+
+<p>删除用户或组条目：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ ldapdelete -x -w secret -D &#39;uid=ldapadmin,ou=people,dc=javachen,dc=com&#39; &quot;uid=test,ou=people,dc=javachen,dc=com&quot;
+$ ldapdelete -x -w secret -D &#39;uid=ldapadmin,ou=people,dc=javachen,dc=com&#39; &quot;cn=test,ou=group,dc=javachen,dc=com&quot;
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ ldapdelete -x -w secret -D <span class="hljs-string">'uid=ldapadmin,ou=people,dc=javachen,dc=com'</span> <span class="hljs-string">"uid=test,ou=people,dc=javachen,dc=com"</span>
+$ ldapdelete -x -w secret -D <span class="hljs-string">'uid=ldapadmin,ou=people,dc=javachen,dc=com'</span> <span class="hljs-string">"cn=test,ou=group,dc=javachen,dc=com"</span>
+</code></pre>
+
+<h1 id="articleHeader13">2. 客户端配置</h1>
+
+<p>在 cdh2 和 cdh3上，使用下面命令安装openldap客户端</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ yum install openldap-clients -y
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ yum install openldap-clients -y
+</code></pre>
+
+<p>修改 /etc/openldap/ldap.conf 以下两个配置</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="BASE    dc=javachen,dc=com
+URI     ldap://cdh1
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre class="hljs nginx"><code><span class="hljs-title">BASE</span>    dc=javachen,dc=com
+URI     <span class="hljs-url">ldap://cdh1</span>
+</code></pre>
+
+<p>然后，运行下面命令测试：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="#先删除 ticket
+$ kdestroy
+
+$ ldapsearch -b &#39;dc=javachen,dc=com&#39;
+  SASL/GSSAPI authentication started
+  ldap_sasl_interactive_bind_s: Local error (-2)
+    additional info: SASL(-1): generic failure: GSSAPI Error: Unspecified GSS failure.  Minor code may provide more information (No credentials cache found)
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash"><span class="hljs-comment">#先删除 ticket</span>
+$ kdestroy
+
+$ ldapsearch -b <span class="hljs-string">'dc=javachen,dc=com'</span>
+  SASL/GSSAPI authentication started
+  ldap_sasl_interactive_<span class="hljs-built_in">bind</span>_s: Local error (-<span class="hljs-number">2</span>)
+    additional info: SASL(-<span class="hljs-number">1</span>): generic failure: GSSAPI Error: Unspecified GSS failure.  Minor code may provide more information (No credentials cache found)
+</code></pre>
+
+<p>重新获取 ticket：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ kinit root/admin
+$ ldapsearch -b &#39;dc=javachen,dc=com&#39;
+ # 没有报错了
+$ ldapwhoami
+  SASL/GSSAPI authentication started
+  SASL username: root/admin@JAVACHEN.COM
+  SASL SSF: 56
+  SASL installing layers
+  dn:uid=root/admin,ou=people,dc=javachen,dc=com
+  Result: Success (0)
+
+# 直接输入 ldapsearch 不会报错
+$ ldapsearch  
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ kinit root/admin
+$ ldapsearch -b <span class="hljs-string">'dc=javachen,dc=com'</span>
+ <span class="hljs-comment"># 没有报错了</span>
+$ ldapwhoami
+  SASL/GSSAPI authentication started
+  SASL username: root/admin@JAVACHEN.COM
+  SASL SSF: <span class="hljs-number">56</span>
+  SASL installing layers
+  dn:uid=root/admin,ou=people,dc=javachen,dc=com
+  Result: Success (<span class="hljs-number">0</span>)
+
+<span class="hljs-comment"># 直接输入 ldapsearch 不会报错</span>
+$ ldapsearch  
+</code></pre>
+
+<h1 id="articleHeader14">3. 配置 Hive 集成 LDAP</h1>
+
+<blockquote>
+  <p>说明： CDH5.2 之前 hive-server2 支不支持集成 ldap，故需要升级 cdh 版本到高版本，如 cdh5.3，该版本支持 ldap。</p>
+</blockquote>
+
+<h2 id="articleHeader15">修改配置文件</h2>
+
+<p>这部分内容参考自<a rel="nofollow" href="http://www.cloudera.com/content/cloudera/en/documentation/core/latest/topics/cdh_sg_hiveserver2_security.html#topic_9_1_3_unique_1" target="_blank">Using LDAP Username/Password Authentication with HiveServer2</a>。</p>
+
+<p>我这使用的是 OpenLDAP ，故修改 hive-site.xml 配置文件如下：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="&lt;property&gt;
+  &lt;name&gt;hive.server2.authentication&lt;/name&gt;
+  &lt;value&gt;LDAP&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.authentication.ldap.url&lt;/name&gt;
+  &lt;value&gt;ldap://cdh1&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.authentication.ldap.baseDN&lt;/name&gt;
+  &lt;value&gt;ou=people,dc=javachen,dc=com&lt;/value&gt;
+&lt;/property&gt;
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">property</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">name</span>&gt;</span>hive.server2.authentication<span class="hljs-tag">&lt;/<span class="hljs-title">name</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">value</span>&gt;</span>LDAP<span class="hljs-tag">&lt;/<span class="hljs-title">value</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">property</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">property</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">name</span>&gt;</span>hive.server2.authentication.ldap.url<span class="hljs-tag">&lt;/<span class="hljs-title">name</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">value</span>&gt;</span>ldap://cdh1<span class="hljs-tag">&lt;/<span class="hljs-title">value</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">property</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">property</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">name</span>&gt;</span>hive.server2.authentication.ldap.baseDN<span class="hljs-tag">&lt;/<span class="hljs-title">name</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">value</span>&gt;</span>ou=people,dc=javachen,dc=com<span class="hljs-tag">&lt;/<span class="hljs-title">value</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">property</span>&gt;</span>
+</code></pre>
+
+<p>为什么这样配置，可以参考 <a rel="nofollow" href="https://svn.apache.org/repos/asf/hive/trunk/service/src/java/org/apache/hive/service/auth/LdapAuthenticationProviderImpl.java" target="_blank">LdapAuthenticationProviderImpl.java</a> 源码。</p>
+
+<h2 id="articleHeader16">测试</h2>
+
+<p>重启服务：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="/etc/init.d/hive-server2 restart
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">/etc/init.d/hive-server2 restart
+</code></pre>
+
+<p>然后使用 beeline 测试：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="beeline --verbose=true
+beeline&gt; !connect jdbc:hive2://cdh1:10000/default
+Connecting to jdbc:hive2://cdh1:10000/default;
+Enter username for jdbc:hive2://cdh1:10000/default;: hive
+Enter password for jdbc:hive2://cdh1:10000/default;: ****
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">beeline --verbose=<span class="hljs-literal">true</span>
+beeline&gt; !connect jdbc:hive2://cdh1:<span class="hljs-number">10000</span>/default
+Connecting to jdbc:hive2://cdh1:<span class="hljs-number">10000</span>/default;
+Enter username <span class="hljs-keyword">for</span> jdbc:hive2://cdh1:<span class="hljs-number">10000</span>/default;: hive
+Enter password <span class="hljs-keyword">for</span> jdbc:hive2://cdh1:<span class="hljs-number">10000</span>/default;: ****
+</code></pre>
+
+<h1 id="articleHeader17">4. 配置 Impala 集成 LDAP</h1>
+
+<h2 id="articleHeader18">修改配置文件</h2>
+
+<p>修改 /etc/default/impala 中的 <code>IMPALA_SERVER_ARGS</code> 参数，添加</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="-enable_ldap_auth=true \
+-ldap_uri=ldaps://cdh1 \
+-ldap_baseDN=ou=people,dc=javachen,dc=com
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">-enable_ldap_auth=<span class="hljs-literal">true</span> \
+-ldap_uri=ldaps://cdh1 \
+-ldap_baseDN=ou=people,dc=javachen,dc=com
+</code></pre>
+
+<p>注意：</p>
+
+<ul>
+<li>如果没有开启 ssl，则添加 <code>-ldap_passwords_in_clear_ok=true</code>，同样如果开启了 ssl，则 <code>ldap_uri</code> 值为 <code>ldaps://XXXX</code>
+</li>
+<li>ldap_baseDN 的值是 <code>ou=people,dc=javachen,dc=com</code>，因为 impala 会将其追加到 <code>uid={用户名},</code> 后面</li>
+</ul>
+<h2 id="articleHeader19">测试</h2>
+
+<p>重启服务：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ /etc/init.d/impala-server restart
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ /etc/init.d/impala-server restart
+</code></pre>
+
+<p>然后使用 impala-shell 测试：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ impala-shell -l -u test
+  Starting Impala Shell using LDAP-based authentication
+  LDAP password for test:
+  Connected to cdh1:21000
+  Server version: impalad version 2.0.0-cdh5 RELEASE (build ecf30af0b4d6e56ea80297df2189367ada6b7da7)
+  Welcome to the Impala shell. Press TAB twice to see a list of available commands.
+
+  Copyright (c) 2012 Cloudera, Inc. All rights reserved.
+
+  (Shell build version: Impala Shell v2.0.0-cdh5 (ecf30af) built on Sat Oct 11 13:56:06 PDT 2014)
+  [cdh1:21000] &gt;
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ impala-shell <span class="hljs-operator">-l</span> -u <span class="hljs-built_in">test</span>
+  Starting Impala Shell using LDAP-based authentication
+  LDAP password <span class="hljs-keyword">for</span> <span class="hljs-built_in">test</span>:
+  Connected to cdh1:<span class="hljs-number">21000</span>
+  Server version: impalad version <span class="hljs-number">2.0</span>.<span class="hljs-number">0</span>-cdh5 RELEASE (build ecf30af0b4d6e56ea80297df2189367ada6b7da7)
+  Welcome to the Impala shell. Press TAB twice to see a list of available commands.
+
+  Copyright (c) <span class="hljs-number">2012</span> Cloudera, Inc. All rights reserved.
+
+  (Shell build version: Impala Shell v2.<span class="hljs-number">0.0</span>-cdh5 (ecf30af) built on Sat Oct <span class="hljs-number">11</span> <span class="hljs-number">13</span>:<span class="hljs-number">56</span>:<span class="hljs-number">06</span> PDT <span class="hljs-number">2014</span>)
+  [cdh1:<span class="hljs-number">21000</span>] &gt;
+</code></pre>
+
+<p>使用 beeline 通过 ldap 方式来连接 jdbc 进行测试：</p>
+
+<div class="widget-codetool" style="display:none;">
+      <div class="widget-codetool--inner">
+      <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+      <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ beeline -u &quot;jdbc:hive2://cdh1:21050/default;&quot; -n test -p test
+  scan complete in 2ms
+  Connecting to jdbc:hive2://cdh1:21050/default;
+  Connected to: Impala (version 2.0.0-cdh5)
+  Driver: Hive JDBC (version 0.13.1-cdh5.2.0)
+  Transaction isolation: TRANSACTION_REPEATABLE_READ
+  Beeline version 0.13.1-cdh5.2.0 by Apache Hive
+
+  0: jdbc:hive2://cdh1:21050/default&gt;show tables;
+  +-----------------------------+--+
+  |            name             |
+  +-----------------------------+--+
+  | t1                          |
+  | tab1                        |
+  | tab2                        |
+  | tab3                        |
+  +-----------------------------+--+
+  4 rows selected (0.325 seconds)
+" title="" data-original-title="复制"></span>
+      <span type="button" class="saveToNote code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="放进笔记"></span>
+      </div>
+      </div><pre><code class="bash">$ beeline -u <span class="hljs-string">"jdbc:hive2://cdh1:21050/default;"</span> -n <span class="hljs-built_in">test</span> -p <span class="hljs-built_in">test</span>
+  scan complete <span class="hljs-keyword">in</span> <span class="hljs-number">2</span>ms
+  Connecting to jdbc:hive2://cdh1:<span class="hljs-number">21050</span>/default;
+  Connected to: Impala (version <span class="hljs-number">2.0</span>.<span class="hljs-number">0</span>-cdh5)
+  Driver: Hive JDBC (version <span class="hljs-number">0.13</span>.<span class="hljs-number">1</span>-cdh5.<span class="hljs-number">2.0</span>)
+  Transaction isolation: TRANSACTION_REPEATABLE_READ
+  Beeline version <span class="hljs-number">0.13</span>.<span class="hljs-number">1</span>-cdh5.<span class="hljs-number">2.0</span> by Apache Hive
+
+  <span class="hljs-number">0</span>: jdbc:hive2://cdh1:<span class="hljs-number">21050</span>/default&gt;show tables;
+  +-----------------------------+--+
+  |            name             |
+  +-----------------------------+--+
+  | t1                          |
+  | tab1                        |
+  | tab2                        |
+  | tab3                        |
+  +-----------------------------+--+
+  <span class="hljs-number">4</span> rows selected (<span class="hljs-number">0.325</span> seconds)
+</code></pre>
+
+<h1 id="articleHeader20">5. 参考文章</h1>
+
+<ul>
+<li><a rel="nofollow" href="http://www.tuicool.com/articles/6fy6z2r" target="_blank">New in CDH 5.2: Impala Authentication with LDAP and Kerberos</a></li>
+<li><a rel="nofollow" href="http://blog.clanzx.net/2013/09/27/ldap-kerberos.html" target="_blank">使用 LDAP + Kerberos 实现集中用户认证及授权系统</a></li>
+<li><a rel="nofollow" href="http://www.cnblogs.com/mchina/archive/2013/01/03/2840040.html" target="_blank">Linux NFS服务器的安装与配置</a></li>
+<li><a rel="nofollow" href="http://blog.csdn.net/kakane/article/details/7455922" target="_blank">linux的LDAP认证服务器的配置及客户端pam网络验证实例</a></li>
+<li><a rel="nofollow" href="https://help.ubuntu.com/10.04/serverguide/kerberos-ldap.html" target="_blank">Kerberos and LDAP</a></li>
+<li><a rel="nofollow" href="http://blog.sina.com.cn/s/blog_64aac6750101gwst.html" target="_blank">RHEL6配置简单LDAP服务器</a></li>
+<li><a rel="nofollow" href="https://www.suse.com/zh-cn/documentation/sles10/book_sle_reference/data/sec.kerbadmin.ldap.html" target="_blank">使用 LDAP 和 Kerberos</a></li>
+<li><a rel="nofollow" href="http://wenku.baidu.com/view/fe7c82757fd5360cba1adbe7.html" target="_blank">kerberos与openldap整合</a></li>
+<li><a rel="nofollow" href="http://ovirt-china.org/mediawiki/index.php/LDAP%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B" target="_blank">LDAP配置示例</a></li>
+<li><a rel="nofollow" href="http://kinggoo.com/openldapinstallconf.htm" target="_blank">centos下yum安装配置openldap 2.4.23-32外送svn的apache下配置</a></li>
+<li><a rel="nofollow" href="http://www.linux-mag.com/id/4765/" target="_blank">Integrating LDAP and Kerberos: Part Two (LDAP)</a></li>
+<li><a rel="nofollow" href="http://techpubs.spinlocksolutions.com/dklar/kerberos.html" target="_blank">Debian GNU and Ubuntu: Setting up MIT Kerberos</a></li>
+</ul>
+
+                </div>
+                                                
+                <div class="clearfix mt10">
+
+                    <ul class="article-operation list-inline pull-left">
+                        <li><a href="https://segmentfault.com/a/1190000002532332" class="text-muted">2015年02月03日发布</a></li>
+                                                                                                                            <li class="dropdown">
+                                <a href="javascript:void(0);" class="dropdown-toggle text-muted" data-toggle="dropdown">更多<b class="caret"></b></a>
+                                <ul class="dropdown-menu dropdown-menu-left">
+                                    <li><a href="https://segmentfault.com/a/1190000002532332#911" data-toggle="modal" data-target="#911" data-type="article" data-id="1190000002532332" data-typetext="文章">举报</a></li>
+                                                                                                                                                                                                    
+                                                                    </ul>
+                            </li>
+                                            </ul>
+                </div>
+
+                <div class="text-center mt10">
+                    
+                        <button type="button" id="mainLike" data-id="1190000002532332" class="btn btn-success btn-lg mr10">
+                            1 推荐
+                        </button>
+                    
+                                            <button type="button" id="mainBookmark" data-type="article" data-id="1190000002532332" class="btn btn-default btn-lg ">
+                            收藏
+                        </button>
+                                    </div>
+
+                                    <div class="recommend-post pt30 mt40 mb30 border-top">
+                        <div class="row">
+                            <div class="col-md-8">
+                                                                <h4 class="mt0">你可能感兴趣的文章</h4>
+                                <ul class="widget-links list-unstyled">
+                                                                            <li class="widget-links__item">
+                                            <a href="https://segmentfault.com/a/1190000002532307" title="CDH 5.2中Impala认证集成LDAP和Kerberos">CDH 5.2中Impala认证集成LDAP和Kerberos</a>
+                                            <small class="text-muted">
+                                                1 收藏，2.4k
+                                                浏览
+                                            </small>
+                                        </li>
+                                                                            <li class="widget-links__item">
+                                            <a href="https://segmentfault.com/a/1190000002540357" title="cdh5.1.0 yum安装总结">cdh5.1.0 yum安装总结</a>
+                                            <small class="text-muted">
+                                                2.5k
+                                                浏览
+                                            </small>
+                                        </li>
+                                                                            <li class="widget-links__item">
+                                            <a href="https://segmentfault.com/a/1190000006010725" title="SVN使用LDAP协议验证与授权">SVN使用LDAP协议验证与授权</a>
+                                            <small class="text-muted">
+                                                217
+                                                浏览
+                                            </small>
+                                        </li>
+                                                                    </ul>
+                                                            </div>
+                            <div class="col-md-4">
+                                                            </div>
+                        </div>
+
+                    </div>
+                                <!-- <ul class="list-unstyled text-muted mt30">
+                                        <li>上一篇：<a href="/a/1190000002532319">安装和部署Presto</a></li>
+                                                            <li class="mt5">下一篇：<a href="/a/1190000002532411">Spark安装和使用</a></li>
+                                    </ul> -->
+
+                <h2 class="h4 post-comment-title">讨论区</h2>
+                <div class="widget-comments" id="comment-1190000002532332" data-id="1190000002532332">
+                    <div class="widget-comments__form row">
+            
+                            <form class="clearfix SFLogin" method="POST">
+                    <div class="form-group mb0 widget-comments__form--input">
+                        <input name="id" type="hidden" value="1190000002532332">
+                        <textarea rows="1" name="text" class="SFLogin form-control mono" id="commentText-1190000002532332" data-id="1190000002532332" placeholder="使用评论询问更多信息或提出修改意见，请不要在评论里回答问题" style="overflow: hidden; word-wrap: break-word; height: 35px;"></textarea>
+
+                    </div>
+                    <div class="widget-comments__btn">
+                        <div class="pull-right">
+                            <button type="submit" class="btn btn-default postComment" data-id="1190000002532332">提交评论
+                            </button>
+                            <span class="widget-comments__btn--tips"><a href="javascript:void(0);" class="toggle-comment-helper" title="语法提示">
+                            <i class="fa fa-question-circle"></i>
+                        </a></span>
+                        </div>
+                    </div>
+                </form>
+                <div class="col-md-12">
+                    <div class="alert alert-warning alert-dismissible mb0 mt10 fmt comment-helper" data-rank="" style="" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="right:0;"><span aria-hidden="true">×</span></button>
+                        评论支持部分 Markdown 语法：<code>**bold**</code> <code>_italic_</code>
+                        <code>[link](http://example.com)</code> <code>&gt; 引用</code> <code>`code`</code> <code>-
+                        列表</code>。<br>同时，被你 @ 的用户也会收到通知
+                    </div>
+                </div>
+            
+        </div><!-- /.widget-comments__form -->
+            </div><!-- /.widget-comments -->
+
+    
+
+                                    
+                
+            </div><!-- /.main -->
+
+
+            <div class="col-xs-12 col-md-3 side">
+                <div class="sfad-sidebar">
+      <div class="sfad-item">
+    <ins><a href="https://sponsor.segmentfault.com/ck.php?oaparams=2__bannerid=60__zoneid=2__cb=1d93c98577__oadest=https%3A%2F%2Fwww.teambition.com%2F%3Futm_source%3Dsegmentfault%26utm_medium%3Dbanner" target="_blank"><img src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/6df1670569b228a4172c0774b70365b3.jpg" width="255" height="165" alt="管研发、管任务、管需求 三管齐下 一「管」到底" title="管研发、管任务、管需求 三管齐下 一「管」到底" border="0"></a><div id="beacon_1d93c98577" style="position: absolute; left: 0px; top: 0px; visibility: hidden;"><img src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/lg.php" width="0" height="0" alt="" style="width: 0px; height: 0px;"></div></ins>
+    <button class="close" type="button" aria-hidden="true">×</button>
+</div>
+
+  </div>
+
+
+                <div class="widget-box no-border">
+                    <p class="text-muted">本文隶属于专栏</p>
+                    <h4 class="fz16"><a href="https://segmentfault.com/blog/junezchen">JunezChen Blog</a></h4>
+
+                    <p class="wordbreak">个人博客：http://blog.javachen.com</p>
+
+
+                    <div class="article__widget--author">
+                        <a href="https://segmentfault.com/u/javachen">
+                            <img class="avatar-40" src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/1251383722-1030000000374689_big64" alt="JavaChen">
+                        </a>
+                        <a href="https://segmentfault.com/u/javachen">
+                            JavaChen
+                        </a>
+                        <p class="text-muted mb0">作者</p>
+
+                                                    <div style="margin-top: 20px;">
+                                                                    <button type="button mb20" class="btn btn-default follow-article" data-do="follow" data-type="blog" data-id="1200000000376016">关注专栏
+                                    </button>
+                                                            </div>
+                        
+
+                    </div>
+
+                </div>
+
+
+                
+                    
+
+
+                <div class="widget-share__full" data-text="Hadoop配置LDAP集成Kerberos" data-url="https://segmentfault.com/a/1190000002532332" data-shorturl="http://sfau.lt/b5kMWe"><div style="margin-bottom:10px;">分享扩散：</div><div class="widget-share-network sharer-0" style="display: block;"><ul class="sn-inline"><li data-network="weibo"><a href="javascript:void(0);" class="entypo-weibo icon-sn-weibo share-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="分享至新浪微博">新浪微博</a></li><li data-network="wechart"><a href="javascript:void(0);" class="entypo-wechart icon-sn-weixin share-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="分享至微信">微信</a></li><li data-network="twitter"><a href="javascript:void(0);" class="entypo-twitter icon-sn-twitter share-3" data-toggle="tooltip" data-placement="top" title="" data-original-title="分享至 Twitter">Twitter</a></li><li data-network="facebook"><a href="javascript:void(0);" class="entypo-facebook icon-sn-facebook share-4" data-toggle="tooltip" data-placement="top" title="" data-original-title="分享至 Facebook">Facebook</a></li></ul></div><a type="button" class="btn btn-sm shareMore btn-sn-more" data-toggle="popover" data-placement="top" data-url="https://segmentfault.com/a/1190000002532332" data-shorturl="http://sfau.lt/b5kMWe"><span class="icon-sn-dotted" data-original-title="" title=""></span><strong class="visible-xs-inline">•••</strong></a></div>
+
+                <div class="post-nav hidden-xs side-outline hidden-sm" style="display: block; width: 100%; top: 0px;">
+                    <div class="panel panel-default widget-outline">
+                        <div class="panel-heading">文章目录</div>
+                        <div class="panel-body">
+                            <div class="nav-body" style="top: 0px;">
+                                <div class="highlight-title" style="display: none; top: 0px; height: 27px;"></div>
+                                <ul class="articleIndex"><li class=""><a href="https://segmentfault.com/a/1190000002532332#articleHeader0">1. 安装服务端</a></li><li style="list-style:none;"><ul><li class=""><a href="https://segmentfault.com/a/1190000002532332#articleHeader1">1.1 安装</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader2">1.2 OpenSSL</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader3">1.3 LDAP 服务端配置</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader4">1.4 启动服务</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader5">1.5 LDAP 和 Kerberos</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader6">1.6 创建数据库</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader7">1.7 LDAP 的使用</a></li><li style="list-style:none;"><ul><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader8">添加</a></li></ul></li></ul></li><li style="list-style:none;"><ul><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader9">导入系统用户</a></li><li style="list-style:none;"><ul><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader10">查询</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader11">修改</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader12">删除</a></li></ul></li></ul></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader13">2. 客户端配置</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader14">3. 配置 Hive 集成 LDAP</a></li><li style="list-style:none;"><ul><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader15">修改配置文件</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader16">测试</a></li></ul></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader17">4. 配置 Impala 集成 LDAP</a></li><li style="list-style:none;"><ul><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader18">修改配置文件</a></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader19">测试</a></li></ul></li><li><a href="https://segmentfault.com/a/1190000002532332#articleHeader20">5. 参考文章</a></li></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.side -->
+        </div>
+    </div>
+</div>
+
+<div id="shareToWeiboModal" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">分享</h4>
+            </div>
+            <div class="modal-body">
+                <p class="sfModal-content">
+                    分享到微博？
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default dont-likeweibo" data-dismiss="modal">取消</button>
+                <a href="https://segmentfault.com/a/1190000002532332" id="shareLink" class="btn btn-primary done-btn" target="_blank" onclick="$(&#39;#shareToWeiboModal&#39;).modal(&#39;hide&#39;)">分享</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+<script type="text/template" id="regNext">
+        <div class="row flex-vertical-center">
+        <div class="col-md-12">
+            <p class="mb0" style="font-size: 14px; margin-right:50px; font-family: Source Code Pro,Consolas,Menlo,Monaco,Courier New,monospace;">
+                    C++ 的结果是 D 还是 E？
+            </p>
+            <button class="btn btn-primary SFLogin mr10"
+                    onclick='ga("send", "event", "join button", "clicked", "footer welcome popup");'>D
+            </button>
+            <button class="btn  btn-default  tomorrow">E</button>
+        </div>
+        
+    </div>
+</script>
+
+<div class="widget-register widget-welcome-question mt20 hidden-xs widget-welcome widget-register-slideUp">
+    <div class="container">
+        <div class="row flex-vertical-center">
+            <div class="col-sm-12 col-md-8">
+                <p class="mb0">
+                                                                技术专栏，帮你记录编程中的点滴，提升你对技术的理解<br>收藏感兴趣的文章，丰富自己的知识库
+                                    </p>
+
+            </div>
+            <div class="col-sm-12 col-lg-3 col-lg-offset-1 col-md-4">
+                <button class="btn btn-primary btn-lg SFLogin  mr10" onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;join button&quot;, &quot;clicked&quot;, &quot;footer welcome popup&quot;);">立即注册
+                </button>
+                <button class="btn btn-lg btn-default  tomorrow">明天提醒我</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal widget-911" id="911" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" data-dismiss="modal" type="button">
+          <span aria-hidden="true">×</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title">举报<span data-model="type"></span></h4>
+      </div>
+      <div class="modal-body">
+        <form id="reportForm">
+          <!-- 后台返回信息 -->
+          <p class="alert alert-warning" data-model="returnMsg"></p>
+          <div data-role="base">
+            <p>
+              <strong class="required">我要举报该<span data-model="type"></span>，理由是：</strong>
+            </p>
+            <ul class="list-unstyled" data-model="list"></ul>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default pull-left" type="button" data-role="back" style="display:none">返回重选</button>
+                <button class="btn btn-default" data-dismiss="modal" type="button">取消</button>
+        <button class="btn btn-primary" data-role="submit" type="button">提交</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<footer id="footer">
+    <div class="container">
+        <div class="row hidden-xs">
+            <dl class="col-sm-2 site-link">
+                <dt>网站相关</dt>
+                <dd><a href="https://segmentfault.com/about">关于我们</a></dd>
+                <dd><a href="https://segmentfault.com/tos">服务条款</a></dd>
+                <dd><a href="https://segmentfault.com/faq">帮助中心</a></dd>
+                <dd><a href="https://segmentfault.com/repu">声望与权限</a></dd>
+                <dd><a href="https://segmentfault.com/markdown">编辑器语法</a></dd>
+                <dd><a href="https://weekly.segmentfault.com/">每周精选</a></dd>
+                <dd><a href="https://segmentfault.com/app">App 下载</a></dd>
+            </dl>
+            <dl class="col-sm-2 site-link">
+                <dt>联系合作</dt>
+                <dd><a href="https://segmentfault.com/contact">联系我们</a></dd>
+                <dd><a href="https://segmentfault.com/hiring">加入我们</a></dd>
+                <dd><a href="https://segmentfault.com/link">合作伙伴</a></dd>
+                <dd><a href="https://segmentfault.com/press">媒体报道</a></dd>
+                <dd><a href="https://board.segmentfault.com/">建议反馈</a></dd>
+                <dd><a href="http://pan.baidu.com/share/link?shareid=604288&amp;uk=839272106" target="_blank">Logo 下载</a>
+                </dd>
+            </dl>
+            <dl class="col-sm-2 site-link">
+                <dt>常用链接</dt>
+                                                <dd><a href="https://chrome.google.com/webstore/detail/segmentfault-%E7%AC%94%E8%AE%B0/pjklfdmleagfaekibdccmhlhellefcfo" target="_blank">笔记插件: Chrome</a></dd>
+                                                                <dd><a href="https://addons.mozilla.org/zh-CN/firefox/addon/sf-note-ext/" target="_blank">笔记插件: Firefox</a></dd>
+                                                                <dd>订阅：<a href="https://segmentfault.com/feeds">问答</a> / <a href="https://segmentfault.com/feeds/blogs">文章</a></dd>
+                                                                <dd><a href="https://mirrors.segmentfault.com/" target="_blank">文档镜像</a></dd>
+                                                                <dd><a href="https://segmentfault.com/blog/interview" target="_blank">社区访谈</a></dd>
+                                                                <dd><a href="https://segmentfault.com/d-day" target="_blank">D-DAY 技术沙龙</a></dd>
+                                                                <dd><a href="https://segmentfault.com/hackathon" target="_blank">黑客马拉松 Hackathon</a></dd>
+                                                                <dd><a href="https://namebeta.com/" target="_blank">域名搜索注册</a></dd>
+                                            </dl>
+            <dl class="col-sm-2 site-link">
+                <dt>关注我们</dt>
+                                <dd><a href="https://github.com/SegmentFault" target="_blank">Github</a></dd>
+                                <dd><a href="https://twitter.com/segment_fault" target="_blank">Twitter</a></dd>
+                                <dd><a href="https://weibo.com/segmentfault" target="_blank">新浪微博</a></dd>
+                                <dd><a href="https://segmentfault.com/blog/segmentfault_team" target="_blank">团队日志</a></dd>
+                                <dd><a href="https://segmentfault.com/blog/segmentfault" target="_blank">产品技术日志</a></dd>
+                                <dd><a href="https://segmentfault.com/blog/community_admin" target="_blank">社区运营日志</a></dd>
+                                <dd><a href="https://segmentfault.com/blog/segmentfault_news" target="_blank">市场运营日志</a></dd>
+                            </dl>
+            <dl class="col-sm-4 site-link" id="license">
+                <dt>内容许可</dt>
+                <dd>除特别说明外，用户内容均采用 <a rel="license" target="_blank" href="http://creativecommons.org/licenses/by-sa/3.0/cn/">知识共享署名-相同方式共享 3.0 中国大陆许可协议</a> 进行许可
+                </dd>
+                <dd>本站由 <a target="_blank" href="https://www.upyun.com/?utm_source=segmentfault&amp;utm_medium=link&amp;utm_campaign=upyun&amp;md=segmentfault">又拍云</a> 提供 CDN 存储服务
+                </dd>
+            </dl>
+        </div>
+        <div class="copyright">
+            Copyright © 2011-2016 SegmentFault. 当前呈现版本 16.08.08<br>
+            <a href="http://www.miibeian.gov.cn/" rel="nofollow">浙ICP备 15005796号-2</a> &nbsp;
+            <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33010602002000" rel="nofollow">浙公网安备 33010602002000号</a>
+        </div>
+        <p class="text-center">
+            <a class="js__view--selector hidden-sm hidden-md hidden-lg" data-action="mobile" href="javascript:;">移动版</a>
+            <a class="js__view--selector hidden-sm hidden-md hidden-lg" data-action="desktop" href="javascript:;">桌面版</a>
+        </p>
+    </div>
+</footer>
+
+<div id="fixedTools" class="hidden-xs hidden-sm">
+    <a id="backtop" class="border-bottom hidden" href="https://segmentfault.com/a/1190000002532332#">回顶部</a>
+
+    <div class="qrcodeWraper">
+        <a href="https://segmentfault.com/app#qrcode"><span class="glyphicon glyphicon-qrcode"></span></a>
+        <img id="qrcode" class="border" alt="sf-wechat" src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/appQrcode.png">
+
+        <p class="qrcode-text">扫扫下载 App</p>
+    </div>
+</div>
+
+<div class="app-promotion-bar">
+    <a href="javascript:;"><i class="fa fa-close close"></i></a>
+    <div class="icon"></div>
+    <h5 class="title h5">SegmentFault</h5>
+    <p class="describe">一起探索更多未知</p>
+    <a class="download-btn btn btn-sm btn-primary" href="https://segmentfault.com/app#qrcode">下载 App</a>
+</div>
+
+<script id="loginModal" type="text/template">
+<div class="row bg-white login-modal">
+    <div class="col-md-4 col-sm-12 col-md-push-7 login-wrap">
+        <h1 class="h4 text-muted login-title">用户登录</h1>
+        <form action="/api/user/login" method="POST" role="form" class="mt30">
+            <div class="form-group">
+                <label class="control-label">Email</label>
+                <input type="email" class="form-control" name="mail" required placeholder="hello@segmentfault.com">
+            </div>
+            <div class="form-group">
+                <label class="control-label">密码</label>
+                <input type="password" class="form-control" name="password" required placeholder="密码">
+            </div>
+            <div class="form-group clearfix">
+                <div class="checkbox pull-left">
+                    <label><input name="remember" type="checkbox" value="1" checked> 记住登录状态</label>
+                </div>
+                <button type="submit" class="btn btn-primary pull-right pl20 pr20" onclick='ga("send", "event", "email login button", "clicked", "login modal");'>登录</button>
+            </div>
+        </form>
+        <p class="h4 text-muted visible-xs-block h4">快速登录</p>
+        <div class="widget-login mt30">
+            <p class="text-muted mt5 mr10 pull-left hidden-xs">快速登录</p>
+            <a href="/user/oauth/google" class="btn btn-default btn-sm btn-sn-google" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "google"});'><span class="icon-sn-bg-google"></span> <strong class="visible-xs-inline">Google 账号</strong></a>
+            <a href="/user/oauth/github" class="btn btn-default btn-sm btn-sn-github" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "github"});");'><span class="icon-sn-bg-github"></span> <strong class="visible-xs-inline">Github 账号</strong></a>
+            <a href="/user/oauth/weibo" class="btn btn-default btn-sm btn-sn-weibo" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "weibo"});'><span class="icon-sn-bg-weibo"></span> <strong class="visible-xs-inline">新浪微博账号</strong></a>
+            <a href="/user/oauth/qq" class="btn btn-default btn-sm btn-sn-qq" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "qq"});'><span class="icon-sn-bg-qq"></span> <strong class="visible-xs-inline">QQ 账号</strong></a>
+            <a href="/user/oauth/weixin" class="btn btn-default btn-sm btn-sn-weixin" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "qq"});'><span class="icon-sn-bg-weixin"></span> <strong class="visible-xs-inline">微信账号</strong></a>
+            <button id="loginShowMore" href="javascript:void(0);" class="btn mb5 btn-default btn-sm btn-sn-dotted"><span class="icon-sn-bg-dotted"></span><strong class="visible-xs-inline">•••</strong></button>
+            <a href="/user/oauth/twitter" class="btn btn-default btn-sn-twitter btn-sm hidden" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "twitter"});'><span class="icon-sn-bg-twitter"></span> <strong class="visible-xs-inline">Twitter 账号</strong></a>
+            <a href="/user/oauth/facebook" class="btn btn-default btn-sn-facebook btn-sm hidden" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "facebook"});'><span class="icon-sn-bg-facebook"></span> <strong class="visible-xs-inline">Facebook 账号</strong></a>
+            <a href="/user/oauth/douban" class="btn btn-default btn-sn-douban btn-sm hidden" onclick='ga("send", "event", "3rd login button", "clicked", "login modal", {media: "douban"});'><span class="icon-sn-bg-douban"></span> <strong class="visible-xs-inline">豆瓣账号</strong></a>
+        </div>
+    </div>
+    <div class="login-vline hidden-xs hidden-sm"></div>
+    <div class="col-md-4 col-md-pull-3 col-sm-12 login-wrap">
+        <h1 class="h4 text-muted login-title">创建新账号</h1>
+        <form action="/api/user/register" method="POST" role="form" class="mt30">
+            <div class="form-group">
+                <label for="name" class="control-label">用户名</label>
+                <input type="text" class="form-control" name="name" required placeholder="字母、数字等，用户名唯一">
+            </div>
+            <div class="form-group">
+                <label for="mail" class="control-label">Email</label>
+                <input type="hidden" style="display:none" name="mail">
+                <input type="email" autocomplete="off" class="form-control register-mail" name="mail" required placeholder="hello@segmentfault.com">
+            </div>
+            <div class="form-group">
+                <label for="password" class="control-label">密码</label>
+                <input type="password" class="form-control" name="password" required placeholder="不少于 6 位">
+            </div>
+            <div class="form-group" style="display:none;">
+                <label class="required control-label">验证码</label>
+                <input type="text" class="form-control" id="captcha" name="captcha" placeholder="请输入下方的验证码">
+                <div class="mt10"><a id="loginReloadCaptcha"  href="javascript:void(0)"><img data-src="/user/captcha?w=240&h=50" class="captcha" width="240" height="50" /></a></div>
+            </div>
+            <div class="form-group clearfix">
+                <div class="checkbox pull-left">
+                    同意并接受<a href="/tos" target="_blank">《服务条款》</a>
+                </div>
+                <button type="submit" class="btn btn-primary pl20 pr20 pull-right" onclick='ga("send", "event", "email register button", "clicked", "login modal");'>注册</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="text-center text-muted mt30">
+    <a href="/user/forgot" class="ml5">找回密码</a>
+</div>
+</script>
+
+
+
+<script>
+    (function (w) {
+        w.SF = {
+            staticUrl: "https://sf-static.b0.upaiyun.com/v-57a9800b"
+        };
+        w.SF.token = (function () {
+    var _8wKN29N = /* '0'//'0' */''+'Szi'//'Szi'
++//'6mv'
+'7'+//'h'
+'b'+'3'//'BLX'
++'1'//'sQ'
++''///*'Wm'*/'Wm'
++//'X9m'
+'f0'+//'gL'
+'cab'+'5'//'TVM'
++//'q1'
+'6'+'3b'//'pR'
++/* 'ZHF'//'ZHF' */''+'8'//'gAm'
++'KUR'//'KUR'
++//'WiJ'
+'457'+'1e'//'Z'
++//'siy'
+'2'+//'rH0'
+'e7'+//'U'
+'f5'+//'ya'
+'54'+'7'//'PAt'
++''///*'eG'*/'eG'
++'c8a'//'uLM'
++//'5'
+'78', _rwARPP = [[0,3],[14,17]];
+
+    for (var i = 0; i < _rwARPP.length; i ++) {
+        _8wKN29N = _8wKN29N.substring(0, _rwARPP[i][0]) + _8wKN29N.substring(_rwARPP[i][1]);
+    }
+
+    return _8wKN29N;
+})();;
+    })(window);
+
+                var lock = {
+        type: "",
+        text: '',
+        table: {"ban_post":[1,"\u4f60\u5df2\u7ecf\u88ab\u7981\u8a00, \u65e0\u6cd5\u8fdb\u884c\u6b64\u64cd\u4f5c, \u5982\u6709\u7591\u4e49\u8bf7\u63d0\u4ea4\u7533\u8bc9, \u6216\u8005\u53d1\u90ae\u4ef6\u5230pr@segmentfault.com"]}
+    };
+</script>
+
+    <script crossorigin="" src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/assets.js"></script>
+    <script crossorigin="" src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/post.min.js"></script>
+
+<script async="" src="./Hadoop配置LDAP集成Kerberos - JunezChen Blog - SegmentFault_files/asyncjs.php"></script>
+
+<script>
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-918487-8']);
+    _gaq.push(['_trackPageview']);
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+            
+        
+
+            
+
+    ga('create', 'UA-918487-8', 'auto', {
+        'userID'
+    : 0,
+        'createdTime'
+    : 0,
+        'now'
+    : 1470731140 });
+    ga('set', 'dimension1', 'guest');
+    ga('send', 'pageview');
+
+</script>
+
+<script type="text/javascript">
+    var _vds = _vds || [];
+    window._vds = _vds;
+    (function() {
+        _vds.push(['setAccountId', '5411b7ab1ae040ed9a4eb4a120a06ead']);
+        (function() {
+            var vds = document.createElement('script');
+            vds.type = 'text/javascript';
+            vds.async = true;
+            vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(vds, s);
+        })();
+    })();
+</script>
+
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "//hm.baidu.com/hm.js?e23800c454aa573c0ccb16b52665ac26";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+<div id="noteWidget" class="noteWidget hidden hidden-xs">
+    <div class="noteWidget-header clearfix">
+        <h2 class="h4 pull-left">记笔记</h2>
+        <ul class="list-inline pull-right mb0">
+            <li id="noteWidgetMinimize"><span class="icon-minimize"></span></li><li id="noteWidgetZoom"><span class="icon-zoom"></span></li><li id="noteWidgetClose"><span class="icon-close"></span></li>
+        </ul>
+    </div>
+    <form method="POST" action="https://segmentfault.com/api/notes/add" role="form">
+        <div class="form-group">
+            <label for="title" class="sr-only">标题</label>
+            <input type="hidden" value="" id="draftId">
+            <input type="text" name="title" data-error="" autocomplete="off" class="form-control" placeholder="笔记描述" value="">
+        </div>
+        <div class="editor-config clearfix">
+            <select name="lang" class="form-control pull-left input-sm">
+                <optgroup label="文本语法">
+                    <option value="text" data-mode="text">纯文本</option>
+                    <option value="markdown" data-mode="markdown">Markdown</option>
+                    <option value="javascript" data-mode="javascript">Javascript</option>
+                    <option value="css" data-mode="css">CSS</option>
+                    <option value="html5" data-mode="htmlmixed">HTML</option>
+                    <option value="php" data-mode="php">PHP</option>
+                    <option value="python" data-mode="python">Python</option>
+                    <option value="ruby" data-mode="ruby">Ruby</option>
+                    <option value="go" data-mode="go">Go</option>
+                    <option value="c" data-mode="clike">C/C++</option>
+                    <option value="java" data-mode="java">Java</option>
+                    <option value="bash" data-mode="shell">Shell/Bash</option>
+                </optgroup>
+            </select>
+            <div class="pull-right hidden-xs">
+                <select name="indentWithTabs" class="form-control inline-block input-sm">
+                    <optgroup label="缩进模式">
+                        <option value="false">空格缩进</option>
+                        <option value="true">Tabs 缩进</option>
+                    </optgroup>
+                </select>
+                <select name="tabSize" class="form-control inline-block input-sm">
+                    <optgroup label="缩进大小">
+                        <option value="2">2</option>
+                        <option value="4" selected="">4</option>
+                    </optgroup>
+                </select>
+                <select name="lineWrap" class="form-control inline-block input-sm">
+                    <optgroup label="换行方式">
+                        <option value="true">自动换行</option>
+                        <option value="false">不换行</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+        <textarea id="codeMirror" class="form-control" style="display: none;"></textarea><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" style="position: absolute; padding: 0px; width: 1000px; height: 1em; outline: none;" tabindex="0"></textarea></div><div class="CodeMirror-hscrollbar" style="left: 0px;"><div style="height: 100%; min-height: 1px;"></div></div><div class="CodeMirror-vscrollbar"><div style="min-width: 1px;"></div></div><div class="CodeMirror-scrollbar-filler"></div><div class="CodeMirror-gutter-filler"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px;"><div style="position: relative;"><div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"></div><div class="CodeMirror-code"></div></div></div></div></div><div style="position: absolute; height: 30px; width: 1px;"></div><div class="CodeMirror-gutters"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 1px;"></div></div></div></div>
+        <div class="mt20 clearfix">
+            <div class="pull-right">
+                <span class="text-muted hidden" id="editorStatus">已保存</span>
+                <a id="dropIt" href="javascript:void(0);" class="mr10 hidden">[舍弃]</a>
+                <button data-type="note" id="publishIt2" class="btn btn-default ml10" data-id="" data-do="add" data-url="" data-text="保存私密笔记" data-name="">保存私密笔记</button>
+                <button data-type="note" id="publishIt" class="btn btn-primary ml10" data-id="" data-do="add" data-url="" data-text="保存公开笔记" data-name="">保存公开笔记</button>
+                </div>
+            </div>
+        </form></div>
+    
+<div id="atwho-container"><div id="atwho-ground-commentText-1190000002532332"><div class="atwho-view" id="at-view-64"><ul class="atwho-view-ul"></ul></div></div></div><textarea tabindex="-1" style="position: absolute; top: -999px; left: 0px; right: auto; bottom: auto; border: 0px; padding: 0px; box-sizing: content-box; word-wrap: break-word; overflow: hidden; transition: none; height: 0px !important; min-height: 0px !important; font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; font-size: 14px; font-weight: 400; font-style: normal; letter-spacing: 0px; text-transform: none; word-spacing: 0px; text-indent: 0px; white-space: pre-wrap; line-height: 21px; width: 649px;" class="autosizejs" id="autosizejs"></textarea></body></html>

@@ -1,0 +1,31 @@
+在http://ip：60010页面发现有个regionserver服务挂机了，查看了日志发现时超时造成的，具体日志如下：
+WARN org.apache.hadoop.hbase.zookeeper.RecoverableZooKeeper: Possibly transient ZooKeeper exception: org.apache.zookeeper.KeeperException$SessionExpiredException: KeeperErrorCode = Session expired for /hbase/rs/test1,60020,1400236557454
+INFO org.apache.hadoop.hbase.util.RetryCounter: Sleeping 2000ms before retry #1...
+WARN org.apache.hadoop.hbase.zookeeper.RecoverableZooKeeper: Possibly transient ZooKeeper exception: org.apache.zookeeper.KeeperException$SessionExpiredException: KeeperErrorCode = Session expired for /hbase/rs/test1,60020,1400236557454
+INFO org.apache.hadoop.hbase.util.RetryCounter: Sleeping 4000ms before retry #2...
+WARN org.apache.hadoop.hbase.zookeeper.RecoverableZooKeeper: Possibly transient ZooKeeper exception: org.apache.zookeeper.KeeperException$SessionExpiredException: KeeperErrorCode = Session expired for /hbase/rs/test1,60020,1400236557454
+INFO org.apache.hadoop.hbase.util.RetryCounter: Sleeping 8000ms before retry #3...
+WARN org.apache.hadoop.hbase.zookeeper.RecoverableZooKeeper: Possibly transient ZooKeeper exception: org.apache.zookeeper.KeeperException$SessionExpiredException: KeeperErrorCode = Session expired for /hbase/rs/test1,60020,1400236557454
+ERROR org.apache.hadoop.hbase.zookeeper.RecoverableZooKeeper: ZooKeeper delete failed after 3 retries
+WARN org.apache.hadoop.hbase.regionserver.HRegionServer: Failed deleting my ephemeral node
+org.apache.zookeeper.KeeperException$SessionExpiredException: KeeperErrorCode = Session expired for /hbase/rs/test1,60020,1400236557454
+        at org.apache.zookeeper.KeeperException.create(KeeperException.java:127)
+        at org.apache.zookeeper.KeeperException.create(KeeperException.java:51)
+        at org.apache.zookeeper.ZooKeeper.delete(ZooKeeper.java:873)
+        at org.apache.hadoop.hbase.zookeeper.RecoverableZooKeeper.delete(RecoverableZooKeeper.java:133)
+        at org.apache.hadoop.hbase.zookeeper.ZKUtil.deleteNode(ZKUtil.java:1195)
+        at org.apache.hadoop.hbase.zookeeper.ZKUtil.deleteNode(ZKUtil.java:1184)
+        at org.apache.hadoop.hbase.regionserver.HRegionServer.deleteMyEphemeralNode(HRegionServer.java:1133)
+        at org.apache.hadoop.hbase.regionserver.HRegionServer.run(HRegionServer.java:900)
+        at java.lang.Thread.run(Thread.java:662)
+下面介绍一下排查方法：
+1、使用vmstat 1 命令查看si so两个swap列，确认没有发生交换，1代表每秒打印一次
+2、使用jstat -gcutil pid 1000 查看fgct列，确认regionserver没有发生长时间gc暂停
+3、使用top命令查看regionserver是否有充足的cpu资源，mapreduce会占用很多cpu，可以减少mapreduce任务数
+4、加大zookeeper会话超时时间，编辑hbase-site.xml文件，添加下面的属性
+<property>
+    	<name>zookeeper.session.timeout</name>
+    	<value>120000</value>
+</property>
+5、加大zookeeper会话最大超时时间编辑zoo.cfg 提高MaxSessionTimeout=120000，修改后重启zookeeper。
+zookeeper的超时时间不要设置太大，在服务挂掉的情况下，会反映很慢。

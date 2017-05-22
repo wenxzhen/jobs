@@ -1,0 +1,31 @@
+[hdfs@node133 csdn]$ klist -e -k -t /etc/security/keytabs/hdfs.service.keytab 
+Keytab name: FILE:/etc/security/keytabs/hdfs.service.keytab
+KVNO Timestamp         Principal
+---- ----------------- --------------------------------------------------------
+   2 10/21/16 17:34:19 hdfs/node133.csdn.net@CSDN.NET (aes256-cts-hmac-sha1-96) 
+   2 10/21/16 17:34:19 hdfs/node133.csdn.net@CSDN.NET (aes128-cts-hmac-sha1-96) 
+   2 10/21/16 17:34:19 hdfs/node133.csdn.net@CSDN.NET (des3-cbc-sha1) 
+   2 10/21/16 17:34:19 hdfs/node133.csdn.net@CSDN.NET (arcfour-hmac) 
+   2 10/21/16 17:34:19 hdfs/node133.csdn.net@CSDN.NET (des-hmac-sha1) 
+   2 10/21/16 17:34:19 hdfs/node133.csdn.net@CSDN.NET (des-cbc-md5) 
+[hdfs@node133 csdn]$ klist -e -k -t /etc/security/keytabs/spnego.service.keytab 
+Keytab name: FILE:/etc/security/keytabs/spnego.service.keytab
+KVNO Timestamp         Principal
+---- ----------------- --------------------------------------------------------
+   3 10/20/16 14:10:25 HTTP/node133.csdn.net@CSDN.NET (aes256-cts-hmac-sha1-96) 
+   3 10/20/16 14:10:25 HTTP/node133.csdn.net@CSDN.NET (aes128-cts-hmac-sha1-96) 
+   3 10/20/16 14:10:25 HTTP/node133.csdn.net@CSDN.NET (des3-cbc-sha1) 
+   3 10/20/16 14:10:25 HTTP/node133.csdn.net@CSDN.NET (arcfour-hmac) 
+   3 10/20/16 14:10:25 HTTP/node133.csdn.net@CSDN.NET (des-hmac-sha1) 
+   3 10/20/16 14:10:25 HTTP/node133.csdn.net@CSDN.NET (des-cbc-md5) 
+[hdfs@node133 csdn]$
+
+[hdfs@node133 csdn]$ kinit -k -t /etc/security/keytabs/hdfs.service.keytab hdfs/node133.csdn.net@CSDN.NET
+[hdfs@node133 csdn]$ klist 
+Ticket cache: FILE:/tmp/krb5cc_501
+Default principal: hdfs/node133.csdn.net@CSDN.NET
+
+Valid starting     Expires            Service principal
+10/24/16 09:57:26  10/25/16 09:57:26  krbtgt/CSDN.NET@CSDN.NET
+	renew until 10/24/16 09:57:26
+[hdfs@node133 csdn]$ 

@@ -1,0 +1,585 @@
+一、安装
+[root@localhost ~]# yum install openldap openldap-servers openldap-clients  -y
+[root@localhost ~]# cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+[root@localhost ~]# chown -R ldap:ldap /var/lib/ldap/*
+[root@localhost ~]# chown -R ldap.ldap /etc/openldap/
+[root@localhost ~]# chkconfig slapd on
+[root@localhost ~]# chkconfig --list slapd
+slapd          	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+[root@localhost ~]# service slapd start
+Starting slapd:                                            [  OK  ]
+[root@localhost ~]# netstat -ntplu | grep -i :389
+tcp        0      0 0.0.0.0:389                 0.0.0.0:*                   LISTEN      15862/slapd         
+tcp        0      0 :::389                      :::*                        LISTEN      15862/slapd         
+
+二、配置
+[root@localhost ~]# cp /usr/share/openldap-servers/slapd.conf.obsolete /etc/openldap/slapd.conf
+[root@localhost ~]# ll /usr/share/openldap-servers/
+total 16
+-rw-r--r--. 1 root root  845 May 11 07:32 DB_CONFIG.example
+-rw-r--r--. 1 root root 4635 May 11 07:32 slapd.conf.obsolete
+-rw-r--r--. 1 root root 2603 May 11 07:32 slapd.ldif.example
+[root@localhost ~]# ll /etc/openldap/
+total 28
+drwxr-xr-x. 2 ldap ldap 4096 Aug 22 15:31 certs
+-rw-r-----. 1 ldap ldap  121 May 11 07:32 check_password.conf
+-rw-r--r--. 1 ldap ldap  282 Apr 20  2015 ldap.conf
+drwxr-xr-x. 2 ldap ldap 4096 Aug 22 15:31 schema
+-rw-r--r--. 1 root root 4635 Aug 22 15:39 slapd.conf
+drwx------. 3 ldap ldap 4096 Aug 22 15:31 slapd.d
+[root@localhost ~]# ll /var/lib/ldap/
+total 1
+-rw-r--r--. 1 ldap ldap       845 Aug 22 15:31 DB_CONFIG
+[root@localhost csdn]# slaptest -f /etc/openldap/slapd.conf 
+config file testing succeeded
+[root@localhost openldap]# slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d/
+config file testing succeeded
+[root@localhost openldap]# 
+[root@localhost ~]# ldapadd -x -D cn=Manager,dc=csdn,dc=com -H ldap:/// -W -f base.ldif 
+Enter LDAP Password: 
+adding new entry "dc=csdn,dc=com"
+
+[root@localhost ~]# cat base.ldif 
+dn: dc=csdn,dc=com
+dc: csdn
+objectClass: top
+objectClass: domain
+[root@localhost ~]# ldapsearch -x -LLL
+dn: dc=csdn,dc=com
+dc: csdn
+objectClass: top
+objectClass: domain
+
+
+集成Kerberos
+yum install krb5-server-ldap
+
+[root@ldap saiku]# cp /usr/share/doc/krb5-server-ldap-1.10.3/kerberos.schema /etc/openldap/schema/
+[root@ldap saiku]# ll /etc/openldap/schema/
+total 332
+-rw-r--r--. 1 ldap ldap  2036 May 11 07:32 collective.ldif
+-rw-r--r--. 1 ldap ldap  6190 May 11 07:32 collective.schema
+-rw-r--r--. 1 ldap ldap  1845 May 11 07:32 corba.ldif
+-rw-r--r--. 1 ldap ldap  8063 May 11 07:32 corba.schema
+-rw-r--r--. 1 ldap ldap 20612 May 11 07:32 core.ldif
+-rw-r--r--. 1 ldap ldap 20499 May 11 07:32 core.schema
+-rw-r--r--. 1 ldap ldap 12006 May 11 07:32 cosine.ldif
+-rw-r--r--. 1 ldap ldap 73994 May 11 07:32 cosine.schema
+-rw-r--r--. 1 ldap ldap  4842 May 11 07:32 duaconf.ldif
+-rw-r--r--. 1 ldap ldap 10388 May 11 07:32 duaconf.schema
+-rw-r--r--. 1 ldap ldap  3330 May 11 07:32 dyngroup.ldif
+-rw-r--r--. 1 ldap ldap  3289 May 11 07:32 dyngroup.schema
+-rw-r--r--. 1 ldap ldap  3481 May 11 07:32 inetorgperson.ldif
+-rw-r--r--. 1 ldap ldap  6267 May 11 07:32 inetorgperson.schema
+-rw-r--r--. 1 ldap ldap  2979 May 11 07:32 java.ldif
+-rw-r--r--. 1 ldap ldap 13901 May 11 07:32 java.schema
+-rw-r--r--. 1 root root 23520 Aug 26 14:08 kerberos.schema
+-rw-r--r--. 1 ldap ldap  2082 May 11 07:32 misc.ldif
+-rw-r--r--. 1 ldap ldap  2387 May 11 07:32 misc.schema
+-rw-r--r--. 1 ldap ldap  6809 May 11 07:32 nis.ldif
+-rw-r--r--. 1 ldap ldap  7640 May 11 07:32 nis.schema
+-rw-r--r--. 1 ldap ldap  3308 May 11 07:32 openldap.ldif
+-rw-r--r--. 1 ldap ldap  1514 May 11 07:32 openldap.schema
+-rw-r--r--. 1 ldap ldap  6904 May 11 07:32 pmi.ldif
+-rw-r--r--. 1 ldap ldap 20467 May 11 07:32 pmi.schema
+-rw-r--r--. 1 ldap ldap  4356 May 11 07:32 ppolicy.ldif
+-rw-r--r--. 1 ldap ldap 19963 May 11 07:32 ppolicy.schema
+
+[root@ldap ~]# cat schema_convert.conf 
+include		/etc/openldap/schema/corba.schema
+include		/etc/openldap/schema/core.schema
+include		/etc/openldap/schema/cosine.schema
+include		/etc/openldap/schema/duaconf.schema
+include		/etc/openldap/schema/dyngroup.schema
+include		/etc/openldap/schema/inetorgperson.schema
+include		/etc/openldap/schema/java.schema
+include		/etc/openldap/schema/misc.schema
+include		/etc/openldap/schema/nis.schema
+include		/etc/openldap/schema/openldap.schema
+include		/etc/openldap/schema/ppolicy.schema
+include		/etc/openldap/schema/collective.schema
+include		/etc/openldap/schema/kerberos.schema
+[root@ldap ~]#  slapcat -f schema_convert.conf -F tmp/ldif_output -n0 -s "cn={12}kerberos,cn=schema,cn=config" > tmp/cn=kerberos.ldif
+
+[root@ldap tmp]# ldapadd -Y EXTERNAL  -H ldapi:/// -f cn\=kerberos.ldif 
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=kerberos,cn=schema,cn=config"
+
+ 
+======================================================================================
+[root@centos7-02 ~]# cat /etc/krb5.conf 
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ dns_lookup_realm = false
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+ rdns = false
+ default_realm = csdn.net
+ default_ccache_name = KEYRING:persistent:%{uid}
+
+[realms]
+ csdn.net = {
+  kdc = centos7-02
+  admin_server = centos7-02
+ }
+
+[domain_realm]
+ .csdn.net = csdn.net
+ csdn.net = csdn.net
+[root@centos7-02 ~]# 
+
+
+[root@centos7-02 ~]# cat /var/kerberos/krb5kdc/kdc.conf 
+[kdcdefaults]
+ kdc_ports = 88
+ kdc_tcp_ports = 88
+
+[realms]
+ csdn.net = {
+  #master_key_type = aes256-cts
+  acl_file = /var/kerberos/krb5kdc/kadm5.acl
+  dict_file = /usr/share/dict/words
+  admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab
+  supported_enctypes = aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal camellia256-cts:normal camellia128-cts:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal
+ }
+[root@centos7-02 ~]# cat /var/kerberos/krb5kdc/kadm5.acl 
+*/admin@csdn.net	*
+[root@centos7-02 ~]# 
+[root@centos7-02 ~]# kdb5_util create -s
+Loading random data
+Initializing database '/var/kerberos/krb5kdc/principal' for realm 'csdn.net',
+master key name 'K/M@csdn.net'
+You will be prompted for the database Master Password.
+It is important that you NOT FORGET this password.
+Enter KDC database master key: (csdn.net)
+Re-enter KDC database master key to verify: (csdn.net)
+
+kadmin.local -q "addprinc ldapadmin@csdn.net"
+kadmin.local -q "addprinc -randkey ldap/centos7-02@csdn.net"
+kadmin.local -q "ktadd -k /etc/openldap/ldap.keytab ldap/centos7-02@csdn.net"
+
+[root@centos7-02 ~]# chown ldap:ldap /etc/openldap/ldap.keytab && chmod 640 /etc/openldap/ldap.keytab
+[root@centos7-02 ~]# cat /etc/sysconfig/slapd 
+# OpenLDAP server configuration
+# see 'man slapd' for additional information
+
+# Where the server will run (-h option)
+# - ldapi:/// is required for on-the-fly configuration using client tools
+#   (use SASL with EXTERNAL mechanism for authentication)
+# - default: ldapi:/// ldap:///
+# - example: ldapi:/// ldap://127.0.0.1/ ldap://10.0.0.1:1389/ ldaps:///
+SLAPD_URLS="ldapi:/// ldap:///"
+
+# Any custom options
+#SLAPD_OPTIONS=""
+
+# Keytab location for GSSAPI Kerberos authentication
+KRB5_KTNAME="FILE:/etc/openldap/ldap.keytab"
+[root@centos7-02 ~]# 
+
+
+[root@localhost ~]# authconfig -h
+Usage: authconfig [options] {--update|--updateall|--test|--probe|--restorebackup <name>|--savebackup <name>|--restorelastbackup}
+
+Options:
+    -h, --help              show this help message and exit
+  --enableshadow, --useshadow
+                        enable shadowed passwords by default
+    --disableshadow         disable shadowed passwords by default
+  --enablemd5, --usemd5
+                        enable MD5 passwords by default
+    --disablemd5            disable MD5 passwords by default
+  --passalgo=<descrypt|bigcrypt|md5|sha256|sha512>
+                        hash/crypt algorithm for new passwords
+    --enablenis             enable NIS for user information by default
+    --disablenis            disable NIS for user information by default
+    --nisdomain=<domain>    default NIS domain
+    --nisserver=<server>    default NIS server
+    --enableldap            enable LDAP for user information by default
+    --disableldap           disable LDAP for user information by default
+    --enableldapauth        enable LDAP for authentication by default
+    --disableldapauth       disable LDAP for authentication by default
+  --ldapserver=<server>
+                        default LDAP server hostname or URI
+    --ldapbasedn=<dn>       default LDAP base DN
+  --enableldaptls, --enableldapstarttls
+                        enable use of TLS with LDAP (RFC-2830)
+  --disableldaptls, --disableldapstarttls
+                        disable use of TLS with LDAP (RFC-2830)
+    --enablerfc2307bis      enable use of RFC-2307bis schema for LDAP user information lookups
+    --disablerfc2307bis     disable use of RFC-2307bis schema for LDAP user information lookups
+  --ldaploadcacert=<URL>
+                        load CA certificate from the URL
+    --enablesmartcard       enable authentication with smart card by default
+    --disablesmartcard      disable authentication with smart card by default
+  --enablerequiresmartcard
+                        require smart card for authentication by default
+  --disablerequiresmartcard
+                        do not require smart card for authentication by default
+  --smartcardmodule=<module>
+                        default smart card module to use
+  --smartcardaction=<0=Lock|1=Ignore>
+                        action to be taken on smart card removal
+    --enablefingerprint     enable authentication with fingerprint readers by default
+    --disablefingerprint    disable authentication with fingerprint readers by default
+    --enablekrb5            enable kerberos authentication by default
+    --disablekrb5           disable kerberos authentication by default
+    --krb5kdc=<server>      default kerberos KDC
+  --krb5adminserver=<server>
+                        default kerberos admin server
+    --krb5realm=<realm>     default kerberos realm
+    --enablekrb5kdcdns      enable use of DNS to find kerberos KDCs
+    --disablekrb5kdcdns     disable use of DNS to find kerberos KDCs
+    --enablekrb5realmdns    enable use of DNS to find kerberos realms
+  --disablekrb5realmdns
+                        disable use of DNS to find kerberos realms
+    --enablewinbind         enable winbind for user information by default
+    --disablewinbind        disable winbind for user information by default
+    --enablewinbindauth     enable winbind for authentication by default
+    --disablewinbindauth    disable winbind for authentication by default
+  --smbsecurity=<user|server|domain|ads>
+                        security mode to use for samba and winbind
+    --smbrealm=<realm>      default realm for samba and winbind when security=ads
+  --smbservers=<servers>
+                        names of servers to authenticate against
+  --smbworkgroup=<workgroup>
+                        workgroup authentication servers are in
+  --smbidmaprange=<lowest-highest>, --smbidmapuid=<lowest-highest>, --smbidmapgid=<lowest-highest>
+                        uid range winbind will assign to domain or ads users
+  --winbindseparator=<\>
+                        the character which will be used to separate the domain and user part of winbind-created user names if winbindusedefaultdomain is not enabled
+  --winbindtemplatehomedir=</home/%D/%U>
+                        the directory which winbind-created users will have as home directories
+  --winbindtemplateprimarygroup=<nobody>
+                        the group which winbind-created users will have as their primary group
+  --winbindtemplateshell=</bin/false>
+                        the shell which winbind-created users will have as their login shell
+  --enablewinbindusedefaultdomain
+                        configures winbind to assume that users with no domain in their user names are domain users
+  --disablewinbindusedefaultdomain
+                        configures winbind to assume that users with no domain in their user names are not domain users
+  --enablewinbindoffline
+                        configures winbind to allow offline login
+  --disablewinbindoffline
+                        configures winbind to prevent offline login
+  --winbindjoin=<Administrator>
+                        join the winbind domain or ads realm now as this administrator
+    --enableipav2           enable IPAv2 for user information and authentication by default
+    --disableipav2          disable IPAv2 for user information and authentication by default
+  --ipav2domain=<domain>
+                        the IPAv2 domain the system should be part of
+    --ipav2realm=<realm>    the realm for the IPAv2 domain
+  --ipav2server=<servers>
+                        the server for the IPAv2 domain
+    --enableipav2nontp      do not setup the NTP against the IPAv2 domain
+    --disableipav2nontp     setup the NTP against the IPAv2 domain (default)
+  --ipav2join=<account>
+                        join the IPAv2 domain as this account
+    --enablewins            enable wins for hostname resolution
+    --disablewins           disable wins for hostname resolution
+    --enablepreferdns       prefer dns over wins or nis for hostname resolution
+    --disablepreferdns      do not prefer dns over wins or nis for hostname resolution
+    --enablehesiod          enable hesiod for user information by default
+    --disablehesiod         disable hesiod for user information by default
+    --hesiodlhs=<lhs>       default hesiod LHS
+    --hesiodrhs=<rhs>       default hesiod RHS
+    --enablesssd            enable SSSD for user information by default with manually managed configuration
+    --disablesssd           disable SSSD for user information by default (still used for supported configurations)
+    --enablesssdauth        enable SSSD for authentication by default with manually managed configuration
+    --disablesssdauth       disable SSSD for authentication by default (still used for supported configurations
+    --enableforcelegacy     never use SSSD implicitly even for supported configurations
+    --disableforcelegacy    use SSSD implicitly if it supports the configuration
+    --enablecachecreds      enable caching of user credentials in SSSD by default
+    --disablecachecreds     disable caching of user credentials in SSSD by default
+    --enablecache           enable caching of user information by default (automatically disabled when SSSD is used)
+    --disablecache          disable caching of user information by default
+    --enablelocauthorize    local authorization is sufficient for local users
+  --disablelocauthorize
+                        authorize local users also through remote service
+    --enablepamaccess       check access.conf during account authorization
+    --disablepamaccess      do not check access.conf during account authorization
+    --enablesysnetauth      authenticate system accounts by network services
+    --disablesysnetauth     authenticate system accounts by local files only
+    --enablemkhomedir       create home directories for users on their first login
+    --disablemkhomedir      do not create home directories for users on their first login
+    --nostart               do not start/stop portmap, ypbind, and nscd
+    --test                  do not update the configuration files, only print new settings
+  --update, --kickstart
+                        opposite of --test, update configuration files with changed settings
+    --updateall             update all configuration files
+    --probe                 probe network for defaults and print them
+    --savebackup=<name>     save a backup of all configuration files
+  --restorebackup=<name>
+                        restore the backup of configuration files
+    --restorelastbackup     restore the backup of configuration files saved before the previous configuration change
+
+[root@localhost ~]# yum install openldap-clients nss-pam-ldapd
+	
+[root@localhost ~]#authconfig --savebackup=systemconfig.bak
+[root@localhost ~]# authconfig --enablemkhomedir --disableldaptls --enableldap --enableldapauth --ldapserver=ldap://192.168.88.137 --ldapbasedn='dc=csdn,dc=com' --enableshadow --update
+[root@localhost ~]# service nslcd restart
+Stopping nslcd:                                            [  OK  ]
+Starting nslcd:                                            [  OK  ]
+[root@localhost ~]# id yangxy
+[root@localhost ~]# chkconfig nslcd on
+uid=1000(yangxy) gid=500(csdn) groups=500(csdn)
+[root@localhost ~]#
+
+
+
+
+
+
+centos 6.4 openldap 2.4 版本 系统认证无法更改密码，错误提示：
+
+     openldap: LDAP password information update failed: Insufficient access
+
+tail /var/log/securce
+
+    passwd: pam_unix(passwd:chauthtok): user "test" does not exist in /etc/passwd
+
+
+解决方案：
+
+一、
+
+[root@localhost ~]# ldapmodify -Y EXTERNAL -H ldapi:/// -f userchangpasswd.ldif 
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+modifying entry "olcDatabase={2}bdb,cn=config"
+
+[root@localhost ~]# cat userchangpasswd.ldif 
+dn: olcDatabase={2}bdb,cn=config
+add: olcAccess
+olcAccess: to attrs=userPassword,shadowLastChange by dn="cn=Manager,dc=csdn,dc=com" write by anonymous auth by self write by * none
+olcAccess: to dn.base="" by * read
+olcAccess: to * by dn="cn=Manager,dc=csdn,dc=com" write by * read
+[root@localhost ~]# 
+
+二、
+   在 sldap.conf 中加入：
+  
+
+
+access to attrs=userPassword
+by self write
+by anonymous auth
+by dn.base="cn=Manager,dc=mycompany,dc=com" write
+by * none
+
+access to *
+by self write
+by dn.base="cn=Manager,dc=mycompany,dc=com" write
+by * read
+
+上面行最主要的加在database config 前面，否则不生效。
+
+然后执行
+
+rm -rf /etc/openldap/slapd.d/*
+slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d
+chown -R ldap:ldap /etc/openldap/slapd.d
+service slapd restart
+
+百度空间：http://hi.baidu.com/nessus1/item/2425dc4cdcb2251c896d10d3
+
+
+[root@localhost ~]# 
+
+[root@localhost ~]# 
+[root@localhost ~]# systemctl start slapd.service 
+[root@localhost ~]# systemctl enable slapd.service 
+Created symlink from /etc/systemd/system/multi-user.target.wants/slapd.service to /usr/lib/systemd/system/slapd.service.
+[root@localhost ~]#
+修改管理员密码
+[root@localhost ~]# slappasswd
+New password: （admin）
+Re-enter new password: （admin）
+{SSHA}UrGtqGqqST+S1eplzZ1kpH5Ldzyul//n
+[root@localhost ~]# vim chrootpw.ldif
+# specify the password generated above for "olcRootPW" section
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}UrGtqGqqST+S1eplzZ1kpH5Ldzyul//n
+
+[root@localhost ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+modifying entry "olcDatabase={0}config,cn=config"
+
+[root@localhost ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=cosine,cn=schema,cn=config"
+
+[root@localhost ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=nis,cn=schema,cn=config"
+
+[root@localhost ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=inetorgperson,cn=schema,cn=config"
+
+[root@localhost ~]# 
+[root@localhost ~]# ldapsearch -x -LLL -H ldap:///
+No such object (32)
+[root@localhost ~]# ldapadd -x -D cn=Manager,dc=csdn,dc=net -W  -f basedomain.ldif
+
+
+[root@ldap ~]# ldapwhoami -x -D "cn=Manager,dc=csdn,dc=net" -W
+Enter LDAP Password: 
+dn:cn=Manager,dc=csdn,dc=net
+
+slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d/
+
+
+
+
+[root@localhost ~]# firewall-cmd --add-service=ldap --permanent 
+success
+[root@localhost ~]# firewall-cmd --reload 
+success
+[root@localhost ~]# 
+
+"cn=Manager,dc=example,dc=com"
+
+
+
+yum install db4 db4-utils db4-devel cyrus-sasl* krb5-server-ldap -y
+yum install openldap openldap-servers openldap-clients openldap-devel compat-openldap -y
+
+
+
+vi /usr/share/migrationtools/migrate_common.ph 
+# Default DNS domain
+$DEFAULT_MAIL_DOMAIN = "csdn.net";
+
+# Default base
+$DEFAULT_BASE = "dc=csdn,dc=net";
+
+
+[root@centos7-02 ~]#cat /etc/sysconfig/slapd 
+# OpenLDAP server configuration
+# see 'man slapd' for additional information
+
+# Where the server will run (-h option)
+# - ldapi:/// is required for on-the-fly configuration using client tools
+#   (use SASL with EXTERNAL mechanism for authentication)
+# - default: ldapi:/// ldap:///
+# - example: ldapi:/// ldap://127.0.0.1/ ldap://10.0.0.1:1389/ ldaps:///
+SLAPD_URLS="ldapi:/// ldap:///"
+
+# Any custom options
+#SLAPD_OPTIONS=""
+
+# Keytab location for GSSAPI Kerberos authentication
+#KRB5_KTNAME="FILE:/etc/openldap/ldap.keytab"
+[root@centos7-02 ~]# 
+
+
+cat /etc/openldap/ldap.conf 
+
+[root@centos7-02 ~]# systemctl start slapd.service 
+[root@centos7-02 ~]# systemctl status slapd.service 
+● slapd.service - OpenLDAP Server Daemon
+   Loaded: loaded (/usr/lib/systemd/system/slapd.service; disabled; vendor preset: disabled)
+   Active: active (running) since Wed 2016-08-10 14:41:56 CST; 10s ago
+     Docs: man:slapd
+           man:slapd-config
+           man:slapd-hdb
+           man:slapd-mdb
+           file:///usr/share/doc/openldap-servers/guide.html
+  Process: 58003 ExecStart=/usr/sbin/slapd -u ldap -h ${SLAPD_URLS} $SLAPD_OPTIONS (code=exited, status=0/SUCCESS)
+  Process: 57988 ExecStartPre=/usr/libexec/openldap/check-config.sh (code=exited, status=0/SUCCESS)
+ Main PID: 58005 (slapd)
+   Memory: 4.0M
+   CGroup: /system.slice/slapd.service
+           └─58005 /usr/sbin/slapd -u ldap -h ldapi:/// ldap:///
+
+Aug 10 14:41:56 centos7-02 slapd[58003]: sql_select option missing
+Aug 10 14:41:56 centos7-02 slapd[58003]: auxpropfunc error no mechanism available
+Aug 10 14:41:56 centos7-02 slapd[58003]: _sasl_plugin_load failed on sasl_auxprop_plug_init for plugin: sql
+Aug 10 14:41:56 centos7-02 slapd[58003]: auxpropfunc error invalid parameter supplied
+Aug 10 14:41:56 centos7-02 slapd[58003]: _sasl_plugin_load failed on sasl_auxprop_plug_init for plugin: ldapdb
+Aug 10 14:41:56 centos7-02 slapd[58003]: ldapdb_canonuser_plug_init() failed in sasl_canonuser_add_plugin(): invalid parameter supplied
+Aug 10 14:41:56 centos7-02 slapd[58003]: _sasl_plugin_load failed on sasl_canonuser_init for plugin: ldapdb
+Aug 10 14:41:56 centos7-02 slapd[58005]: hdb_db_open: warning - no DB_CONFIG file found in directory /var/lib/ldap: (2).
+                                         Expect poor performance for suffix "dc=my-domain,dc=com".
+Aug 10 14:41:56 centos7-02 slapd[58005]: slapd starting
+Aug 10 14:41:56 centos7-02 systemd[1]: Started OpenLDAP Server Daemon.
+[root@centos7-02 ~]# 
+
+[root@centos7-02 ~]# cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+[root@centos7-02 ~]# 
+[root@centos7-02 openldap]# cp /usr/share/doc/krb5-server-ldap-1.13.2/kerberos.schema /etc/openldap/schema/
+[root@centos7-02 openldap]# touch /etc/openldap/slapd.conf
+[root@centos7-02 openldap]# echo "include /etc/openldap/schema/corba.schema
+> include /etc/openldap/schema/core.schema
+> include /etc/openldap/schema/cosine.schema
+> include /etc/openldap/schema/duaconf.schema
+> include /etc/openldap/schema/dyngroup.schema
+> include /etc/openldap/schema/inetorgperson.schema
+> include /etc/openldap/schema/java.schema
+> include /etc/openldap/schema/misc.schema
+> include /etc/openldap/schema/nis.schema
+> include /etc/openldap/schema/openldap.schema
+> include /etc/openldap/schema/ppolicy.schema
+> include /etc/openldap/schema/collective.schema
+> include /etc/openldap/schema/kerberos.schema" > /etc/openldap/slapd.conf
+[root@centos7-02 openldap]# echo -e "pidfile /var/run/openldap/slapd.pid\nargsfile /var/run/openldap/slapd.args" >> /etc/openldap/slapd.conf
+[root@centos7-02 openldap]# slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d
+config file testing succeeded
+[root@centos7-02 openldap]# cat slapd.conf 
+include /etc/openldap/schema/corba.schema
+include /etc/openldap/schema/core.schema
+include /etc/openldap/schema/cosine.schema
+include /etc/openldap/schema/duaconf.schema
+include /etc/openldap/schema/dyngroup.schema
+include /etc/openldap/schema/inetorgperson.schema
+include /etc/openldap/schema/java.schema
+include /etc/openldap/schema/misc.schema
+include /etc/openldap/schema/nis.schema
+include /etc/openldap/schema/openldap.schema
+include /etc/openldap/schema/ppolicy.schema
+include /etc/openldap/schema/collective.schema
+include /etc/openldap/schema/kerberos.schema
+pidfile /var/run/openldap/slapd.pid
+argsfile /var/run/openldap/slapd.args
+[root@centos7-02 openldap]# chown -R ldap:ldap /etc/openldap/slapd.d && chmod -R 700 /etc/openldap/slapd.d
+[root@centos7-02 openldap]# 
+[root@centos7-02 ~]# ldapsearch -x -b '' -s base '(objectclass=*)'  
+# extended LDIF
+#
+# LDAPv3
+# base <> with scope baseObject
+# filter: (objectclass=*)
+# requesting: ALL
+#
+
+#
+dn:
+objectClass: top
+objectClass: OpenLDAProotDSE
+
+# search result
+search: 2
+result: 0 Success
+
+# numResponses: 2
+# numEntries: 1
+[root@centos7-02 ~]# 

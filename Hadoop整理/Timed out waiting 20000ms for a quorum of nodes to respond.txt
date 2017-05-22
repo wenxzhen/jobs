@@ -1,0 +1,66 @@
+2017-04-12 15:08:13,640 INFO org.apache.hadoop.hdfs.server.namenode.NNStorageRetentionManager: Purging old image FSImageFile(file=/data/1/hadoop/dfs/nn/fsimage/current/fsimage_0000000000001550037, cpktTxId=0000000000001550037)
+2017-04-12 15:08:14,317 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Purging remote journals older than txid 560159
+2017-04-12 15:08:14,317 INFO org.apache.hadoop.hdfs.server.namenode.FileJournalManager: Purging logs older than 560159
+2017-04-12 15:08:23,500 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Took 3156ms to send a batch of 1 edits (123 bytes) to remote journal 192.168.103.166:8485
+2017-04-12 15:08:26,344 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 6001 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.166:8485]
+2017-04-12 15:08:27,346 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 7002 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.166:8485]
+2017-04-12 15:08:28,346 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 8003 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.166:8485]
+2017-04-12 15:08:29,347 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 9004 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.166:8485]
+2017-04-12 15:08:30,349 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 10005 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.166:8485]
+2017-04-12 15:08:31,349 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 11006 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.166:8485]
+2017-04-12 15:08:32,350 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 12007 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.166:8485]
+2017-04-12 15:08:32,606 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Took 12263ms to send a batch of 1 edits (123 bytes) to remote journal 192.168.103.170:8485
+2017-04-12 15:08:33,352 INFO org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 13009 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.170:8485,192.168.103.166:8485]
+2017-04-12 15:08:34,353 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 14010 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.170:8485,192.168.103.166:8485]
+2017-04-12 15:08:35,355 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 15011 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.170:8485,192.168.103.166:8485]
+2017-04-12 15:08:36,355 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 16012 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.170:8485,192.168.103.166:8485]
+2017-04-12 15:08:37,356 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 17013 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.170:8485,192.168.103.166:8485]
+2017-04-12 15:08:38,358 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 18014 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.170:8485,192.168.103.166:8485]
+2017-04-12 15:08:39,358 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Waited 19015 ms (timeout=20000 ms) for a response for sendEdits. Succeeded so far: [192.168.103.170:8485,192.168.103.166:8485]
+2017-04-12 15:08:40,344 FATAL org.apache.hadoop.hdfs.server.namenode.FSEditLog: Error: flush failed for required journal (JournalAndStream(mgr=QJM to [192.168.103.166:8485, 192.168.103.167:8485, 192.168.103.168:8485, 192.168.103.169:8485, 192.168.103.170:8485], stream=QuorumOutputStream starting at txid 1584298))
+java.io.IOException: Timed out waiting 20000ms for a quorum of nodes to respond.
+	at org.apache.hadoop.hdfs.qjournal.client.AsyncLoggerSet.waitForWriteQuorum(AsyncLoggerSet.java:137)
+	at org.apache.hadoop.hdfs.qjournal.client.QuorumOutputStream.flushAndSync(QuorumOutputStream.java:107)
+	at org.apache.hadoop.hdfs.server.namenode.EditLogOutputStream.flush(EditLogOutputStream.java:113)
+	at org.apache.hadoop.hdfs.server.namenode.EditLogOutputStream.flush(EditLogOutputStream.java:107)
+	at org.apache.hadoop.hdfs.server.namenode.JournalSet$JournalSetOutputStream$8.apply(JournalSet.java:533)
+	at org.apache.hadoop.hdfs.server.namenode.JournalSet.mapJournalsAndReportErrors(JournalSet.java:393)
+	at org.apache.hadoop.hdfs.server.namenode.JournalSet.access$100(JournalSet.java:57)
+	at org.apache.hadoop.hdfs.server.namenode.JournalSet$JournalSetOutputStream.flush(JournalSet.java:529)
+	at org.apache.hadoop.hdfs.server.namenode.FSEditLog.logSync(FSEditLog.java:647)
+	at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.delete(FSNamesystem.java:3723)
+	at org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.delete(NameNodeRpcServer.java:953)
+	at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolServerSideTranslatorPB.delete(ClientNamenodeProtocolServerSideTranslatorPB.java:611)
+	at org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos$ClientNamenodeProtocol$2.callBlockingMethod(ClientNamenodeProtocolProtos.java)
+	at org.apache.hadoop.ipc.ProtobufRpcEngine$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine.java:616)
+	at org.apache.hadoop.ipc.RPC$Server.call(RPC.java:982)
+	at org.apache.hadoop.ipc.Server$Handler$1.run(Server.java:2049)
+	at org.apache.hadoop.ipc.Server$Handler$1.run(Server.java:2045)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at javax.security.auth.Subject.doAs(Subject.java:422)
+	at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1698)
+	at org.apache.hadoop.ipc.Server$Handler.run(Server.java:2043)
+2017-04-12 15:08:40,344 WARN org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager: Aborting QuorumOutputStream starting at txid 1584298
+2017-04-12 15:08:40,348 INFO org.apache.hadoop.util.ExitUtil: Exiting with status 1
+2017-04-12 15:08:40,357 INFO org.apache.hadoop.hdfs.server.namenode.NameNode: SHUTDOWN_MSG: 
+/************************************************************
+SHUTDOWN_MSG: Shutting down NameNode at VCG-HDP-NN-01/192.168.103.161
+************************************************************/
+
+
+org.apache.hadoop.hdfs.DFSConfigKeys 
+public static final String DFS_QJOURNAL_WRITE_TXNS_TIMEOUT_KEY = "dfs.qjournal.write-txns.timeout.ms"; 
+public static final int DFS_QJOURNAL_WRITE_TXNS_TIMEOUT_DEFAULT = 20000; 
+public static final String DFS_QJOURNAL_SELECT_INPUT_STREAMS_TIMEOUT_KEY = "dfs.qjournal.select-input-streams.timeout.ms"; 
+public static final int DFS_QJOURNAL_SELECT_INPUT_STREAMS_TIMEOUT_DEFAULT = 20000; 
+public static final int DFS_QJOURNAL_START_SEGMENT_TIMEOUT_DEFAULT = 20000; 
+public static final String DFS_QJOURNAL_START_SEGMENT_TIMEOUT_KEY = "dfs.qjournal.start-segment.timeout.ms"; 
+
+修改 hdfs-site.xml 
+
+dfs.qjournal.start-segment.timeout.ms = 90000 
+dfs.qjournal.select-input-streams.timeout.ms = 90000 
+dfs.qjournal.write-txns.timeout.ms = 90000 
+
+修改core-site.xml 
+ipc.client.connect.timeout = 90000
