@@ -1,0 +1,70 @@
+﻿<?xml version="1.0"?>  
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+
+<!--通过jdbc协议连接mysql的hive库-->
+  <property>  
+    <name>javax.jdo.option.ConnectionURL</name>  
+    <value>jdbc:mysql://192.168.88.1:3306/hive?createDatabaseIfNotExist=true</value>  
+    <description>JDBC connect string for a JDBC metastore</description>  
+  </property>
+
+<!--jdbc的mysql驱动-->
+  <property>  
+    <name>javax.jdo.option.ConnectionDriverName</name>  
+    <value>com.mysql.jdbc.Driver</value>  
+    <description>Driver class name for a JDBC metastore</description>  
+  </property>
+
+<!--mysql用户名-->
+  <property>  
+    <name>javax.jdo.option.ConnectionUserName</name>  
+    <value>root</value>  
+    <description>username to use against metastore database</description>  
+  </property>  
+
+<!--mysql用户密码-->    
+  <property>  
+    <name>javax.jdo.option.ConnectionPassword</name>  
+    <value>root</value>  
+    <description>password to use against metastore database</description>  
+  </property>
+
+<!--远程模式-->
+<property>
+  <name>hive.metastore.local</name>
+  <value>false</value>
+</property>
+
+<!--指定hive元数据访问路径-->
+<property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://192.168.88.137:9083</value>
+</property>
+
+
+</configuration>
+
+
+
+bin/schematool -dbType mysql -initSchema
+
+nohup bin/hive --service metastore >> metastore.out 2>&1 &
+
+set hive.execution.engine=tez;
+
+set tez.lib.uris=/apps/tez-0.8.2.tar.gz;
+
+
+
+$ bin/schematool -initSchema -dbType derby
+
+Metastore connection URL:	 jdbc:derby:;databaseName=metastore_db;create=true
+Metastore Connection Driver :	 org.apache.derby.jdbc.EmbeddedDriver
+Metastore connection User:	 APP
+Starting metastore schema initialization to 2.1.0
+Initialization script hive-schema-2.1.0.derby.sql
+Initialization script completed
+schemaTool completed

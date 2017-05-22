@@ -1,0 +1,63 @@
+http://kudu.apache.org/docs/installation.html
+
+
+http://www.cloudera.com/documentation/enterprise/latest/topics/impala.html
+
+cd /etc/yum.repos.d/
+wget http://archive.cloudera.com/beta/kudu/redhat/6/x86_64/kudu/cloudera-kudu.repo
+wget http://archive.cloudera.com/beta/kudu/redhat/7/x86_64/kudu/cloudera-kudu.repo
+
+
+
+sudo yum install kudu                         # Base Kudu files
+sudo yum install kudu-master                  # Kudu master init.d service script and default configuration
+sudo yum install kudu-tserver                 # Kudu tablet server init.d service script and default configuration
+sudo yum install kudu-client0                 # Kudu C++ client shared library
+sudo yum install kudu-client-devel            # Kudu C++ client SDK
+
+yum install kudu kudu-master   kudu-tserver kudu-client0  kudu-client-devel  
+
+
+[root@localhost conf]# systemctl start kudu-master.service 
+[root@localhost conf]# systemctl start kudu-tserver.service
+[root@localhost conf]# 
+[root@localhost conf]# 
+[root@localhost conf]# systemctl status kudu-master.service 
+● kudu-master.service - LSB: Kudu Master Server
+   Loaded: loaded (/etc/rc.d/init.d/kudu-master)
+   Active: active (exited) since Thu 2016-10-13 13:55:18 CST; 2min 32s ago
+     Docs: man:systemd-sysv-generator(8)
+  Process: 18910 ExecStart=/etc/rc.d/init.d/kudu-master start (code=exited, status=0/SUCCESS)
+
+Oct 13 13:55:17 localhost.localdomain systemd[1]: Starting LSB: Kudu Master Server...
+Oct 13 13:55:17 localhost.localdomain su[18926]: (to kudu) root on none
+Oct 13 13:55:18 localhost.localdomain kudu-master[18910]: Started Kudu Master Server (kudu-master):[  OK  ]
+Oct 13 13:55:18 localhost.localdomain systemd[1]: Started LSB: Kudu Master Server.
+[root@localhost conf]# systemctl status kudu-tserver.service
+● kudu-tserver.service - LSB: Kudu Tablet Server
+   Loaded: loaded (/etc/rc.d/init.d/kudu-tserver)
+   Active: active (exited) since Thu 2016-10-13 13:55:55 CST; 2min 8s ago
+     Docs: man:systemd-sysv-generator(8)
+  Process: 19107 ExecStart=/etc/rc.d/init.d/kudu-tserver start (code=exited, status=0/SUCCESS)
+
+Oct 13 13:55:53 localhost.localdomain systemd[1]: Starting LSB: Kudu Tablet Server...
+Oct 13 13:55:54 localhost.localdomain su[19123]: (to kudu) root on none
+Oct 13 13:55:55 localhost.localdomain kudu-tserver[19107]: Started Kudu Tablet Server (kudu-tserver):[  OK  ]
+Oct 13 13:55:55 localhost.localdomain systemd[1]: Started LSB: Kudu Tablet Server.
+
+[root@localhost conf]# ll /etc/kudu/
+total 0
+lrwxrwxrwx. 1 root root 27 Oct 13 13:03 conf -> /etc/alternatives/kudu-conf
+drwxr-xr-x. 2 root root 53 Oct 13 13:54 conf.dist
+[root@localhost conf]# 
+
+
+
+
+
+wget http://archive.cloudera.com/beta/impala-kudu/redhat/7/x86_64/impala-kudu/cloudera-impala-kudu.repo
+
+
+yum install impala-kudu-server  impala-kudu-catalog  impala-kudu-state-store impala-kudu-shell
+
+

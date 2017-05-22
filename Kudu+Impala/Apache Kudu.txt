@@ -1,0 +1,42 @@
+The clock on each Kudu master and tablet server daemon must be synchronized using Network Time Protocol (NTP). 
+If NTP is not installed or is not running, you may see errors such as the following:
+I0929 10:00:26.570979 21371 master_main.cc:52] Initializing master server...
+F0929 10:00:26.571107 21371 master_main.cc:53] Check failed: _s.ok() Bad status: Service unavailable: Clock is not synchronized:
+  Error reading clock. Clock considered unsynchronized. Errno: Invalid argument
+=============================================================================================  
+https://kudu.apache.org/docs/installation.html
+
+配置
+cat /etc/kudu/conf/master.gflagfile 
+# Do not modify these two lines. If you wish to change these variables,
+# modify them in /etc/default/kudu-master.
+--fromenv=rpc_bind_addresses
+--fromenv=log_dir
+
+--fs_wal_dir=/var/lib/kudu/master
+--fs_data_dirs=/var/lib/kudu/master
+
+--master_addresses=master01:7051,master02:7051
+
+
+cat /etc/kudu/conf/tserver.gflagfile 
+# Do not modify these two lines. If you wish to change these variables,
+# modify them in /etc/default/kudu-tserver.
+--fromenv=rpc_bind_addresses
+--fromenv=log_dir
+
+--fs_wal_dir=/var/lib/kudu/tserver
+--fs_data_dirs=/var/lib/kudu/tserver
+
+--tserver_master_addrs=master01:7051,master02:7051
+
+=============================================================================================
+
+sudo systemctl status kudu-master.service
+sudo systemctl restart kudu-master.service
+
+sudo systemctl start kudu-tserver 
+sudo systemctl restart kudu-tserver 
+
+http://master01:8051
+http://master02:8051

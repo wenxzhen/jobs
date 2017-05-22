@@ -1,0 +1,18 @@
+bin/spark-shell --jars kudu-spark2_2.11-1.1.0.jar
+
+import org.apache.kudu.spark.kudu._
+import org.apache.kudu.client._
+
+val df = spark.read.options(Map("kudu.master" -> "master02","kudu.table" -> "metrics")).kudu
+df.registerTempTable("metrics")
+
+spark.sql("select * from metrics limit 5").show()    
+
+spark.sql("select host, metric, avg(value) from metrics group by host, metric").show()
+
+val kuduContext = new KuduContext("master02:7051")
+val metric_ids_rdd=kuduContext.kuduRDD(sc,"metric_ids")
+metric_ids_rdd.count
+
+echo ./jars/*.jar |sed 's/ /:/g'
+
