@@ -1,0 +1,2 @@
+type=command
+command=echo "Job A Running ..........."

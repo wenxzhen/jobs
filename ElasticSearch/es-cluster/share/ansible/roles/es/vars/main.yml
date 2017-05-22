@@ -1,0 +1,14 @@
+
+
+es_package: '{{package_path}}/elasticsearch-5.2.1.tar.gz'
+
+es_install_path: '/opt/elasticsearch-5.2.1'
+
+cluster_name: 'csdn-es'
+
+data_path: '/data/es/data'
+
+log_path: '/data/es/logs'
+
+
+

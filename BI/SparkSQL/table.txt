@@ -1,0 +1,116 @@
+hive> DESCRIBE FORMATTED file_pv_re
+    > ;
+OK
+# col_name            	data_type           	comment             
+	 	 
+dt                  	string              	from deserializer   
+ip                  	string              	from deserializer   
+cid                 	string              	from deserializer   
+uid                 	string              	from deserializer   
+ref                 	string              	from deserializer   
+pid                 	string              	from deserializer   
+mod                 	string              	from deserializer   
+mtp                 	string              	from deserializer   
+ck                  	string              	from deserializer   
+con                 	string              	from deserializer   
+curl                	string              	from deserializer   
+agt                 	string              	from deserializer   
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+pdate               	string              	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	default             	 
+Owner:              	webuser             	 
+CreateTime:         	Tue Nov 12 16:37:52 CST 2013	 
+LastAccessTime:     	UNKNOWN             	 
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+Location:           	hdfs://csdn/data/log/re	 
+Table Type:         	EXTERNAL_TABLE      	 
+Table Parameters:	 	 
+	EXTERNAL            	TRUE                
+	numFiles            	39                  
+	numPartitions       	38                  
+	numRows             	0                   
+	rawDataSize         	0                   
+	totalSize           	220877071400        
+	transient_lastDdlTime	1406079206          
+	 	 
+# Storage Information	 	 
+SerDe Library:      	net.csdn.hive.lp.pvre.PVReLogSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Storage Desc Params:	 	 
+	input.describer.path	/data/configuration/re/re.json
+	serialization.format	1                   
+Time taken: 4.408 seconds
+
+
+
+
+hive> DESCRIBE FORMATTED file_pv_track;
+OK
+# col_name            	data_type           	comment             
+	 	 
+dt                  	string              	from deserializer   
+ip                  	string              	from deserializer   
+cid                 	string              	from deserializer   
+uid                 	string              	from deserializer   
+ref                 	string              	from deserializer   
+curl                	string              	from deserializer   
+aid                 	string              	from deserializer   
+oid                 	string              	from deserializer   
+pid                 	string              	from deserializer   
+tag                 	string              	from deserializer   
+tos                 	string              	from deserializer   
+agt                 	string              	from deserializer   
+sys_success         	string              	from deserializer   
+sys_desc            	string              	from deserializer   
+sys_data            	string              	from deserializer   
+sid                 	string              	from deserializer   
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+pdate               	string              	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	default             	 
+Owner:              	hadoop              	 
+CreateTime:         	Fri Nov 15 15:24:26 CST 2013	 
+LastAccessTime:     	UNKNOWN             	 
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+Location:           	hdfs://csdn/data/log/track	 
+Table Type:         	EXTERNAL_TABLE      	 
+Table Parameters:	 	 
+	EXTERNAL            	TRUE                
+	last_modified_by    	hadoop              
+	last_modified_time  	1399442328          
+	numFiles            	45                  
+	numPartitions       	43                  
+	numRows             	0                   
+	rawDataSize         	0                   
+	totalSize           	107091172788        
+	transient_lastDdlTime	1406078309          
+	 	 
+# Storage Information	 	 
+SerDe Library:      	net.csdn.hive.lp.pvre.PVReLogSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Storage Desc Params:	 	 
+	input.describer.path	/data/configuration/track/track.json
+	serialization.format	1                   
+Time taken: 0.23 seconds
+hive> 

@@ -1,0 +1,13 @@
+[all]
+master
+slave01
+slave02
+slave03
+
+[all:vars]
+es_group='es'
+es_user='es'
+package_path=/share
+unicast_hosts='["master"]'
+ansible_ssh_user=es
+ansible_ssh_pass=es

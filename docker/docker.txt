@@ -1,0 +1,264 @@
+[root@localhost ~]# docker run --name centos-jdk8 -it -v /tmp/data/:/data centos /bin/bash
+[root@de10b5576dcd /]# ls /data/
+jdk1.8.0_65  ubuntu
+[root@de10b5576dcd /]# mkdir java
+[root@de10b5576dcd /]# ll                         
+total 44
+-rw-r--r--.   1 root root 18307 Jul 19 17:08 anaconda-post.log
+lrwxrwxrwx.   1 root root     7 Jul 19 17:05 bin -> usr/bin
+drwxr-xr-x.   4 root root    37 Jul 27 02:14 data
+drwxr-xr-x.   5 root root   380 Jul 27 02:48 dev
+drwxr-xr-x.  48 root root  4096 Jul 27 02:48 etc
+drwxr-xr-x.   2 root root     6 Aug 12  2015 home
+drwxr-xr-x.   2 root root     6 Jul 27 02:48 java
+lrwxrwxrwx.   1 root root     7 Jul 19 17:05 lib -> usr/lib
+lrwxrwxrwx.   1 root root     9 Jul 19 17:05 lib64 -> usr/lib64
+drwx------.   2 root root     6 Jul 19 17:04 lost+found
+drwxr-xr-x.   2 root root     6 Aug 12  2015 media
+drwxr-xr-x.   2 root root     6 Aug 12  2015 mnt
+drwxr-xr-x.   2 root root     6 Aug 12  2015 opt
+dr-xr-xr-x. 425 root root     0 Jul 27 02:48 proc
+dr-xr-x---.   2 root root  4096 Jul 19 17:08 root
+drwxr-xr-x.  10 root root  4096 Jul 19 17:08 run
+lrwxrwxrwx.   1 root root     8 Jul 19 17:05 sbin -> usr/sbin
+drwxr-xr-x.   2 root root     6 Aug 12  2015 srv
+dr-xr-xr-x.  13 root root     0 Jul 25 08:15 sys
+drwxrwxrwt.   7 root root  4096 Jul 19 17:08 tmp
+drwxr-xr-x.  13 root root  4096 Jul 19 17:05 usr
+drwxr-xr-x.  18 root root  4096 Jul 19 17:08 var
+[root@de10b5576dcd /]# cp -r /data/jdk1.8.0_65/ /java/
+[root@de10b5576dcd /]# ll java/
+total 4
+drwxr-xr-x. 8 root root 4096 Jul 27 02:49 jdk1.8.0_65
+[root@de10b5576dcd /]# vi /etc/profile      
+[root@de10b5576dcd /]# source /etc/profile
+[root@de10b5576dcd /]# java -version
+java version "1.8.0_65"
+Java(TM) SE Runtime Environment (build 1.8.0_65-b17)
+Java HotSpot(TM) 64-Bit Server VM (build 25.65-b01, mixed mode)
+[root@de10b5576dcd ~]# ln -s /java/jdk1.8.0_65/bin/java /usr/bin/java
+[root@de10b5576dcd ~]# ls -l /usr/bin/java 
+lrwxrwxrwx. 1 root root 26 Jul 27 02:59 /usr/bin/java -> /java/jdk1.8.0_65/bin/java
+[root@de10b5576dcd /]# exit
+exit
+[root@localhost ~]# 
+========================================================================================
+
+[root@localhost ~]# docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                        PORTS               NAMES
+de10b5576dcd        centos              "/bin/bash"         12 minutes ago      Exited (1) 11 seconds ago                         centos-jdk8
+553af103315c        centos              "/bin/bash"         33 minutes ago      Exited (127) 14 minutes ago                       sleepy_minsky
+c23b782b702e        centos              "/bin/bash"         53 minutes ago      Exited (130) 48 minutes ago                       awesome_brahmagupta
+[root@localhost ~]# docker start -i centos-jdk8
+[root@de10b5576dcd /]# java -version
+java version "1.8.0_65"
+Java(TM) SE Runtime Environment (build 1.8.0_65-b17)
+Java HotSpot(TM) 64-Bit Server VM (build 25.65-b01, mixed mode)
+[root@de10b5576dcd /]# 
+
+========================================================================================
+https://hub.docker.com/
+yxydde@163.com
+yxydde456
+
+[root@localhost ~]# docker login -u yangxy -p yxydde456
+Login Succeeded
+[root@localhost ~]# docker pull yangxy/csdn
+Using default tag: latest
+Pulling repository docker.io/yangxy/csdn
+Tag latest not found in repository docker.io/yangxy/csdn
+[root@localhost ~]# 
+
+========================================================================================
+[root@localhost ~]# docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                           PORTS               NAMES
+de10b5576dcd        centos              "/bin/bash"         35 minutes ago      Exited (0) 22 minutes ago                            centos-jdk8
+553af103315c        centos              "/bin/bash"         55 minutes ago      Exited (127) 37 minutes ago                          sleepy_minsky
+c23b782b702e        centos              "/bin/bash"         About an hour ago   Exited (130) About an hour ago                       awesome_brahmagupta
+[root@localhost ~]# docker commit --help
+
+Usage:	docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
+
+Create a new image from a container's changes
+
+  -a, --author        Author (e.g., "John Hannibal Smith <hannibal@a-team.com>")
+  -c, --change=[]     Apply Dockerfile instruction to the created image
+  --help              Print usage
+  -m, --message       Commit message
+  -p, --pause=true    Pause container during commit
+[root@localhost ~]# docker commit -a "yangxy" -m "base centos add jdk8" centos-jdk8 centos-jdk8:v1
+sha256:3e333fc01042bedde5eae4beb6a172eff7e5121f4648e3728a782848ed357734
+[root@localhost ~]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos-jdk8         v1                  3e333fc01042        9 seconds ago       390.6 MB
+ubuntu              latest              42118e3df429        4 days ago          124.8 MB
+centos              latest              50dae1ee8677        7 days ago          196.7 MB
+[root@localhost ~]# 
+
+========================================================================================
+[root@localhost ~]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos-jdk8         v1                  9e68a8aef4d1        7 minutes ago       561.6 MB
+yangxy/csdn         v1                  c8e9164d67bc        10 minutes ago      561.6 MB
+[root@localhost ~]# docker rmi centos-jdk8:v1
+Untagged: centos-jdk8:v1
+Deleted: sha256:9e68a8aef4d14cde3c7c8a3ef60d86798f811b77da65302ff4427848b9ae1b5c
+[root@localhost ~]# docker rmi yangxy/csdn:v1
+Untagged: yangxy/csdn:v1
+Deleted: sha256:c8e9164d67bce79047ed822f435034a41c574b16ad8c4caba3ff8da530c076a9
+Deleted: sha256:b802f010f331c60f60b1129bfd7ec2ba246ca34a16c67006bdc313ac4099a2bc
+[root@localhost ~]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+ubuntu              latest              42118e3df429        4 days ago          124.8 MB
+centos              latest              50dae1ee8677        7 days ago          196.7 MB
+tomcat              7.0                 d90cd5c24907        2 weeks ago         367.8 MB
+[root@localhost ~]# 
+
+
+[root@localhost ~]# docker tag --help
+
+Usage:	docker tag [OPTIONS] IMAGE[:TAG] [REGISTRYHOST/][USERNAME/]NAME[:TAG]
+
+Tag an image into a repository
+
+  --help             Print usage
+[root@localhost ~]# docker tag centos-jdk8:v1 yangxy/csdn:v1
+[root@localhost ~]# docker push yangxy/csdn:v1
+The push refers to a repository [docker.io/yangxy/csdn]
+f615a81c82f3: Pushed 
+0fe55794a0f7: Pushed 
+v1: digest: sha256:5a5687e84221cc014b062d5515670c2334c7996f8453ee894084725d07216952 size: 741
+
+========================================================================================
+[root@localhost tomcat]# ll
+total 8
+drwxr-xr-x. 9 root root 4096 Jul 27 14:41 apache-tomcat-8.0.24
+-rw-r--r--. 1 root root  152 Jul 27 14:41 Dockerfile
+[root@localhost tomcat]# cat Dockerfile 
+FROM yangxy/csdn:v1
+MAINTAINER yangxy <yangxy@csdn.net>
+RUN mkdir /tomcat
+COPY apache-tomcat-8.0.24/ /tomcat
+EXPOSE 8080
+CMD  ["/tomcat/bin/catalina.sh","run"]
+
+[root@localhost tomcat]# docker build -t centos-tomcat:v1 .
+Sending build context to Docker daemon 207.9 MB
+Step 1 : FROM yangxy/csdn:v1
+ ---> 3e333fc01042
+Step 2 : MAINTAINER yangxy <yangxy@csdn.net>
+ ---> Running in 7803d1f38058
+ ---> 7fc9d3c0e545
+Removing intermediate container 7803d1f38058
+Step 3 : RUN mkdir /tomcat
+ ---> Running in c61ab24042bb
+ ---> 8ce6f304b637
+Removing intermediate container c61ab24042bb
+Step 4 : COPY apache-tomcat-8.0.24/ /tomcat
+ ---> 0f5419e5c8ff
+Removing intermediate container 4ff550519e15
+Step 5 : EXPOSE 8080
+ ---> Running in 2cc34a24f32c
+ ---> de550f5527c0
+Removing intermediate container 2cc34a24f32c
+Step 6 : CMD /tomcat/bin/catalina.sh run
+ ---> Running in c1b0d32a2d90
+ ---> 26690e67d572
+Removing intermediate container c1b0d32a2d90
+Successfully built 26690e67d572
+
+[root@localhost tomcat]# 
+[root@localhost tomcat]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos-tomcat       v1                  52f5ac340f99        2 minutes ago       403.5 MB
+centos-jdk8         v1                  3e333fc01042        3 hours ago         390.6 MB
+yangxy/csdn         v1                  3e333fc01042        3 hours ago         390.6 MB
+[root@localhost tomcat]#
+
+
+[root@localhost tomcat]# docker run --name centos-tomcat -d -p 8088:8080  centos-tomcat:v1 
+9a52c1a25421330fe95149a405d1d54894e911c3dbd1142852d600b2f1a34458
+[root@localhost tomcat]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES
+9a52c1a25421        centos-tomcat:v1    "/tomcat/bin/catalina"   4 seconds ago       Up 3 seconds        0.0.0.0:8088->8080/tcp   centos-tomcat
+[root@localhost tomcat]# docker log
+login   logout  logs    
+[root@localhost tomcat]# docker logs -f centos-tomcat
+27-Jul-2016 07:51:09.572 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version:        Apache Tomcat/8.0.24
+27-Jul-2016 07:51:09.574 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Jul 1 2015 20:19:55 UTC
+27-Jul-2016 07:51:09.574 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server number:         8.0.24.0
+27-Jul-2016 07:51:09.574 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Linux
+27-Jul-2016 07:51:09.574 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            3.10.0-327.el7.x86_64
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             /java/jdk1.8.0_65
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           1.8.0_65-b17
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         /tomcat
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         /tomcat
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=/tomcat/conf/logging.properties
+27-Jul-2016 07:51:09.575 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+
+
+
+
+[root@localhost saiku]# cat Dockerfile 
+FROM centos
+MAINTAINER yangxy <yangxy@csdn.net>
+RUN mkdir /saiku-server
+COPY saiku-server /saiku-server
+RUN mkdir /java
+COPY jre /java
+ENV JAVA_HOME=/java
+ENV PATH=$PATH:$JAVA_HOME/bin
+EXPOSE 8080
+VOLUME /saiku-server/tomcat/logs
+#Docker will generate /etc/hosts dynamically every time you create a new container. So that it can link others. 
+#You can use --add-host option:
+#RUN echo "192.168.88.1 saiku-db-host" >> /etc/hosts
+
+CMD /saiku-server/start-saiku.sh && tail -f /saiku-server/tomcat/logs/catalina.out
+
+
+
+
+
+docker build -t csdn-saiku:v1 .
+
+docker run --add-host saiku-db-host:192.168.88.1 -d -p 8088:8080 csdn-saiku:v1
+
+docker run --add-host saiku-db-host:192.168.88.1 --name csdn-saiku -d -p 8088:8080 csdn-saiku:v1
+
+
+docker run --add-host saiku-db-host:192.168.88.134 -v $(pwd)/logs:/saiku-server/tomcat/logs --name csdn-saiku -d -p 8088:8080 csdn-saiku:v1
+
+
+docker run --add-host saiku-db-host:192.168.88.1 --rm -it -p 8088:8080 csdn-saiku:v1 bash
+
+
+
+docker run --add-host saiku-db-host:192.168.88.134 -v $(pwd)/logs1:/saiku-server/tomcat/logs --name csdn-saiku1 -d -p 8087:8080 csdn-saiku:node1
+
+docker run --add-host saiku-db-host:192.168.88.134 -v $(pwd)/logs2:/saiku-server/tomcat/logs --name csdn-saiku2 -d -p 8088:8080 csdn-saiku:node2
+
+docker run --add-host saiku-db-host:192.168.88.134 -v $(pwd)/logs3:/saiku-server/tomcat/logs --name csdn-saiku3 -d -p 8089:8080 csdn-saiku:node3
+
+
+
+docker run --name quick-nginx -d -p 80:80 nginx
+
+docker run --name proxy-nginx -v $(pwd)/conf/:/etc/nginx/conf.d/:ro -v $(pwd)/logs:/var/log/nginx/ -d -p 80:80 nginx
+
+
+
+docker run -it --rm nginx bash
+
+
+
+
+docker build -t csdn-saiku:repo .
+
+docker run --add-host saiku-db-host:192.168.88.134 -v $(pwd)/logs4:/saiku-server/tomcat/logs -v $(pwd)/repository:/saiku-server/repository --name csdn-saiku4 -d -p 8090:8080 csdn-saiku:repo
+
+
+
+docker exec -ti code_saiku1 bash

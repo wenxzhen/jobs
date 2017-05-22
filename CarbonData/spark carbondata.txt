@@ -1,0 +1,175 @@
+spark-shell --master yarn --num-executors 3 --jars carbonlib/carbondata_2.11-1.1.0-incubating-SNAPSHOT-shade-hadoop2.7.2.jar
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.CarbonSession._
+
+val carbon = SparkSession.builder().config(sc.getConf).getOrCreateCarbonSession("hdfs://csdncluster/data/CarbonStore")
+
+carbon.sql("show tables").show;
+
+val countryDF = spark.read.format("csv").load("/user/hadoop/DEFAULT.KYLIN_COUNTRY.csv")
+countryDF.createOrReplaceTempView("KYLIN_COUNTRY_TMP");
+spark.sql("select count(1) from KYLIN_COUNTRY_TMP").show;
+
+carbon.sql("CREATE TABLE carbondata.KYLIN_COUNTRY(COUNTRY string,LATITUDE double,LONGITUDE double,NAME string)STORED BY 'carbondata'")
+
+carbon.sql("use carbondata").show;
+carbon.sql("show tables").show;
+
+spark.sql("INSERT INTO TABLE carbondata.KYLIN_COUNTRY SELECT * FROM KYLIN_COUNTRY_TMP ").show;
+spark.sql("select count(1) from carbondata.KYLIN_COUNTRY ").show;
+
+[hadoop@master02 spark-2.1.1-bin-hadoop2.7]$ bin/spark-shell --master yarn --num-executors 3 --jars carbonlib/carbondata_2.11-1.1.0-SNAPSHOT-shade-hadoop2.7.3.jar 
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+17/05/05 14:47:20 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Spark context Web UI available at http://192.168.25.31:4040
+Spark context available as 'sc' (master = yarn, app id = application_1491372378491_0078).
+Spark session available as 'spark'.
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 2.1.1
+      /_/
+         
+Using Scala version 2.11.8 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_101)
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> spark.sql("show databases").show
++------------+
+|databaseName|
++------------+
+|  carbondata|
+|     default|
+|        test|
++------------+
+
+
+scala> import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.SparkSession
+
+scala> import org.apache.spark.sql.CarbonSession._
+import org.apache.spark.sql.CarbonSession._
+
+scala> val carbon = SparkSession.builder().config(sc.getConf).getOrCreateCarbonSession("hdfs://csdncluster/data/CarbonStore")
+17/05/05 14:51:15 WARN spark.SparkContext: Using an existing SparkContext; some configuration may not take effect.
+carbon: org.apache.spark.sql.SparkSession = org.apache.spark.sql.CarbonSession@41f84bb1
+
+scala> carbon.sql("show tables").show;
++--------+--------------------+-----------+
+|database|           tableName|isTemporary|
++--------+--------------------+-----------+
+| default|           customers|      false|
+| default|             git_log|      false|
+| default|         git_log_tmp|      false|
+| default|        kylin_cal_dt|      false|
+| default|       kylin_country|      false|
+| default|         kylin_sales|      false|
+| default|           sample_07|      false|
+| default|           sample_08|      false|
+| default|            web_logs|      false|
++--------+--------------------+-----------+
+
+
+scala> carbon.sql("CREATE TABLE carbondata.KYLIN_COUNTRY(COUNTRY string,LATITUDE double,LONGITUDE double,NAME string)STORED BY 'carbondata'")
+17/05/05 14:51:32 AUDIT command.CreateTable: [master02][hadoop][Thread-1]Creating Table with Database name [carbondata] and Table name [kylin_country]
+17/05/05 14:51:33 WARN hive.HiveExternalCatalog: Couldn't find corresponding Hive SerDe for data source provider org.apache.spark.sql.CarbonSource. Persisting data source table `carbondata`.`kylin_country` into Hive metastore in Spark SQL specific format, which is NOT compatible with Hive.
+17/05/05 14:51:33 AUDIT command.CreateTable: [master02][hadoop][Thread-1]Table created with Database name [carbondata] and Table name [kylin_country]
+res2: org.apache.spark.sql.DataFrame = []
+
+scala> carbon.sql("show tables").show;
++--------+--------------------+-----------+
+|database|           tableName|isTemporary|
++--------+--------------------+-----------+
+| default|           customers|      false|
+| default|             git_log|      false|
+| default|         git_log_tmp|      false|
+| default|        kylin_cal_dt|      false|
+| default|       kylin_country|      false|
+| default|         kylin_sales|      false|
+| default|           sample_07|      false|
+| default|           sample_08|      false|
+| default|            web_logs|      false|
++--------+--------------------+-----------+
+
+
+scala> carbon.sql("use carbondata").show;
+++
+||
+++
+++
+
+
+scala> carbon.sql("show tables").show;
++----------+---------------+-----------+
+|  database|      tableName|isTemporary|
++----------+---------------+-----------+
+|carbondata|  kylin_country|      false|
+|carbondata|    kylin_sales|      false|
+|carbondata|kylin_sales_bkt|      false|
++----------+---------------+-----------+
+
+
+scala> val countryDF = spark.read.format("csv").load("/user/hadoop/DEFAULT.KYLIN_COUNTRY.csv")
+countryDF: org.apache.spark.sql.DataFrame = [_c0: string, _c1: string ... 2 more fields]
+
+scala> countryDF.createOrReplaceTempView("KYLIN_COUNTRY_TMP");
+
+scala> spark.sql("select count(1) from KYLIN_COUNTRY_TMP").show;
++--------+
+|count(1)|
++--------+
+|     244|
++--------+
+
+scala> spark.sql("INSERT INTO TABLE carbondata.KYLIN_COUNTRY SELECT * FROM KYLIN_COUNTRY_TMP ").show;
+17/05/05 14:57:12 AUDIT rdd.CarbonDataRDDFactory$: [master02][hadoop][Thread-1]Data load request has been received for table carbondata.kylin_country
+17/05/05 14:57:13 AUDIT rdd.CarbonDataRDDFactory$: [master02][hadoop][Thread-1]Data load is successful for carbondata.kylin_country
+++
+||
+++
+++
+
+
+scala> spark.sql("select count(1) from carbondata.KYLIN_COUNTRY ").show;
++--------+
+|count(1)|
++--------+
+|     244|
++--------+
+
+
+scala> spark.sql("INSERT INTO TABLE carbondata.KYLIN_COUNTRY SELECT * FROM KYLIN_COUNTRY_TMP ").show;
+17/05/05 14:58:25 AUDIT rdd.CarbonDataRDDFactory$: [master02][hadoop][Thread-1]Data load request has been received for table carbondata.kylin_country
+17/05/05 14:58:26 AUDIT rdd.CarbonDataRDDFactory$: [master02][hadoop][Thread-1]Data load is successful for carbondata.kylin_country
+++
+||
+++
+++
+
+
+scala> spark.sql("select count(1) from carbondata.KYLIN_COUNTRY ").show;
++--------+                                                                      
+|count(1)|
++--------+
+|     488|
++--------+
+
+
+scala> spark.sql("INSERT INTO TABLE carbondata.KYLIN_COUNTRY SELECT * FROM KYLIN_COUNTRY_TMP ");
+17/05/05 14:58:38 AUDIT rdd.CarbonDataRDDFactory$: [master02][hadoop][Thread-1]Data load request has been received for table carbondata.kylin_country
+17/05/05 14:58:40 AUDIT rdd.CarbonDataRDDFactory$: [master02][hadoop][Thread-1]Data load is successful for carbondata.kylin_country
+res14: org.apache.spark.sql.DataFrame = []
+
+scala> spark.sql("select count(1) from carbondata.KYLIN_COUNTRY ").show;
++--------+                                                                      
+|count(1)|
++--------+
+|     732|
++--------+
+
+
+scala> 
+

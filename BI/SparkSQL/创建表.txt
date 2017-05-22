@@ -1,0 +1,116 @@
+DESCRIBE FORMATTED file_pv_re;
+DESCRIBE FORMATTED file_pv_track;
+
+
+add jar /data/bigData/hive-0.13.1-cdh5.2.0/lib/ezmorph-1.0.4.jar;
+add jar /data/bigData/hive-0.13.1-cdh5.2.0/lib/commons-beanutils-1.7.0.jar;
+add jar /data/bigData/hive-0.13.1-cdh5.2.0/lib/json-lib-2.2.2-jdk15.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/logpig.jar;
+
+CREATE EXTERNAL TABLE file_pv_re(
+dt    string,
+ip    string,
+cid   string,
+uid   string,
+ref   string,
+pid   string,
+mod   string,
+mtp   string,
+ck    string,
+con   string,
+curl  string,
+agt   string
+)PARTITIONED BY (pdate string)
+ROW FORMAT SERDE 'net.csdn.hive.lp.pvre.PVReLogSerDe' 
+WITH SERDEPROPERTIES ('input.describer.path'='/data/configuration/re/re.json','serialization.format'='1')
+LOCATION '/data/log/re';
+
+
+
+CREATE EXTERNAL TABLE file_pv_track(
+dt           string,
+ip           string,
+cid          string,
+uid          string,
+ref          string,
+curl         string,
+aid          string,
+oid          string,
+pid          string,
+tag          string,
+tos          string,
+agt          string,
+sys_success  string,
+sys_desc     string,
+sys_data     string,
+sid          string
+)PARTITIONED BY (pdate string)
+ROW FORMAT SERDE 'net.csdn.hive.lp.pvre.PVReLogSerDe' 
+WITH SERDEPROPERTIES ('input.describer.path'='/data/configuration/track/track.json','serialization.format'='1')
+LOCATION '/data/log/track';
+
+
+
+
+bin/hive -e "ALTER  TABLE file_pv_re ADD IF NOT EXISTS PARTITION(pdate=\"2013-09-16\") location '/data/log/re/2013-09-16'"
+
+
+0: jdbc:hive2://192.168.6.80:10000> show partitions file_pv_re;
++-------------------+--+
+|      result       |
++-------------------+--+
+| pdate=2013-09-16  |
++-------------------+--+
+1 row selected (1.908 seconds)
+
+
+
+
+!connect jdbc:hive2://hadoop001:10000
+
+在Sark中：
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/guava-11.0.2.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/ezmorph-1.0.4.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/commons-beanutils-1.7.0.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/json-lib-2.2.2-jdk15.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/logpig.jar;
+
+
+sbin/start-thriftserver.sh --master spark://hadoop001:7077 --executor-memory 10G
+!connect jdbc:hive2://hadoop001:10000
+
+
+ALTER  TABLE file_pv_re ADD IF NOT EXISTS PARTITION(pdate="2013-09-16") location '/data/log/re/pdate=2013-09-16/';
+ALTER  TABLE file_pv_re ADD IF NOT EXISTS PARTITION(pdate="2016-01-21") location '/data/log/re/pdate=2016-01-21/';
+ALTER  TABLE file_pv_re ADD IF NOT EXISTS PARTITION(pdate="2016-01-22") location '/data/log/re/pdate=2016-01-22/';
+ALTER  TABLE file_pv_re ADD IF NOT EXISTS PARTITION(pdate="2016-01-23") location '/data/log/re/pdate=2016-01-23/';
+ALTER  TABLE file_pv_re ADD IF NOT EXISTS PARTITION(pdate="2016-01-24") location '/data/log/re/pdate=2016-01-24/';
+
+
+
+ALTER  TABLE file_pv_track ADD IF NOT EXISTS PARTITION(pdate="2016-01-21") location '/data/log/track/pdate=2016-01-21/';
+ALTER  TABLE file_pv_track ADD IF NOT EXISTS PARTITION(pdate="2016-01-22") location '/data/log/track/pdate=2016-01-22/';
+ALTER  TABLE file_pv_track ADD IF NOT EXISTS PARTITION(pdate="2016-01-23") location '/data/log/track/pdate=2016-01-23/';
+ALTER  TABLE file_pv_track ADD IF NOT EXISTS PARTITION(pdate="2016-01-24") location '/data/log/track/pdate=2016-01-24/';
+
+
+ALTER TABLE file_pv_re DROP IF EXISTS PARTITION (pdate="2013-09-16");
+
+
+select count(*) from file_pv_re;
+
+select distinct(ip) from file_pv_re where pdate='2016-01-21';
+
+select count( distinct(ip)) from file_pv_re where pdate='2016-01-21';
+
+select uid, count(curl) as ucnt from file_pv_re where pdate='2016-01-21' group by uid sort by ucnt desc limit 10;
+select uid, count(curl) as ucnt from file_pv_re where pdate='2016-01-21' group by uid sort by ucnt limit 10;
+
+
+select re.ip, count(re.curl) as cnt from file_pv_re as re , file_pv_track as track where re.ip = track.ip group by re.ip order by cnt desc limit 10;
+select re.ip, count(re.curl) as cnt from file_pv_re as re , file_pv_track as track where re.ip = track.ip group by re.ip order by cnt desc limit 10;
+
+
+select file_pv_re.ip, count(file_pv_re.curl) as cnt from file_pv_re , file_pv_track where file_pv_re.ip = file_pv_track.ip group by file_pv_re.ip order by cnt desc limit 10;
+
+

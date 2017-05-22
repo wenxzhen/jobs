@@ -1,0 +1,10 @@
+{
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:mysql://192.168.25.11:3306/kafka_uc?user=kafka&password=csdn.net&default_character_encoding=utf8",
+    "table.whitelist": "userinfo",
+    "mode": "bulk",
+    "topic.prefix": "curl-demo",
+    "poll.interval.ms": "10000",
+    "batch.max.rows": "10",
+    "tasks.max": "10"
+}

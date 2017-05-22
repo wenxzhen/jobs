@@ -1,0 +1,1 @@
+docker build -t graphite:v1 -f Dockerfile .

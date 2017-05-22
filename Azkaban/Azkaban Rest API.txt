@@ -1,0 +1,48 @@
+[spark@client01 ~]$ curl -k -X POST --data "action=login&username=azkaban&password=azkaban" http://192.168.25.22:8081
+{
+  "session.id" : "6d4c801d-3215-4d55-bab2-670ca148d58b",
+  "status" : "success"
+}
+[spark@client01 ~]$ 
+
+curl -k -X POST --data "session.id=6d4c801d-3215-4d55-bab2-670ca148d58b&name=commandJob&description=Ajax Api Test" http://192.168.25.22:8081/manager?action=create
+
+[spark@client01 ~]$ curl -k -X POST --data "session.id=6d4c801d-3215-4d55-bab2-670ca148d58b&name=commandJob&description=Ajax Api Test" http://192.168.25.22:8081/manager?action=create
+{"path":"manager?project=commandJob","action":"redirect","status":"success"}
+[spark@client01 ~]$ 
+
+
+curl -k -i -H "Content-Type: multipart/mixed" -X POST --form 'session.id=6d4c801d-3215-4d55-bab2-670ca148d58b'\
+ --form 'ajax=upload' --form 'file=@command.zip;type=application/zip'\
+ --form 'project=commandJob' http://192.168.25.22:8081/manager
+ 
+[spark@client01 ~]$ curl -k -i -H "Content-Type: multipart/mixed" -X POST --form 'session.id=6d4c801d-3215-4d55-bab2-670ca148d58b'\
+>  --form 'ajax=upload' --form 'file=@command.zip;type=application/zip'\
+>  --form 'project=commandJob' http://192.168.25.22:8081/manager
+HTTP/1.1 100 Continue
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 42
+Server: Jetty(6.1.26)
+
+{
+  "projectId" : "4",
+  "version" : "1"
+}
+
+
+curl -k --get --data 'session.id=6d4c801d-3215-4d55-bab2-670ca148d58b'\
+ --data 'ajax=executeFlow' --data 'project=commandJob'\
+ --data 'flow=command' http://192.168.25.22:8081/executor
+ 
+ 
+[spark@client01 ~]$ curl -k --get --data 'session.id=6d4c801d-3215-4d55-bab2-670ca148d58b'\
+>  --data 'ajax=executeFlow' --data 'project=commandJob'\
+>  --data 'flow=command' http://192.168.25.22:8081/executor
+{
+  "project" : "commandJob",
+  "message" : "Execution submitted successfully with exec id 40",
+  "flow" : "command",
+  "execid" : 40
+}

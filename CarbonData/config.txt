@@ -1,0 +1,56 @@
+spark.hadoop.yarn.timeline-service.enabled  false
+
+
+spark.yarn.dist.files		        conf/carbon.properties
+spark.yarn.dist.archives		carbonlib/carbondata.tar.gz
+spark.executor.extraJavaOptions		-Dcarbon.properties.filepath=carbon.properties
+spark.executor.extraClassPath		carbondata.tar.gz/carbonlib/*
+spark.driver.extraClassPath		$SPARK_HOME/carbonlib/carbonlib/*
+spark.driver.extraJavaOptions		-Dcarbon.properties.filepath=conf/carbon.properties
+
+
+nohup  ./bin/spark-submit --conf spark.sql.hive.thriftServer.singleSession=true \
+--conf spark.yarn.executor.memoryOverhead=512m \
+--master yarn \
+--num-executors 3 \
+--executor-cores 3 \
+--queue super \
+--executor-memory 5G \
+--driver-memory 3G \
+--class org.apache.carbondata.spark.thriftserver.CarbonThriftServer $SPARK_HOME/carbonlib/carbondata_2.11-1.1.0-incubating-SNAPSHOT-shade-hadoop2.7.2.jar \
+hdfs://csdncluster/data/CarbonStore >> CarbonThriftServer.out 2>&1 &
+
+
+bin/beeline -u jdbc:hive2://master02:10000 -n hadoop
+
+
+export HIVE_SERVER2_THRIFT_PORT=10001
+nohup  ./bin/spark-submit --conf spark.sql.hive.thriftServer.singleSession=false \
+--master yarn \
+--num-executors 5 \
+--executor-cores 4 \
+--queue super \
+--executor-memory 10G \
+--driver-memory 10G \
+--files hdfs://csdncluster/user/spark/log4j.properties \
+--class org.apache.carbondata.spark.thriftserver.CarbonThriftServer $SPARK_HOME/carbonlib/carbondata_2.11-1.1.0-shade-hadoop2.7.3.jar \
+hdfs://csdncluster/carbondata/CarbonStore > ThriftServer.out 2>&1 &
+
+
+ cat conf/spark-defaults.conf
+
+spark.history.ui.port             18080
+spark.eventLog.enabled            true
+spark.eventLog.dir                hdfs://csdncluster/apps/spark/eventLog_2.1.1
+spark.history.fs.logDirectory     hdfs://csdncluster/apps/spark/eventLog_2.1.1
+spark.yarn.historyServer.address  CSDN-HDP-CLI-04:18080
+spark.hadoop.yarn.timeline-service.enabled  false
+spark.yarn.archive                  hdfs://csdncluster/user/spark/spark-2.1.1.jar
+
+spark.yarn.dist.files		        conf/carbon.properties
+spark.yarn.dist.archives	        carbonlib/carbondata.tar.gz
+spark.executor.extraJavaOptions		-Dcarbon.properties.filepath=carbon.properties -Dlog4j.configuration=log4j.properties
+spark.executor.extraClassPath		carbondata.tar.gz/carbonlib/*
+spark.driver.extraClassPath		$SPARK_HOME/carbonlib/carbonlib/* 
+spark.driver.extraJavaOptions		-Dcarbon.properties.filepath=$SPARK_HOME/conf/carbon.properties -Dspark.home=$SPARK_HOME
+ 

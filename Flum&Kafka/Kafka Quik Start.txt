@@ -1,0 +1,88 @@
+nohup bin/zookeeper-server-start.sh config/zookeeper.properties 1>>zookeeper.out 2>&1 &
+nohup bin/kafka-server-start.sh config/server-1.properties 1>>server-1.out 2>&1 &
+nohup bin/kafka-server-start.sh config/server-2.properties 1>>server-2.out 2>&1 &
+nohup bin/kafka-server-start.sh config/server-3.properties 1>>server-3.out 2>&1 &
+
+
+nohup bin/kafka-server-start.sh config/server.properties 1>>server.out 2>&1 &
+
+bin/kafka-topics.sh --list --zookeeper 192.168.100.132:2181
+
+bin/kafka-topics.sh --create --zookeeper 192.168.100.132:2181 --replication-factor 3 --partitions 25 --topic connect-offsets
+
+bin/kafka-topics.sh --create --zookeeper 192.168.100.132:2181 --replication-factor 3 --partitions 1 --topic connect-configs
+
+bin/kafka-topics.sh --create --zookeeper 192.168.100.132:2181 --replication-factor 3 --partitions 3 --topic connect-status
+
+
+
+bin/kafka-topics.sh --describe --zookeeper 192.168.100.132:2181 --topic connect-status
+
+bin/kafka-topics.sh --describe --zookeeper 192.168.100.132:2181 --topic connect-configs
+
+bin/kafka-topics.sh --describe --zookeeper 192.168.100.132:2181 --topic connect-offsets
+
+
+
+bin/kafka-topics.sh --delete --zookeeper 192.168.100.132:2181 --topic connect-offsets
+
+
+bin/connect-standalone.sh config/connect-standalone.properties config/connect-file-source.properties config/connect-file-sink.properties
+
+nohup bin/connect-distributed.sh config/connect-distributed.properties 1>>connect-distributed.out 2>&1 &
+
+
+$ curl -X POST -H "Content-Type: application/json" --data '{"name": "local-console-source", "config": {"connector.class":"org.apache.kafka.connect.file.FileStreamSourceConnector", "tasks.max":"1", "topic":"connect-test","file"="/tmp/test.txt" }}' http://localhost:8083/connectors
+# Or, to use a file containing the JSON-formatted configuration
+# curl -X POST -H "Content-Type: application/json" --data @config.json http://localhost:8083/connectors
+
+
+curl -X GET  http://192.168.100.132:8083/connectors
+
+curl -X POST -H "Content-Type: application/json" --data '{"name": "file-source-connect2", "config": {"connector.class":"org.apache.kafka.connect.file.FileStreamSourceConnector", "tasks.max":"3", "topic":"connect-file-source" }}' http://192.168.100.131:8083/connectors
+
+
+
+
+
+http://docs.confluent.io/3.0.0/connect/userguide.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tickTime=2000
+initLimit=5
+syncLimit=2
+dataDir=/home/csdn/kafka_2.10-0.10.0.0/zookeeper/data
+dataLogDir=/home/csdn/kafka_2.10-0.10.0.0/zookeeper/logs
+clientPort=2181
+server.1=192.168.100.129:2888:3888
+server.2=192.168.100.130:2888:3888
+server.3=192.168.100.131:2888:3888
+
+
+echo 1 > /home/csdn/kafka_2.10-0.10.0.0/zookeeper/data/myid
+echo 2 > /home/csdn/kafka_2.10-0.10.0.0/zookeeper/data/myid
+echo 3 > /home/csdn/kafka_2.10-0.10.0.0/zookeeper/data/myid
+

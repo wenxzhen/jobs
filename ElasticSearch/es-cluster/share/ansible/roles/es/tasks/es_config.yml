@@ -1,0 +1,3 @@
+
+- name: Config elasticsearch.yml
+  template: src=elasticsearch.yml.j2 dest="{{ es_install_path }}/config/elasticsearch.yml" owner={{ es_user }} group={{ es_group}}

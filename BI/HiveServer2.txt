@@ -1,0 +1,40 @@
+
+CSDN-HDP-ZSS-01
+thrift://CSDN-HDP-ZSS-01:9083
+
+
+bin/hive --service metastore&
+
+bin/hive --service hiveserver2  &
+
+select curl from file_pv_track where pdate='2016-01-23' limit 10;
+select count(1) from file_pv_track where pdate='2016-01-23' limit 10;
+DESCRIBE FORMATTED file_pv_track;
+select expid(curl,'pid9.properties') as pid from file_pv_track where pdate='2016-01-23' limit 10;
+
+bin/beeline -u jdbc:hive2://
+
+add jar /data/1/usr/local/hive/jars/HiveClick.jar;
+add jar /data/1/usr/local/hive/jars/guava-14.0.1.jar;
+add jar /data/1/usr/local/hive/jars/ezmorph-1.0.6.jar;
+add jar /data/1/usr/local/hive/jars/joda-time-2.3.jar;
+add jar /data/1/usr/local/hive/jars/json-lib-2.4-jdk15.jar;
+add jar /data/1/usr/local/hive/jars/ansj_seg-20130418.jar;
+add jar /data/1/usr/local/hive/jars/snakeyaml-1.11.jar;
+add jar /data/1/usr/local/hive/jars/ua-parser-1.2.2-SNAPSHOT.jar;
+add jar /data/1/usr/local/hive/lib/hive-serde-0.11.0.jar;
+add jar /data/1/usr/local/hive/jars/hive_udf.jar;
+
+create temporary function extract_query_from_ref as 'net.csdn.hive.cf.ExtractSearchEngineQuery';
+create temporary function collect_set_count as 'net.csdn.hive.cf.CollectSetCount';
+create temporary function vec as 'net.csdn.hive.cf.Vectorize';
+create temporary function c_analyze as 'net.csdn.hive.cf.AnalyzeContent';
+CREATE TEMPORARY FUNCTION expid AS 'net.csdn.hive.cf2.ExtractProduct2';
+
+
+
+
+
+
+select pdate, expid(curl,'pid9.properties') as pid,  count(1) as pv  from file_pv_track where pdate >= '2015-12-21' and pdate <= '2016-01-21' 
+group by pdate, expid(curl,'pid9.properties') having pid = 'iteye' ;

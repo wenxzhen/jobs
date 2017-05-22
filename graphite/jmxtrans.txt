@@ -1,0 +1,30 @@
+https://github.com/jmxtrans/jmxtrans
+https://github.com/jmxtrans/jmxtrans/wiki
+
+[hadoop@maven jmxtrans-264]$ bin/jmxtrans.sh start jvm.json 
+
+[hadoop@maven jmxtrans-264]$ bin/jmxtrans.sh status jvm.json 
+jmxtrans appears to be running at pid: 33958
+
+[hadoop@maven jmxtrans-264]$ cat jvm.json 
+{
+  "servers" : [ {
+    "port" : "9999",
+    "host" : "192.168.76.132",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "192.168.25.30",
+          "rootPrefix" : "JmxTrans"
+      } ],
+      "obj" : "java.lang:type=OperatingSystem",
+      "resultAlias": "OperatingSystem",
+      "attr" : [ "SystemLoadAverage", "AvailableProcessors", "TotalPhysicalMemorySize", 
+                        "FreePhysicalMemorySize", "TotalSwapSpaceSize", "FreeSwapSpaceSize", 
+                        "OpenFileDescriptorCount", "MaxFileDescriptorCount" ]
+    } ],
+    "numQueryThreads" : 2
+  } ]
+}
+

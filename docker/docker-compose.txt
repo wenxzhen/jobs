@@ -1,0 +1,62 @@
+docker run --rm -it centos /bin/bash
+
+
+[root@localhost ansible]# cat Dockerfile 
+FROM centos:latest
+MAINTAINER yangxy <yangxy@csdn.net>
+
+RUN yum -y update && yum -y install openssh-server && yum clean all
+RUN ssh-keygen -A
+RUN mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys && chown -R root:root ~/.ssh && chmod -R 700 ~/.ssh 
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
+
+
+
+[root@localhost ansible]# cat build_images 
+docker build -t centos_sshd:v1 .
+
+
+docker run -d -p 10022:22 --name test_sshd centos_sshd:v1
+
+
+docker exec -it test_sshd /bin/bash
+
+docker rm test_sshd
+docker stop test_sshd
+
+
+
+version: 'v1'
+services:
+  master:
+	build: .
+	image: centos_sshd:v1
+	hostname: master
+	ports:
+	 - "8022:22"
+	volumes:
+	 - ./share:/share
+  slave01:
+    hostname: slave01
+	image: centos_sshd:v1
+	ports:
+	 - "8023:22"
+	volumes:
+	 - ./share
+  slave02:
+    hostname: slave02
+	image: centos_sshd:v1
+	ports:
+	 - "8024:22"
+	volumes:
+	 - ./share
+  slave03:
+    hostname: slave03
+	image: centos_sshd:v1
+	ports:
+	 - "8025:22"
+	volumes:
+	 - ./share

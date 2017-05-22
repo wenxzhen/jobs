@@ -1,0 +1,8 @@
+type=command
+
+dependencies=Job-01
+
+command=echo ${PARAM_2}
+
+
+

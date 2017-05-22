@@ -1,0 +1,8 @@
+---
+- name: "Pull down source for Whisper, Carbon, and Graphite Web"
+  git: repo='https://github.com/etsy/statsd.git'
+       dest=/opt/statsd
+       version={{ statsd_version }}
+
+- name: Configure statsd 
+  copy: src=config.js dest=/opt/statsd/config.js

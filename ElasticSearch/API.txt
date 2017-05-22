@@ -1,0 +1,54 @@
+[csdn@node137 ~]$ curl -XPUT 'localhost:9200/customer/external/1?pretty' -d '
+> {
+>   "name": "John Doe"
+> }'
+{
+  "_index" : "customer",
+  "_type" : "external",
+  "_id" : "1",
+  "_version" : 1,
+  "_shards" : {
+    "total" : 2,
+    "successful" : 1,
+    "failed" : 0
+  },
+  "created" : true
+}
+[csdn@node137 ~]$ curl -XGET 'localhost:9200/customer/external/1?pretty'
+{
+  "_index" : "customer",
+  "_type" : "external",
+  "_id" : "1",
+  "_version" : 1,
+  "found" : true,
+  "_source" : {
+    "name" : "John Doe"
+  }
+}
+[csdn@node137 ~]$ curl -XDELETE 'localhost:9200/customer?pretty'
+{
+  "acknowledged" : true
+}
+
+
+[csdn@node137 ~]$ curl -XPOST 'localhost:9200/customer/external?pretty' -d '
+> {
+>   "name": "Jane Doe"
+> }'
+{
+  "_index" : "customer",
+  "_type" : "external",
+  "_id" : "AVet_PuEAT3Yrj7CzcDe",
+  "_version" : 1,
+  "_shards" : {
+    "total" : 2,
+    "successful" : 1,
+    "failed" : 0
+  },
+  "created" : true
+}
+[csdn@node137 ~]$ 
+
+
+
+curl -XDELETE 'localhost:9200/customer/external/AVet_PuEAT3Yrj7CzcDe?pretty'

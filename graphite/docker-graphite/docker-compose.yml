@@ -1,0 +1,10 @@
+ version: '2'
+ services:
+  graphite:
+    image: graphite:v1
+    hostname: graphite
+    ports:
+     - "8000:8000"
+     - "2003:2003"
+    volumes:
+     - ./share:/share

@@ -1,0 +1,11 @@
+---
+graphite_carbon_version: "0.9.15"
+graphite_whisper_version: "0.9.15"
+graphite_web_version: "0.9.15"
+
+graphite_home: "/opt/graphite"
+
+graphite_web_port: 8080
+graphite_web_secret_key: "SECRET"
+pip_version: "9.0.*"
+statsd_version: 'v0.8.0'

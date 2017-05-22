@@ -1,0 +1,55 @@
+[root@client01 ~]# hostname client01.csdn.net
+[root@client01 ~]# ipa-client-install --mkhomedir
+DNS discovery failed to determine your DNS domain
+Provide the domain name of your IPA server (ex: example.com): csdn.net
+Provide your IPA server name (ex: ipa.example.com): ipamaster.csdn.net
+The failure to use DNS to find your IPA server indicates that your resolv.conf file is not properly configured.
+Autodiscovery of servers for failover cannot work with this configuration.
+If you proceed with the installation, services will be configured to always access the discovered server for all operations and will not fail over to other servers in case of failure.
+Proceed with fixed values and no DNS discovery? [no]: yes
+Client hostname: client01.csdn.net
+Realm: CSDN.NET
+DNS Domain: csdn.net
+IPA Server: ipamaster.csdn.net
+BaseDN: dc=csdn,dc=net
+
+Continue to configure the system with these values? [no]: yes
+Synchronizing time with KDC...
+Attempting to sync time using ntpd.  Will timeout after 15 seconds
+User authorized to enroll computers: admin
+Password for admin@CSDN.NET: 
+Successfully retrieved CA cert
+    Subject:     CN=Certificate Authority,O=CSDN.NET
+    Issuer:      CN=Certificate Authority,O=CSDN.NET
+    Valid From:  Mon Oct 24 03:12:02 2016 UTC
+    Valid Until: Fri Oct 24 03:12:02 2036 UTC
+
+Enrolled in IPA realm CSDN.NET
+Created /etc/ipa/default.conf
+New SSSD config will be created
+Configured sudoers in /etc/nsswitch.conf
+Configured /etc/sssd/sssd.conf
+Configured /etc/krb5.conf for IPA realm CSDN.NET
+trying https://ipamaster.csdn.net/ipa/json
+Forwarding 'ping' to json server 'https://ipamaster.csdn.net/ipa/json'
+Forwarding 'ca_is_enabled' to json server 'https://ipamaster.csdn.net/ipa/json'
+Systemwide CA database updated.
+Added CA certificates to the default NSS database.
+Hostname (client01.csdn.net) does not have A/AAAA record.
+Failed to update DNS records.
+Missing A/AAAA record(s) for host client01.csdn.net: 192.168.25.23.
+Missing reverse record(s) for address(es): 192.168.25.23.
+Adding SSH public key from /etc/ssh/ssh_host_rsa_key.pub
+Adding SSH public key from /etc/ssh/ssh_host_ecdsa_key.pub
+Adding SSH public key from /etc/ssh/ssh_host_ed25519_key.pub
+Forwarding 'host_mod' to json server 'https://ipamaster.csdn.net/ipa/json'
+Could not update DNS SSHFP records.
+SSSD enabled
+Configured /etc/openldap/ldap.conf
+No SRV records of NTP servers found. IPA server address will be used
+NTP enabled
+Configured /etc/ssh/ssh_config
+Configured /etc/ssh/sshd_config
+Configuring csdn.net as NIS domain.
+Client configuration complete.
+[root@client01 ~]# 

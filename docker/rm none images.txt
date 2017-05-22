@@ -1,0 +1,1 @@
+docker images | awk '/none/ { print "docker rmi "$3}'

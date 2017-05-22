@@ -1,0 +1,27 @@
+max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]
+max number of threads [1024] for user [hadoop] is too low, increase to at least [2048]
+max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+ 
+解决方案：
+max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]
+切换到root用户
+ ulimit -Hn  查看硬限制
+vim /etc/security/limits.conf 
+添加下面设置 hadoop是用户
+hadoop soft nofile 65536
+hadoop hard nofile 65536
+退出用户重新登录，使配置生效
+重新 ulimit -Hn  查看硬限制 会发现数值有4096改成65535
+vim /etc/security/limits.d/90-nproc.conf 
+找到如下内容：
+soft nproc 1024
+修改为
+soft nproc 2048
+vi /etc/sysctl.conf
+添加下面配置：
+vm.max_map_count=655360
+并执行命令：
+sysctl -p
+
+
+http://www.w2bc.com/article/223069

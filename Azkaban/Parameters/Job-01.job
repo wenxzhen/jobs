@@ -1,0 +1,14 @@
+type=command
+
+command=pwd
+
+command.1=pwd
+
+PARAM_1="Paramete One ....."
+
+command.2=echo ${PARAM_1}
+
+command.3=echo ${JAVA_HOME}
+
+
+PARAM_2="Paramete Two ....."

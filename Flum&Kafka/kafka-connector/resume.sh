@@ -1,0 +1,1 @@
+curl -X PUT -i http://node05.csdn.net:8083/connectors/jdbc-souce-connector-demo/resume

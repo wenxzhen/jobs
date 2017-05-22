@@ -1,0 +1,39 @@
+---
+- name: Install Graphite Web
+  shell: "python check-dependencies.py && python setup.py install --prefix={{ graphite_home }}"
+  args:
+    chdir: /usr/local/src/graphite-web
+    creates: '{{ graphite_home }}/conf/graphite.wsgi.example'
+
+- name: Configure Carbon and storage
+  copy: src={{ graphite_home }}/conf/{{ item }}.conf.example
+            dest={{ graphite_home }}/conf/{{ item }}.conf
+  with_items:
+    - carbon
+    - storage-schemas
+    - storage-aggregation
+    - graphTemplates
+    - dashboard
+    - aggregation-rules
+    - blacklist
+    - relay-rules
+    - rewrite-rules
+    - whitelist
+  
+- name: Configure Graphite nginx
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+
+- name: Configure supervisord
+  copy: src=supervisord.conf dest=/etc/supervisord.d/supervisord.ini
+
+- name: Copy Graphite Web local_settings
+  copy: src={{ graphite_home }}/webapp/graphite/local_settings.py.example dest={{ graphite_home }}/webapp/graphite/local_settings.py
+
+- name: Configure Graphite Web local_settings TIME_ZONE
+  lineinfile: dest={{ graphite_home }}/webapp/graphite/local_settings.py regexp="#TIME_ZONE = 'America/Los_Angeles'" line="TIME_ZONE = 'Asia/Shanghai'"
+
+- name: Ensure that manage.py is executable
+  file: path="{{ graphite_home }}/webapp/graphite/manage.py" mode=0755
+
+- name: Setup the Graphite Web database
+  django_manage: command='syncdb --noinput' app_path="{{ graphite_home }}/webapp/graphite"

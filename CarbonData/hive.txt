@@ -1,0 +1,120 @@
+show create table file_pv_track;
+OK
+CREATE EXTERNAL TABLE `file_pv_track`(
+  `dt` string COMMENT 'from deserializer', 
+  `ip` string COMMENT 'from deserializer', 
+  `cid` string COMMENT 'from deserializer', 
+  `uid` string COMMENT 'from deserializer', 
+  `ref` string COMMENT 'from deserializer', 
+  `curl` string COMMENT 'from deserializer', 
+  `aid` string COMMENT 'from deserializer', 
+  `oid` string COMMENT 'from deserializer', 
+  `pid` string COMMENT 'from deserializer', 
+  `tag` string COMMENT 'from deserializer', 
+  `tos` string COMMENT 'from deserializer', 
+  `agt` string COMMENT 'from deserializer', 
+  `sys_success` string COMMENT 'from deserializer', 
+  `sys_desc` string COMMENT 'from deserializer', 
+  `sys_data` string COMMENT 'from deserializer', 
+  `sid` string COMMENT 'from deserializer')
+PARTITIONED BY ( 
+  `pdate` string)
+ROW FORMAT SERDE 
+  'net.csdn.hive.lp.pvre.PVReLogSerDe' 
+WITH SERDEPROPERTIES ( 
+  'input.describer.path'='/data/configuration/track/track.json') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://csdncluster/data/log/track'
+TBLPROPERTIES (
+  'transient_lastDdlTime'='1493955341')
+Time taken: 0.894 seconds, Fetched: 31 row(s)
+hive>
+
+SHOW PARTITIONS file_pv_track;
+
+ALTER TABLE file_pv_track ADD PARTITION (pdate='2016-05-07') location '/data/log/track/pdate=2016-05-07';
+
+
+CREATE TABLE `file_pv_track`(
+  `dt` string COMMENT 'from deserializer', 
+  `ip` string COMMENT 'from deserializer', 
+  `cid` string COMMENT 'from deserializer', 
+  `uid` string COMMENT 'from deserializer', 
+  `ref` string COMMENT 'from deserializer', 
+  `curl` string COMMENT 'from deserializer', 
+  `aid` string COMMENT 'from deserializer', 
+  `oid` string COMMENT 'from deserializer', 
+  `pid` string COMMENT 'from deserializer', 
+  `tag` string COMMENT 'from deserializer', 
+  `tos` string COMMENT 'from deserializer', 
+  `agt` string COMMENT 'from deserializer', 
+  `sys_success` string COMMENT 'from deserializer', 
+  `sys_desc` string COMMENT 'from deserializer', 
+  `sys_data` string COMMENT 'from deserializer', 
+  `sid` string COMMENT 'from deserializer')
+PARTITIONED BY (pdate string)
+STORED AS PARQUET;
+
+https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select
+#选择除pdate以外的所有列
+set hive.support.quoted.identifiers=none
+select `(pdate)?+.+` from default.file_pv_track where pdate='2016-05-07' limit 1;
+
+
+insert into table test.file_pv_track PARTITION (pdate='2016-05-07') select `(pdate)?+.+` from default.file_pv_track where pdate='2016-05-07';
+
+select count(1) from file_pv_track;
+select count(distinct(uid)) from default.file_pv_track;
+
+
+CREATE TABLE `file_pv_track_rcfile`(
+  `dt` string COMMENT 'from deserializer', 
+  `ip` string COMMENT 'from deserializer', 
+  `cid` string COMMENT 'from deserializer', 
+  `uid` string COMMENT 'from deserializer', 
+  `ref` string COMMENT 'from deserializer', 
+  `curl` string COMMENT 'from deserializer', 
+  `aid` string COMMENT 'from deserializer', 
+  `oid` string COMMENT 'from deserializer', 
+  `pid` string COMMENT 'from deserializer', 
+  `tag` string COMMENT 'from deserializer', 
+  `tos` string COMMENT 'from deserializer', 
+  `agt` string COMMENT 'from deserializer', 
+  `sys_success` string COMMENT 'from deserializer', 
+  `sys_desc` string COMMENT 'from deserializer', 
+  `sys_data` string COMMENT 'from deserializer', 
+  `sid` string COMMENT 'from deserializer')
+PARTITIONED BY (pdate string)
+STORED AS RCFILE;
+
+insert into table test.file_pv_track_rcfile PARTITION (pdate='2016-05-07') select `(pdate)?+.+` from test.file_pv_track where pdate='2016-05-07';
+
+
+CREATE TABLE carbondata.`file_pv_track_rcfile`(
+  `dt` string COMMENT 'from deserializer', 
+  `ip` string COMMENT 'from deserializer', 
+  `cid` string COMMENT 'from deserializer', 
+  `uid` string COMMENT 'from deserializer', 
+  `ref` string COMMENT 'from deserializer', 
+  `curl` string COMMENT 'from deserializer', 
+  `aid` string COMMENT 'from deserializer', 
+  `oid` string COMMENT 'from deserializer', 
+  `pid` string COMMENT 'from deserializer', 
+  `tag` string COMMENT 'from deserializer', 
+  `tos` string COMMENT 'from deserializer', 
+  `agt` string COMMENT 'from deserializer', 
+  `sys_success` string COMMENT 'from deserializer', 
+  `sys_desc` string COMMENT 'from deserializer', 
+  `sys_data` string COMMENT 'from deserializer', 
+  `sid` string COMMENT 'from deserializer',
+  `pdate` string
+  )STORED BY 'carbondata';
+
+
+alter table file_pv_track_rcfile rename to file_pv_track;
+ALTER TABLE file_pv_track ADD COLUMNS (pdate string);
+insert into table carbondata.file_pv_track select * from test.file_pv_track where pdate='2016-05-07';

@@ -1,0 +1,11 @@
+192.168.6.153(hadoop/csdn.net) ²âÊÔ»·¾³
+
+http://192.168.103.103:8585/zeus-web/
+
+BI系统访问地址 http://bi.csdn.net/csdnbi/
+
+
+\web-effective-pom.xml
+
+
+http://csdn-hdp-nn-02:50070/dfshealth.jsp

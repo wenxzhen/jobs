@@ -1,0 +1,76 @@
+docker实现多主机互联有很多方法，基于openvswitch等。docker在1.9之后支持overlay network特性。可以方便的实现多主机互联。
+ 
+用docker创建overlay网络，需要一个key-value存储服务，存储各个主机节点在overlay网络中的配置信息。我们下面以两台主机为例讲一下如何基于zookeeper配置overlay网络。
+ 
+首先有两台主机分别叫Host1和Host2，操作系统为CentOS7，内核版本3.12以上，我的是4.3。Host1和Host2能够互通，我的机器是通过eno16777736网卡互通的。
+
+
+首先要打开防火墙端口：
+firewall-cmd --zone=public --add-port=2376/tcp --permanent
+firewall-cmd --zone=public --add-port=2181/tcp --permanent
+firewall-cmd --zone=public --add-port=4789/udp --permanent
+firewall-cmd --zone=public --add-port=7946/udp --permanent
+firewall-cmd --zone=public --add-port=7946/tcp --permanent
+firewall-cmd --reload
+firewall-cmd --list-port
+ 
+第一步，首先在Host1上安装zookeeper，我安装的是zookeeper3.4.7，用默认配置启动，zookeeper监听端口为2181.
+添加防洪墙端口
+[root@localhost csdn]# firewall-cmd --add-port=2181/tcp
+success
+[root@localhost csdn]# firewall-cmd --list-ports
+2181/tcp
+
+第二步，在Host1和Host2上分别安装docker 1.12.0版本。并修改vi /etc/systemd/system/docker.service.d/docker.conf配置：
+Host1:
+[Service]
+ExecStart=
+ExecStart=/usr/bin/docker daemon --cluster-store=zk://192.168.88.134:2181 --cluster-advertise=192.168.88.135:2376 -H tcp://0.0.0.0:2376 -H unix:///var/run/docker.sock
+
+Host2:
+[Service]
+ExecStart=
+ExecStart=/usr/bin/docker daemon --cluster-store=zk://192.168.88.135:2181 --cluster-advertise=192.168.88.135:2376 -H tcp://0.0.0.0:2376 -H unix:///var/run/docker.sock
+
+其中--cluster-store是指向key-value存储的地址，我这里就是zookeeper的地址，zookeeper里保存着整个overlay网络配置和节点信息。
+--cluster-advertise中的ip是Host1和Host2互通的网络端口。
+然后执行systemctl daemon-reload使配置生效，然后执行systemctl start docker.service启动docker服务。
+docker服务启动后，通过netstat -na|grep 2181可以看到docker引擎已经和zookeeper建立了连接。
+ 
+第三步，创建overlay网络. docker network ls可以查看docker 创建了哪些网络，如下：
+[root@node08 docker]# docker network ls
+NETWORK ID          NAME                DRIVER    
+4a118dc25d96        bridge              bridge              
+7e2b69f7e6b3        none                null                
+70ea5d08e37f        host                host
+ 
+bridge，none，host是默认网络，我们需要创建一个overlay网络，执行下面的命令：
+docker network create --driver overlay multi-host-network
+用docker network ls查看，multi-host-network已经创建成功。
+NETWORK ID          NAME                DRIVER    
+2b0e076bc8fa        multi-host-network                 overlay
+4a118dc25d96        bridge              bridge              
+7e2b69f7e6b3        none                null                
+70ea5d08e37f        host                host
+ 
+ 
+然后我们在Host1和Host2上分别创建两个容器：
+docker run -it --rm --hostname test01 --net=multi-host-network  centos /bin/bash
+docker run -it --rm --hostname test02 --net=multi-host-network  centos /bin/bash
+ docker run -it --rm --net=multi-host-network  centos /bin/bash
+ 
+可以看到Host1的容器test1的eth0的IP是10.0.0.2，Host2的容器test1的eth0的IP是10.0.0.3.
+在Host1的test1执行ping 10.0.0.3，能够ping通Host2的容器test1.
+同样在Host2的容器test1里ping 10.0.0.2，也能够ping通。
+这样多主机overlay网络就创建成功了。
+
+
+systemctl start docker.service
+systemctl status docker.service
+
+
+
+http://jnzg905.iteye.com/blog/2269583
+
+
+journalctl -u docker

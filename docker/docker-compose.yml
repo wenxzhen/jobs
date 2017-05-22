@@ -1,0 +1,30 @@
+ version: '2'
+ services:
+  master:
+    image: centos_sshd:v1
+    hostname: master
+    ports:
+     - "8022:22"
+    volumes:
+     - ./share:/share
+  slave01:
+    hostname: slave01
+    image: centos_sshd:v1
+    ports:
+     - "8023:22"
+    volumes:
+    - ./share:/share
+  slave02:
+    hostname: slave02
+    image: centos_sshd:v1
+    ports:
+    - "8024:22"
+    volumes:
+    - ./share:/share
+  slave03:
+    hostname: slave03
+    image: centos_sshd:v1
+    ports:
+     - "8025:22"
+    volumes:
+     - ./share:/share

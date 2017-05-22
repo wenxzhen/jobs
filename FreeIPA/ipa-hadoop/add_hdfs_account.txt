@@ -1,0 +1,37 @@
+
+ipa group-add --desc='hadoop service account' hadoop
+
+[yangxy@client01 ipa-hadoop]$ ipa user-add hdfs --first=hdfs --last=hadoop --shell=/bin/bash --gidnumber=1173800001 --password
+Password: 
+Enter Password again to verify: 
+-----------------
+Added user "hdfs"
+-----------------
+  User login: hdfs
+  First name: hdfs
+  Last name: hadoop
+  Full name: hdfs hadoop
+  Display name: hdfs hadoop
+  Initials: hh
+  Home directory: /home/hdfs
+  GECOS: hdfs hadoop
+  Login shell: /bin/bash
+  Kerberos principal: hdfs@CSDN.NET
+  Email address: hdfs@csdn.net
+  UID: 1173800006
+  GID: 1173800001
+  Password: True
+  Member of groups: ipausers
+  Kerberos keys available: True
+[yangxy@client01 ipa-hadoop]$ ipa group-find hadoop
+---------------
+1 group matched
+---------------
+  Group name: hadoop
+  Description: hadoop service account
+  GID: 1173800001
+----------------------------
+Number of entries returned 1
+----------------------------
+[yangxy@client01 ipa-hadoop]$ id hdfs
+uid=1173800006(hdfs) gid=1173800001(hadoop) groups=1173800001(hadoop)

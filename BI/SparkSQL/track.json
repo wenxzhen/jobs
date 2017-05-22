@@ -1,0 +1,108 @@
+{
+    "sources": {
+			    "v0": {
+				  "type":"custom",
+						  "ref":[
+				          {
+				              "name": "ip",
+				              "type": "string",
+							  "start": 26 
+ 
+				          },
+				          {
+				              "name": "agt",
+				              "type": "string" 
+				          },
+				          {
+				              "name": "curl",
+				              "type": "string" 
+				          },
+				          {
+				              "name": "ref",
+				              "type": "string" 
+				          },
+				          {
+				              "name": "uid",
+				              "type": "string" 
+				          },
+				          {
+				              "name": "tag",
+				              "type": "string" 
+				          },
+				          {
+				              "name": "cid",
+				              "type": "string" 
+				          },
+				          {
+				              "name": "dt",
+				              "type": "time",
+							  "original":"yyyy-MM-dd HH:mm:ss",
+							  "target":"yyyyMMdd HH:mm:ss" 
+				          }
+						  ]
+	     
+						},
+        "v1": {
+            "type": "custom",
+            "ref": [
+                {
+                    "name": "dt",
+                    "type": "string" 
+                },
+                {
+                    "name": "ip",
+                    "type": "string" 
+                },
+                {
+                    "name": "cid",
+                    "type": "string" 
+                },                
+                {
+                    "name": "url",
+                    "type": "custom",
+                    "ref": {
+                        "v0": {
+                            "uid": {
+                                "default": "-",
+								"name":"user_name" 
+                            },
+                            "ref": {
+                                "type": "string",
+								"name":"referrer"
+                            },
+                            "pid": {
+                                "type": "string"                                
+                            },
+                            "oid": {
+                                "type": "string" 
+                            },
+                            "tag": {
+                                "type": "string" 
+                            },
+                            "aid": {
+                                "type": "string" 
+                            },
+                            "tos": {
+                                "type": "string" 
+                            },
+			    "sid": {
+				"name": "session_id",
+                                "type": "string" 
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "curl",
+                    "type": "string" 
+                },
+                {
+                    "name": "agt",
+                    "type": "string" 
+                }
+            ]           
+        }
+    },
+    "array_splitter":"\t",
+	"second_array_splitter":"\\u0000"
+}

@@ -1,0 +1,43 @@
+D:\azkaban-3.19.0\azkaban-common\src\main\java\azkaban\executor\ExecutorManager.java
+
+azkaban.executor.ExecutorManager.QueueProcessorThread#selectExecutor
+    /* Choose Executor for exflow among the available executors */
+    private Executor selectExecutor(ExecutableFlow exflow,
+      Set<Executor> availableExecutors) {
+      Executor choosenExecutor =
+        getUserSpecifiedExecutor(exflow.getExecutionOptions(),
+          exflow.getExecutionId());
+
+      // If no executor was specified by admin
+      if (choosenExecutor == null) {
+        logger.info("Using dispatcher for execution id :"
+          + exflow.getExecutionId());
+        ExecutorSelector selector = new ExecutorSelector(filterList, comparatorWeightsMap);
+        choosenExecutor = selector.getBest(availableExecutors, exflow);
+      }
+      return choosenExecutor;
+    }
+
+
+useExecutor 指定 Executor id
+
+ajax API
+
+projectId:1
+project:demo
+ajax:executeFlow
+flow:command
+disabled:[]
+failureEmailsOverride:false
+successEmailsOverride:false
+failureAction:finishCurrent
+failureEmails:
+successEmails:
+notifyFailureFirst:false
+notifyFailureLast:false
+flowOverride[useExecutor]:1
+concurrentOption:skip
+
+
+azkaban.server.HttpRequestUtils#parseFlowOptions
+flowOverride[useExecutor]:1

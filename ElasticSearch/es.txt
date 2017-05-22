@@ -1,0 +1,37 @@
+ERROR: bootstrap checks failed
+max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]
+
+max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+
+
+vi /etc/security/limits.conf 
+*	soft nofile 65536
+*	hard nofile 65536
+重新登陆即可
+#ulimit -a
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 31120
+max locked memory       (kbytes, -l) 64
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 65535
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) 8192
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 4096
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited
+
+sysctl -w vm.max_map_count=262144
+sysctl vm.max_map_count
+临时生效
+
+cat /etc/sysctl.conf 
+vm.max_map_count=262144
+永久生效
+
+find /etc -name '*.conf' -type f -exec grep "vm.max_map_count" {} \+

@@ -1,0 +1,9 @@
+.vagrant
+
+examples/roles/azavea.python
+examples/roles/azavea.pip
+examples/roles/azavea.apache2
+examples/roles/azavea.git
+examples/roles/azavea.memcached
+examples/roles/azavea.collectd
+examples/roles/azavea.statsite

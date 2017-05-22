@@ -1,0 +1,47 @@
+accumulo
+ams
+atlas
+falcon
+flume
+hbase
+hdfs
+hive
+kafka
+knox
+mahout
+mapred
+oozie
+postgres
+ranger
+kms
+spark
+sqoop
+storm
+tez
+hcat
+yarn
+zookeeper
+ambari
+ambari-qa
+
+
+[root@ipa01 ~]# ipa group-add --desc='hadoop service account' hadoop
+--------------------
+Added group "hadoop"
+--------------------
+  Group name: hadoop
+  Description: hadoop service account
+  GID: 1040800001
+[root@ipa01 ~]# 
+
+ipa user-add storm --first=storm --last=Hadoop --shell=/sbin/nologin --gidnumber=1040800001
+
+awk  '{print "ipa user-add "$1" --first="$1" --last="$1" --shell=/sbin/nologin --gidnumber=1040800001"}' users.txt > ipa-add-user.sh
+
+
+
+ipa passwd ambari
+
+ipa user-add fangbin --first=fang --last=binbin --shell=/bin/bash --gidnumber=1040900500
+ipa user-add yangxy --first=yang --last=xueyou --shell=/bin/bash --gidnumber=1040900500 --password csdn.net
+ipa user-add csdngroup --first=csdn --last=csdn --shell=/bin/bash --gidnumber=1040900500 --password=csdn.net

@@ -1,0 +1,17 @@
+- name: Install JDK Env
+  copy: src=java.sh dest='/etc/profile.d/'
+
+- name: Install ES Package to All Nodes
+  unarchive:
+    copy=yes src={{ es_package }} dest=/opt owner={{ es_user }} group={{ es_group }}  creates={{ es_install_path }}
+
+
+- name: Make Log Path
+  file: path={{ log_path }} state=directory owner={{ es_user }} group={{ es_group }}
+
+- name: Make Data Path
+  file: path={{ data_path }} state=directory owner={{ es_user }} group={{ es_group }}
+
+
+
+

@@ -1,0 +1,225 @@
+spark-1.6.0-bin-cdh4]$ sbin/start-thriftserver.sh --master spark://hadoop001:7077  --driver-cores 4 --driver-memory 2G --executor-memory 4G
+spark-1.6.0-bin-cdh4]$ sbin/start-thriftserver.sh --master yarn   --driver-memory 4G
+!connect jdbc:hive2://hadoop001:10000
+
+
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/guava-11.0.2.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/ezmorph-1.0.4.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/commons-beanutils-1.7.0.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/json-lib-2.2.2-jdk15.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/logpig.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/hive_udf.jar;
+
+CREATE TEMPORARY FUNCTION expid AS 'net.csdn.hive.cf2.ExtractProduct2';        
+
+drop view track_view_pid;
+
+##创建视图(单个分区)
+CREATE VIEW IF NOT EXISTS track_view_pid as
+select substr(dt,10,2) as hour_id,curl,ip,
+case split(cid,'_')[1] when '20160121' then cid else '-' end as n_cid,
+cid,
+case tos when '-' then '0' else tos end as tos
+from file_pv_track 
+where pdate = '2016-01-21';
+
+
+#expid方法在创建视图时不能用，可以在视图查询时使用
+select expid(curl,'pid9.properties') as pid from file_pv_track limit 10;
+
+##创建视图(全部分区)
+CREATE VIEW IF NOT EXISTS track_view_pids as
+select pdate, substr(dt,10,2) as hour_id,curl,ip,
+case split(cid,'_')[1] when '20160121' then cid else '-' end as n_cid,
+cid,
+case tos when '-' then '0' else tos end as tos
+from file_pv_track;
+
+
+select expid(curl,'pid9.properties') as pid,  count(curl) as pv  from file_pv_track where pdate = '2016-01-21' group by expid(curl,'pid9.properties');
+select expid(curl,'pid9.properties') as pid,  count(1) as pv  from file_pv_track where pdate = '2016-01-21' group by expid(curl,'pid9.properties');
+
+#各产品PV
+0: jdbc:hive2://hadoop001:10000> select expid(curl,'pid9.properties') as pid,  count(1) as pv  from file_pv_track where pdate = '2016-01-21' group by expid(curl,'pid9.properties');
++-------------------+----------+--+
+|        pid        |    pv    |
++-------------------+----------+--+
+| so                | 23978    |
+| cto               | 3183     |
+| space             | 72343    |
+| exam              | 2        |
+| edu               | 39681    |
+| conference        | 1        |
+| ask               | 40334    |
+| hardware          | 1141     |
+| storage           | 1010     |
+| norule            | 110509   |
+| game              | 1130     |
+| hero              | 65       |
+| database          | 1107     |
+| geek              | 53851    |
+| docker            | 1139     |
+| code              | 16606    |
+| weixin            | 1107     |
+| spark             | 1312     |
+| bbs               | 962013   |
+| iteye             | 497839   |
+| lib               | 15111    |
+| camp              | 5        |
+| conference        | 10274    |
+| hadoop            | 1266     |
+| vip               | 1596     |
+| openstack         | 1284     |
+| www               | 56912    |
+| task              | 29452    |
+| download          | 889113   |
+| EMS               | 1335     |
+| dingyue           | 1343     |
+| notify            | 8704     |
+| blog              | 2867760  |
+| passport          | 87999    |
+| tag               | 21944    |
+| swift             | 1167     |
+| server            | 1148     |
+| cmdn              | 8        |
+| news              | 69897    |
+| job               | 2751     |
+| student           | 2675     |
+| LogDataException  | 364      |
+| aws               | 1437     |
+| mall              | 22703    |
+| ink               | 41       |
+| security          | 1081     |
++-------------------+----------+--+
+46 rows selected (218.152 seconds)
+
+
+
+select pdate, expid(curl,'pid9.properties') as pid,  count(1) as pv  from file_pv_track where pdate >= '2016-01-21' and pdate <= '2016-01-23' 
+group by pdate, expid(curl,'pid9.properties') having pid = 'iteye' ;
+
+
+#单个产品指定时间范围的PV
+0: jdbc:hive2://hadoop001:10000> select pdate, expid(curl,'pid9.properties') as pid,  count(1) as pv  from file_pv_track where pdate >= '2016-01-21' and pdate <= '2016-01-23' 
+0: jdbc:hive2://hadoop001:10000> group by pdate, expid(curl,'pid9.properties') having pid = 'iteye' ;
++-------------+--------+---------+--+
+|    pdate    |  pid   |   pv    |
++-------------+--------+---------+--+
+| 2016-01-21  | iteye  | 497839  |
+| 2016-01-22  | iteye  | 434315  |
+| 2016-01-23  | iteye  | 200632  |
++-------------+--------+---------+--+
+3 rows selected (427.086 seconds)
+0: jdbc:hive2://hadoop001:10000> 
+
+
+
+
+select pdate,expid(curl,'pid9.properties') as pid, count(distinct cid) as uv from file_pv_track where pdate >= '2016-01-21' and pdate <= '2016-01-23' 
+group by pdate, expid(curl,'pid9.properties') having pid = 'iteye' ;
+
+#单个产品指定时间范围的UV
+0: jdbc:hive2://hadoop001:10000> select pdate,expid(curl,'pid9.properties') as pid, count(distinct cid) as uv from file_pv_track where pdate >= '2016-01-21' and pdate <= '2016-01-23' 
+0: jdbc:hive2://hadoop001:10000> group by pdate, expid(curl,'pid9.properties') having pid = 'iteye' ;
++-------------+--------+---------+--+
+|    pdate    |  pid   |   uv    |
++-------------+--------+---------+--+
+| 2016-01-21  | iteye  | 283475  |
+| 2016-01-22  | iteye  | 250777  |
+| 2016-01-23  | iteye  | 120017  |
++-------------+--------+---------+--+
+3 rows selected (436.198 seconds)
+0: jdbc:hive2://hadoop001:10000> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+select pdate, expid(curl,'pid9.properties') as pid,sum(if(tos>0 and tos<=600,tos,0)) as duration,sum(if(tos>0 and tos<=600,1,0)) as pv_10min 
+from track_view_pids group by pdate ,expid(curl,'pid9.properties') having pid = 'iteye' ;
+
+
+
+
+
+
+
+
+
+sql1="select '$date',
+a.hour_id,
+a.pid,
+count(1) as pv,
+count(distinct cid) as uv,
+count(distinct a.n_cid) as n_uv,
+count(distinct ip) as n_ip,
+sum(if(tos>0 and tos<=600,tos,0)) as duration,
+sum(if(tos>0 and tos<=600,1,0)) as pv_10min
+where a.hour_id<25
+group by a.pid,a.hour_id"; 
+
+
+select '2016-01-21',hour_id,
+expid(curl,'pid9.properties') as pid,
+count(1) as pv,
+count(distinct cid) as uv,
+count(distinct a.n_cid) as n_uv,
+count(distinct ip) as n_ip,
+sum(if(tos>0 and tos<=600,tos,0)) as duration,
+sum(if(tos>0 and tos<=600,1,0)) as pv_10min
+FROM track_view_pid a
+where hour_id<25
+group by pid,hour_id ;
+
+
+
+
+sql2="select '$date',
+'24',
+a.pid,
+count(1),
+count(distinct cid) as uv,
+count(distinct a.n_cid) as n_uv,
+count(distinct ip) as n_ip,
+sum(if(tos>0 and tos<=600,tos,0)) as duration,
+sum(if(tos>0 and tos<=600,1,0)) as pv_10min
+group by a.pid" 
+
+
+
+hive -e "$sqlParams;$sqlFun;$drop_view;$create_view;
+FROM track_view_pid a
+INSERT OVERWRITE DIRECTORY '${output1}/pid/' $sql1
+INSERT OVERWRITE DIRECTORY '${output1}/24/' $sql2
+
+
+FROM track_view_pid a
+INSERT OVERWRITE DIRECTORY '/user/pid/' 
+select '2016-01-21',
+a.hour_id,
+expid(a.curl,'pid9.properties') as pid,
+count(1) as pv,
+count(distinct cid) as uv,
+count(distinct a.n_cid) as n_uv,
+count(distinct ip) as n_ip,
+sum(if(tos>0 and tos<=600,tos,0)) as duration,
+sum(if(tos>0 and tos<=600,1,0)) as pv_10min
+where a.hour_id<25
+group by pid,a.hour_id;
+
+
+
+

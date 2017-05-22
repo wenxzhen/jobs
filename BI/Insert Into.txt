@@ -1,0 +1,124 @@
+add jar /data/bigData/hive-0.13.1-cdh5.2.0/lib/ezmorph-1.0.4.jar;
+add jar /data/bigData/hive-0.13.1-cdh5.2.0/lib/commons-beanutils-1.7.0.jar;
+add jar /data/bigData/hive-0.13.1-cdh5.2.0/lib/json-lib-2.2.2-jdk15.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/logpig.jar;
+add jar /data/bigData/spark-1.6.0-bin-cdh4/lib/hive_udf.jar;
+CREATE TEMPORARY FUNCTION exagent AS 'net.csdn.hive.cf2.ExtractAgent';
+CREATE TEMPORARY FUNCTION expid AS 'net.csdn.hive.cf2.ExtractProduct2'; 
+
+
+
+CREATE EXTERNAL TABLE file_pv(
+dt           string,
+ip           string,
+cid          string,
+uid          string,
+ref          string,
+curl         string,
+aid          string,
+oid          string,
+pid          string,
+tag          string,
+tos          string,
+agt          string,
+sys_success  string,
+sys_desc     string,
+sys_data     string,
+sid          string
+)PARTITIONED BY (pdate string);
+
+insert overwrite table file_pv partition (pdate = '2016-01-21')
+select dt, ip, cid, uid, ref, curl, aid, oid, expid(curl,'pid9.properties') as pid, tag, tos, exagent(agt)['version'] as agt, sys_success, sys_desc, sys_data, sid 
+from file_pv_track pv   where pv.pdate ='2016-01-21';
+
+insert overwrite table file_pv partition (pdate = '2016-01-22')
+select dt, ip, cid, uid, ref, curl, aid, oid, expid(curl,'pid9.properties') as pid, tag, tos, exagent(agt)['version'] as agt, sys_success, sys_desc, sys_data, sid 
+from file_pv_track pv   where pv.pdate ='2016-01-22';
+
+insert overwrite table file_pv partition (pdate = '2016-01-23')
+select dt, ip, cid, uid, ref, curl, aid, oid, expid(curl,'pid9.properties') as pid, tag, tos, exagent(agt)['version'] as agt, sys_success, sys_desc, sys_data, sid 
+from file_pv_track pv   where pv.pdate ='2016-01-23';
+
+insert overwrite directory '/user/pv/pdate=2016-01-22'
+select dt, ip, cid, uid, ref, curl, aid, oid, expid(curl,'pid9.properties') as pid, tag, tos, exagent(agt)['version'] as agt, sys_success, sys_desc, sys_data, sid from file_pv_track pv   where pv.pdate ='2016-01-22';
+
+
+select   count(1) as pv  from file_pv_track where pdate = '2016-01-21' and expid(curl,'pid9.properties') = 'iteye';
+
+
+
+
+hive> select count(1) from file_pv where pid = 'iteye';
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1457681934615_0007, Tracking URL = http://API:8088/proxy/application_1457681934615_0007/
+Kill Command = /data/bigData/hadoop-2.0.0-cdh4.6.0/bin/hadoop job  -kill job_1457681934615_0007
+Hadoop job information for Stage-1: number of mappers: 7; number of reducers: 1
+2016-03-11 17:32:55,055 Stage-1 map = 0%,  reduce = 0%
+2016-03-11 17:33:03,486 Stage-1 map = 14%,  reduce = 0%, Cumulative CPU 2.63 sec
+2016-03-11 17:33:05,562 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 29.36 sec
+2016-03-11 17:33:10,804 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 31.4 sec
+MapReduce Total cumulative CPU time: 31 seconds 400 msec
+Ended Job = job_1457681934615_0007
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 7  Reduce: 1   Cumulative CPU: 31.4 sec   HDFS Read: 1767568910 HDFS Write: 7 SUCCESS
+Total MapReduce CPU Time Spent: 31 seconds 400 msec
+OK
+497837
+Time taken: 23.106 seconds, Fetched: 1 row(s)
+hive> select   count(1) as pv  from file_pv_track where pdate = '2016-01-21' and expid(curl,'pid9.properties') = 'iteye';
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1457681934615_0008, Tracking URL = http://API:8088/proxy/application_1457681934615_0008/
+Kill Command = /data/bigData/hadoop-2.0.0-cdh4.6.0/bin/hadoop job  -kill job_1457681934615_0008
+Hadoop job information for Stage-1: number of mappers: 13; number of reducers: 1
+2016-03-11 17:34:36,630 Stage-1 map = 0%,  reduce = 0%
+2016-03-11 17:35:14,228 Stage-1 map = 6%,  reduce = 0%, Cumulative CPU 526.77 sec
+2016-03-11 17:35:23,609 Stage-1 map = 13%,  reduce = 0%, Cumulative CPU 666.43 sec
+2016-03-11 17:35:25,731 Stage-1 map = 17%,  reduce = 0%, Cumulative CPU 677.47 sec
+2016-03-11 17:35:26,775 Stage-1 map = 23%,  reduce = 0%, Cumulative CPU 709.13 sec
+2016-03-11 17:35:34,077 Stage-1 map = 23%,  reduce = 3%, Cumulative CPU 794.78 sec
+2016-03-11 17:35:47,683 Stage-1 map = 24%,  reduce = 3%, Cumulative CPU 1006.3 sec
+2016-03-11 17:35:50,861 Stage-1 map = 26%,  reduce = 3%, Cumulative CPU 1050.01 sec
+2016-03-11 17:35:57,089 Stage-1 map = 28%,  reduce = 3%, Cumulative CPU 1134.95 sec
+2016-03-11 17:35:59,149 Stage-1 map = 32%,  reduce = 3%, Cumulative CPU 1151.48 sec
+2016-03-11 17:36:00,191 Stage-1 map = 38%,  reduce = 3%, Cumulative CPU 1177.16 sec
+2016-03-11 17:36:17,786 Stage-1 map = 40%,  reduce = 3%, Cumulative CPU 1405.19 sec
+2016-03-11 17:36:20,900 Stage-1 map = 41%,  reduce = 3%, Cumulative CPU 1447.5 sec
+2016-03-11 17:36:30,260 Stage-1 map = 42%,  reduce = 3%, Cumulative CPU 1579.29 sec
+2016-03-11 17:36:31,291 Stage-1 map = 45%,  reduce = 3%, Cumulative CPU 1593.95 sec
+2016-03-11 17:36:32,331 Stage-1 map = 47%,  reduce = 3%, Cumulative CPU 1603.88 sec
+2016-03-11 17:36:33,362 Stage-1 map = 51%,  reduce = 3%, Cumulative CPU 1620.75 sec
+2016-03-11 17:36:34,410 Stage-1 map = 54%,  reduce = 3%, Cumulative CPU 1634.96 sec
+2016-03-11 17:36:43,739 Stage-1 map = 58%,  reduce = 3%, Cumulative CPU 1760.87 sec
+2016-03-11 17:36:45,834 Stage-1 map = 62%,  reduce = 3%, Cumulative CPU 1800.2 sec
+2016-03-11 17:36:46,863 Stage-1 map = 62%,  reduce = 8%, Cumulative CPU 1800.23 sec
+2016-03-11 17:37:02,434 Stage-1 map = 65%,  reduce = 8%, Cumulative CPU 1981.99 sec
+2016-03-11 17:37:03,473 Stage-1 map = 69%,  reduce = 8%, Cumulative CPU 1992.62 sec
+2016-03-11 17:37:04,507 Stage-1 map = 88%,  reduce = 8%, Cumulative CPU 2016.46 sec
+2016-03-11 17:37:05,565 Stage-1 map = 92%,  reduce = 21%, Cumulative CPU 2017.72 sec
+2016-03-11 17:37:06,624 Stage-1 map = 100%,  reduce = 21%, Cumulative CPU 2022.5 sec
+2016-03-11 17:37:07,666 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 2023.71 sec
+MapReduce Total cumulative CPU time: 33 minutes 43 seconds 710 msec
+Ended Job = job_1457681934615_0008
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 13  Reduce: 1   Cumulative CPU: 2023.97 sec   HDFS Read: 3311711597 HDFS Write: 7 SUCCESS
+Total MapReduce CPU Time Spent: 33 minutes 43 seconds 970 msec
+OK
+497839
+Time taken: 158.661 seconds, Fetched: 1 row(s)
+hive> 

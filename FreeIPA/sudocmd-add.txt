@@ -1,0 +1,6 @@
+ipa sudocmd-add /bin/less --desc="For reading log files"
+ipa sudocmd-add /bin/tail
+ipa sudocmd-add /bin/cat
+ipa sudocmd-add /bin/mkdir
+ipa sudocmd-add /bin/chmod
+ipa sudocmd-add /bin/chown

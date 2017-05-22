@@ -1,0 +1,6 @@
+---
+- name: Install Whisper
+  command: "python setup.py install --prefix={{ graphite_home }}"
+  args:
+    chdir: /usr/local/src/whisper
+    creates: '{{ graphite_home }}/bin/whisper-create.py'

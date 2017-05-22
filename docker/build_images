@@ -1,0 +1,1 @@
+docker build -t centos_sshd:v1 .

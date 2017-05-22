@@ -1,0 +1,25 @@
+---
+- name: Install Carbon dependencies
+  pip: requirements=/usr/local/src/carbon/requirements.txt
+
+- name: Install Carbon
+  command: "python setup.py install --prefix={{ graphite_home }}"
+  args:
+    chdir: /usr/local/src/carbon
+    creates: '{{ graphite_home }}/bin/carbon-cache.py'
+
+- name: Set permissions for log storage
+  file: path={{ graphite_home }}/storage/log
+        state=directory
+
+- name: Set permissions for Whisper storage
+  file: path={{ graphite_home }}/storage/whisper
+        state=directory
+
+- name: Configure Carbon service definition
+  template: src=carbon-cache.j2
+            dest=/etc/init.d/carbon-cache
+            mode=0755
+
+#- name: Enable the Carbon service
+#  service: name=carbon-cache enabled=yes

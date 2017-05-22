@@ -1,0 +1,87 @@
+create database carbondata;
+
+CREATE TABLE carbondata.KYLIN_SALES
+(
+TRANS_ID bigint
+,PART_DT date COMMENT 'Order Date'
+,LSTG_FORMAT_NAME string COMMENT 'Order Transaction Type'
+,LEAF_CATEG_ID bigint COMMENT 'Category ID'
+,LSTG_SITE_ID int COMMENT 'Site ID'
+,SLR_SEGMENT_CD smallint
+,PRICE decimal(19,4) COMMENT 'Order Price'
+,ITEM_COUNT bigint COMMENT 'Number of Purchased Goods'
+,SELLER_ID bigint COMMENT 'Seller ID'
+,BUYER_COUNTRY string COMMENT 'Buyer Country'
+,SELLER_COUNTRY string COMMENT 'Seller Country'
+,USER_ID string COMMENT 'System User ID'
+,REGION string COMMENT 'System User Region'
+)
+STORED BY 'carbondata';
+
+
+LOAD DATA INPATH 'hdfs://csdncluster/tmp/DEFAULT.KYLIN_SALES.csv'  INTO TABLE carbondata.KYLIN_SALES;
+
+
+INSERT INTO TABLE carbondata.KYLIN_SALES SELECT * FROM DEFAULT.KYLIN_SALES ;
+
+select count(1),REGION from kylin_sales group by REGION;
+
+
+
+CREATE TABLE carbondata.KYLIN_SALES_BKT
+(
+TRANS_ID bigint
+,PART_DT date COMMENT 'Order Date'
+,LSTG_FORMAT_NAME string COMMENT 'Order Transaction Type'
+,LEAF_CATEG_ID bigint COMMENT 'Category ID'
+,LSTG_SITE_ID int COMMENT 'Site ID'
+,SLR_SEGMENT_CD smallint
+,PRICE decimal(19,4) COMMENT 'Order Price'
+,ITEM_COUNT bigint COMMENT 'Number of Purchased Goods'
+,SELLER_ID bigint COMMENT 'Seller ID'
+,BUYER_COUNTRY string COMMENT 'Buyer Country'
+,SELLER_COUNTRY string COMMENT 'Seller Country'
+,USER_ID string COMMENT 'System User ID'
+,REGION string COMMENT 'System User Region'
+)
+STORED BY 'carbondata'
+TBLPROPERTIES ('BUCKETNUMBER'='3','BUCKETCOLUMNS'='REGION');
+
+
+INSERT INTO TABLE carbondata.KYLIN_SALES_BKT SELECT * FROM carbondata.KYLIN_SALES ;
+
+select count(1),REGION from KYLIN_SALES_BKT group by REGION;
+
+
+
+CREATE TABLE test.kylin_country (`COUNTRY` STRING, `LATITUDE` DOUBLE, `LONGITUDE` DOUBLE, `NAME` STRING)
+row format delimited 
+fields terminated by ' ' 
+lines terminated by '\n' 
+stored as textfile location '/user/hadoop/output';
+
+
+insert into table test.kylin_country select * from carbondata.kylin_country;
+insert into table test.kylin_country_parquet select * from carbondata.kylin_country;
+
+CREATE TABLE test.kylin_country_parquet (`COUNTRY` STRING, `LATITUDE` DOUBLE, `LONGITUDE` DOUBLE, `NAME` STRING)
+STORED AS PARQUET location '/user/hadoop/output';
+
+
+select COUNTRY,count(1) from kylin_country group by COUNTRY;
+select COUNTRY,count(1) from kylin_country_parquet group by COUNTRY;
+select COUNTRY,count(1) from carbondata.kylin_country group by COUNTRY;
+
+
+
+CREATE TABLE test.kylin_country_parquet_part (`COUNTRY` STRING, `LATITUDE` DOUBLE, `LONGITUDE` DOUBLE, `NAME` STRING)
+PARTITIONED BY (pdate string)
+STORED AS PARQUET;
+
+insert into table test.kylin_country_parquet_part PARTITION (pdate='1') select * from carbondata.kylin_country;
+insert into table test.kylin_country_parquet_part PARTITION (pdate='2') select * from carbondata.kylin_country;
+
+hdfs dfs -ls /user/hive/warehouse/test.db/kylin_country_parquet_part
+Found 2 items
+drwx------   - hadoop supergroup          0 2017-05-18 14:22 /user/hive/warehouse/test.db/kylin_country_parquet_part/pdate=1
+drwx------   - hadoop supergroup          0 2017-05-18 14:23 /user/hive/warehouse/test.db/kylin_country_parquet_part/pdate=2

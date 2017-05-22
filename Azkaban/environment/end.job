@@ -1,0 +1,4 @@
+type=javaprocess
+env.PROP_FILE=/tmp/out.tmp
+dependencies=myjob
+java.class=App

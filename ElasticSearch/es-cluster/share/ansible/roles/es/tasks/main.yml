@@ -1,0 +1,4 @@
+
+- include: install_es.yml
+
+- include: es_config.yml

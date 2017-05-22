@@ -1,0 +1,9 @@
+type=command
+
+command=pwd
+param1=mytest
+foo=${replaceparameter}
+env.prop=xxxx
+env.JOB_OUTPUT=/tmp/out.tmpxx
+
+command.1=echo $JOB_OUTPUT_PROP_FILE

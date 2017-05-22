@@ -1,0 +1,72 @@
+=======================================================================================================
+ Package                  Arch               Version                            Repository        Size
+=======================================================================================================
+Installing:
+ graphite-web             noarch             0.9.15-1.el7                       epel             1.8 M
+Installing for dependencies:
+ httpd                    x86_64             2.4.6-45.el7.centos                base             2.7 M
+ mod_wsgi                 x86_64             3.4-12.el7_0                       base              76 k
+
+Transaction Summary
+=======================================================================================================
+Install  1 Package (+2 Dependent packages)
+
+
+
+Package python-whisper-0.9.15-1.el7.noarch already installed and latest version
+Resolving Dependencies
+--> Running transaction check
+---> Package python-carbon.noarch 0:0.9.15-1.el7 will be updated
+---> Package python-carbon.noarch 0:0.9.15-6.el7 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+=======================================================================================================
+ Package                     Arch                 Version                     Repository          Size
+=======================================================================================================
+Updating:
+ python-carbon               noarch               0.9.15-6.el7                epel               111 k
+
+Transaction Summary
+=======================================================================================================
+Upgrade  1 Package
+
+systemctl status carbon-cache.service
+
+yum install python-carbon python-whisper  graphite-web -y
+/usr/lib/python2.7/site-packages/graphite/manage.py syncdb
+/usr/lib/python2.7/site-packages/graphite/manage.py runserver 0.0.0.0:8000
+python /usr/share/doc/graphite-web-0.9.15/example-client.py
+
+yum install collectd -y
+
+vi /etc/collectd.conf
+<Plugin write_graphite>
+  <Node "example">
+    Host "localhost"
+    Port "2003"
+    Protocol "tcp"
+    ReconnectInterval 0
+    LogSendErrors true
+    Prefix "collectd"
+    Postfix "collectd"
+    StoreRates true
+    AlwaysAppendDS false
+    EscapeCharacter "_"
+    SeparateInstances false
+    PreserveSeparator false
+    DropDuplicateFields false
+  </Node>
+</Plugin>
+
+
+
+systemctl status collectd
+
+
+nohup /usr/bin/carbon-cache --config /etc/carbon/carbon.conf start &
+
+
+
+http://centoshowtos.org/monitoring/graphite/
