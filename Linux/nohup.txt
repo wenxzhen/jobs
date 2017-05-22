@@ -1,0 +1,3 @@
+nohup bin/zookeeper-server-start.sh config/zookeeper.properties 1>> zookeeper.out 2>&1 &
+
+nohup bin/kafka-server-start.sh config/server.properties >> kafka.out 2>&1 &

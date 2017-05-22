@@ -1,0 +1,23 @@
+http://www.blogjava.net/nkjava/archive/2015/05/06/424896.html
+
+CentOS7安装Nginx三部曲
+Nginx就不多介绍了，下面是三部曲具体的操作。
+1.安装EPTL源
+sudo yum install epel-release
+2.安装NGINX
+sudo yum install nginx
+3.配置NGINX
+系统自动启动：
+sudo systemctl enable nginx.service
+立刻启动服务
+sudo systemctl start nginx.service 
+
+防火墙配置
+sudo firewall-cmd --permanent --zone=public --add-service=http 
+sudo firewall-cmd --permanent --zone=public --add-service=https
+sudo firewall-cmd --reload
+
+Firewall启动和关闭
+systemctl start firewalld
+systemctl stop firewalld
+好了，大功完成。

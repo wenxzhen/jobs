@@ -1,0 +1,120 @@
+一、配置防火墙，开启80端口、3306端口
+CentOS 7.0默认使用的是firewall作为防火墙，这里改为iptables防火墙。
+1、关闭firewall：
+systemctl stop firewalld.service #停止firewall
+systemctl disable firewalld.service #禁止firewall开机启动
+
+ 
+2、安装iptables防火墙
+yum install iptables-services #安装
+vi /etc/sysconfig/iptables #编辑防火墙配置文件
+# Firewall configuration written by system-config-firewall
+# Manual customization of this file is not recommended.
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 3306 -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+:wq! #保存退出
+systemctl restart iptables.service #最后重启防火墙使配置生效
+systemctl enable iptables.service #设置防火墙开机启动
+
+ 
+二、关闭SELINUX
+vi /etc/selinux/config
+#SELINUX=enforcing #注释掉
+#SELINUXTYPE=targeted #注释掉
+SELINUX=disabled #增加
+:wq! #保存退出
+setenforce 0 #使配置立即生效
+
+
+
+
+systemctl start mariadb.service #启动MariaDB
+systemctl stop mariadb.service #停止MariaDB
+systemctl restart mariadb.service #重启MariaDB
+systemctl enable mariadb.service #设置开机启动
+systemctl is-enabled mariadb.service
+
+
+systemctl is-enabled iptables.service
+systemctl is-enabled servicename.service #查询服务是否开机启动
+systemctl enable *.service #开机运行服务
+systemctl disable *.service #取消开机运行
+systemctl start *.service #启动服务
+systemctl stop *.service #停止服务
+systemctl restart *.service #重启服务
+systemctl reload *.service #重新加载服务配置文件
+systemctl status *.service #查询服务运行状态
+systemctl --failed #显示启动失败的服务
+
+
+
+开启80端口
+
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+出现success表明添加成功
+
+命令含义：
+--zone #作用域
+--add-port=80/tcp  #添加端口，格式为：端口/通讯协议
+--permanent   #永久生效，没有此参数重启后失效
+重启防火墙
+
+systemctl restart firewalld.service
+1、运行、停止、禁用firewalld
+启动：# systemctl start  firewalld
+查看状态：# systemctl status firewalld 或者 firewall-cmd --state
+停止：# systemctl disable firewalld
+禁用：# systemctl stop firewalld
+ 
+2、配置firewalld
+查看版本：$ firewall-cmd --version
+查看帮助：$ firewall-cmd --help
+查看设置：
+显示状态：$ firewall-cmd --state
+查看区域信息: $ firewall-cmd --get-active-zones
+查看指定接口所属区域：$ firewall-cmd --get-zone-of-interface=eth0
+拒绝所有包：# firewall-cmd --panic-on
+取消拒绝状态：# firewall-cmd --panic-off
+查看是否拒绝：$ firewall-cmd --query-panic
+ 
+更新防火墙规则：# firewall-cmd --reload
+# firewall-cmd --complete-reload
+两者的区别就是第一个无需断开连接，就是firewalld特性之一动态添加规则，第二个需要断开连接，类似重启服务
+ 
+将接口添加到区域，默认接口都在public
+# firewall-cmd --zone=public --add-interface=eth0
+永久生效再加上 --permanent 然后reload防火墙
+ 
+设置默认接口区域
+# firewall-cmd --set-default-zone=public
+立即生效无需重启
+ 
+打开端口（貌似这个才最常用）
+查看所有打开的端口：
+# firewall-cmd --zone=dmz --list-ports
+加入一个端口到区域：
+# firewall-cmd --zone=dmz --add-port=8080/tcp
+若要永久生效方法同上
+ 
+打开一个服务，类似于将端口可视化，服务需要在配置文件中添加，/etc/firewalld 目录下有services文件夹，这个不详细说了，详情参考文档
+# firewall-cmd --zone=work --add-service=smtp
+ 
+移除服务
+# firewall-cmd --zone=work --remove-service=smtp
+
+
+
+
+firewall-cmd --permanent --add-port={80/tcp,443/tcp,389/tcp,636/tcp,88/tcp,464/tcp,53/tcp,88/udp,464/udp,53/udp,123/udp}
+firewall-cmd --reload

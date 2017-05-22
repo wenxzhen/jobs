@@ -1,0 +1,27 @@
+server:
+
+yum install rpcbind nfs-utils
+
+systemctl enable rpcbind nfs-server 
+systemctl start rpcbind nfs-server 
+
+firewall-cmd --add-service=nfs --permanent 
+
+firewall-cmd --reload 
+
+vi /etc/exports
+
+
+clinet:
+
+yum install nfs-utils -y
+mkdir -p /mnt/nfs/install/
+mount -t nfs ipamaster.csdn.net:/data/nfs /mnt/nfs/install
+ll /mnt/nfs/install/
+
+
+systemctl enable autofs.service
+systemctl start autofs.service
+echo "/mnt/nfs/install  ipamaster.csdn.net:/data/nfs" >>  /etc/auto.nfs 
+cat /etc/auto.nfs 
+/mnt/nfs/install  ipamaster.csdn.net:/data/nfs

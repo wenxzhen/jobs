@@ -1,0 +1,8 @@
+SSH对公钥、私钥的权限和所有权的要求是非常严格的，总结如下：
+1、下面两个目录的所有权必须是user，所属组也应该是user，权限必须为700
+\home\user
+\home\user\.ssh
+2、下面公钥文件的所有权必须是user，所属组也应该是user，权限必须为644
+\home\user\.ssh\authorized_keys
+3、下面私钥文件的所有权必须是user，所属组也应该是user，权限必须是600
+\home\user\.ssh\id_rsa

@@ -1,0 +1,150 @@
+Linux 系统(我特指发行版, 没说内核) 下大部分软件的风格就是不会仔细去考虑向后 的兼容性, 比如你上个版本能用这种程序配置, 没准到了下一个版本, 该程序已经不见了. 比如 sysvinit 这种东西.
+
+设置时区同样, 在 CentOS 7 中, 引入了一个叫 timedatectl 的设置设置程序.
+
+用法很简单:
+
+# timedatectl # 查看系统时间方面的各种状态
+      Local time: 四 2014-12-25 10:52:10 CST
+  Universal time: 四 2014-12-25 02:52:10 UTC
+        RTC time: 四 2014-12-25 02:52:10
+        Timezone: Asia/Shanghai (CST, +0800)
+     NTP enabled: yes
+NTP synchronized: yes
+ RTC in local TZ: no
+      DST active: n/a
+# timedatectl list-timezones # 列出所有时区
+# timedatectl set-local-rtc 1 # 将硬件时钟调整为与本地时钟一致, 0 为设置为 UTC 时间
+# timedatectl set-timezone Asia/Shanghai # 设置系统时区为上海
+其实不考虑各个发行版的差异化, 从更底层出发的话, 修改时间时区比想象中要简单:
+
+# cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+
+[root@localhost csdn]# cat /etc/inittab 
+# inittab is no longer used when using systemd.
+#
+# ADDING CONFIGURATION HERE WILL HAVE NO EFFECT ON YOUR SYSTEM.
+#
+# Ctrl-Alt-Delete is handled by /usr/lib/systemd/system/ctrl-alt-del.target
+#
+# systemd uses 'targets' instead of runlevels. By default, there are two main targets:
+#
+# multi-user.target: analogous to runlevel 3
+# graphical.target: analogous to runlevel 5
+#
+# To view current default target, run:
+# systemctl get-default
+#
+# To set a default target, run:
+# systemctl set-default TARGET.target
+#
+[root@localhost csdn]# vi /etc/inittab 
+[root@localhost csdn]# systemctl get-default
+graphical.target
+[root@localhost csdn]# systemctl set-default multi-user.target
+Removed symlink /etc/systemd/system/default.target.
+Created symlink from /etc/systemd/system/default.target to /usr/lib/systemd/system/multi-user.target.
+[root@localhost csdn]# systemctl get-default
+multi-user.target
+[root@localhost csdn]#
+
+
+[root@localhost csdn]# ntpq  -p
+ntpq: read: Connection refused
+[root@localhost csdn]# systemctl start ntpd.service
+[root@localhost csdn]# systemctl status ntpd.service
+● ntpd.service - Network Time Service
+   Loaded: loaded (/usr/lib/systemd/system/ntpd.service; disabled; vendor preset: disabled)
+   Active: active (running) since Fri 2016-08-05 03:18:41 PDT; 6s ago
+  Process: 90952 ExecStart=/usr/sbin/ntpd -u ntp:ntp $OPTIONS (code=exited, status=0/SUCCESS)
+ Main PID: 90953 (ntpd)
+   Memory: 628.0K
+   CGroup: /system.slice/ntpd.service
+           └─90953 /usr/sbin/ntpd -u ntp:ntp -g
+
+Aug 05 03:18:41 centos7-02 ntpd[90953]: Listen normally on 8 vethea8e50d fe80::fca2:f0ff:fed8:4f21 UDP 123
+Aug 05 03:18:41 centos7-02 ntpd[90953]: Listen normally on 9 vethf86cfeb fe80::a434:38ff:fe72:8678 UDP 123
+Aug 05 03:18:41 centos7-02 ntpd[90953]: Listen normally on 10 docker_gwbridge fe80::42:f2ff:fe0d:aed UDP 123
+Aug 05 03:18:41 centos7-02 ntpd[90953]: Listen normally on 11 docker0 fe80::42:11ff:fe39:6c2d UDP 123
+Aug 05 03:18:41 centos7-02 ntpd[90953]: Listen normally on 12 eno16777736 fe80::20c:29ff:fe5d:6038 UDP 123
+Aug 05 03:18:41 centos7-02 ntpd[90953]: Listening on routing socket on fd #29 for interface updates
+Aug 05 03:18:41 centos7-02 ntpd[90953]: 0.0.0.0 c016 06 restart
+Aug 05 03:18:41 centos7-02 ntpd[90953]: 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+Aug 05 03:18:41 centos7-02 ntpd[90953]: 0.0.0.0 c011 01 freq_not_set
+Aug 05 03:18:44 centos7-02 ntpd[90953]: 0.0.0.0 c614 04 freq_mode
+[root@localhost csdn]# ntpq -p
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+ dns1.synet.edu. .INIT.          16 u    -   64    0    0.000    0.000   0.000
+ 202.118.1.130   .INIT.          16 u    -   64    0    0.000    0.000   0.000
+*news.neu.edu.cn 202.118.1.47     2 u    8   64    1   13.282   -0.103   0.175
+[root@localhost csdn]# date
+Fri Aug  5 03:19:01 PDT 2016
+[root@localhost csdn]# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+一、时区
+显示时区
+date --help 获取帮助
+date -R
+date +%z
+上面两个命令都可
+
+[root@localhost ~]# date -R; date +%z  
+Fri, 19 Oct 2012 23:34:27 +0800  
++0800  
+主要就是后面的+0800，东八区
+
+修改时区
+
+cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime  
+时区的信息存在/usr/share/zoneinfo/下面，本机的时区信息存在/etc/localtime，利用tab键技巧，可以任意修改时区
+tzselect，互动式命令，不过用了好象不太行，还是用上面的吧。
+
+二、时间
+概念：Linux时间有两个
+系统时间：也叫软件时间(sys)， 1970年1月1日到当前时间的秒数
+BOIS时间：也叫硬件时间(hc)
+显示时间
+
+[root@localhost ~]# date;hwclock -r  
+2012年 10月 19日 星期五 23:39:44 CST  
+2012年10月19日 星期五 23时39分45秒  -0.317993 seconds  
+
+设置时间
+1、date -s
+
+date -s 20121019  
+
+date -s 23:40:00  
+没有网络的情况下可以用这个
+
+2、ntpdate
+
+ntpdate time.windows.com && hwclock -w  
+连网更新时间，如果成功，将系统时间，写入BOIS
+hwclock -w 或 hwclock --systohc
+可以做到crontab里
+
+3、启动ntpd服务，开启后2就不能用了。
+先用ntpdate更新一下，确保时间不至于差别太大
+rpm -qa | grep ntp #查询一下可安装了
+chkconfig --list | grep ntp #看下服务情况
+chkconifg ntpd on
+service ntpd start 或/etc/init.d/ntpd start
+必要的话，设置一下/etc/ntp.conf，再把服务reload一下。
+ntp的知识参考一下鸟哥的服务器篇

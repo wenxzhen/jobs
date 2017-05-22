@@ -1,0 +1,1 @@
+awk '/^[^#]/ { print "ssh hadoop@"$1" hbase-daemon.sh restart regionserver\r\nsleep 1m" }' /data/1/usr/local/hbase/conf/regionservers

@@ -1,0 +1,84 @@
+[root@maven ~]# yum install ntp
+Loaded plugins: fastestmirror
+Setting up Install Process
+Loading mirror speeds from cached hostfile
+ * base: mirrors.yun-idc.com
+ * extras: mirrors.btte.net
+ * updates: mirrors.cug.edu.cn
+base                                                                                                    | 3.7 kB     00:00     
+cloudera-cdh5                                                                                           |  951 B     00:00     
+extras                                                                                                  | 3.4 kB     00:00     
+nginx                                                                                                   | 2.9 kB     00:00     
+updates                                                                                                 | 3.4 kB     00:00     
+updates/primary_db                                                                                      | 1.4 MB     00:00     
+Resolving Dependencies
+--> Running transaction check
+---> Package ntp.x86_64 0:4.2.6p5-10.el6.centos.1 will be installed
+--> Processing Dependency: ntpdate = 4.2.6p5-10.el6.centos.1 for package: ntp-4.2.6p5-10.el6.centos.1.x86_64
+--> Running transaction check
+---> Package ntpdate.x86_64 0:4.2.6p5-5.el6.centos.4 will be updated
+---> Package ntpdate.x86_64 0:4.2.6p5-10.el6.centos.1 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+===============================================================================================================================
+ Package                   Arch                     Version                                    Repository                 Size
+===============================================================================================================================
+Installing:
+ ntp                       x86_64                   4.2.6p5-10.el6.centos.1                    updates                   598 k
+Updating for dependencies:
+ ntpdate                   x86_64                   4.2.6p5-10.el6.centos.1                    updates                    78 k
+
+Transaction Summary
+===============================================================================================================================
+Install       1 Package(s)
+Upgrade       1 Package(s)
+
+Total download size: 677 k
+Is this ok [y/N]: y
+Downloading Packages:
+(1/2): ntp-4.2.6p5-10.el6.centos.1.x86_64.rpm                                                           | 598 kB     00:00     
+(2/2): ntpdate-4.2.6p5-10.el6.centos.1.x86_64.rpm                                                       |  78 kB     00:00     
+-------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                          2.3 MB/s | 677 kB     00:00     
+Running rpm_check_debug
+Running Transaction Test
+Transaction Test Succeeded
+Running Transaction
+  Updating   : ntpdate-4.2.6p5-10.el6.centos.1.x86_64                                                                      1/3 
+  Installing : ntp-4.2.6p5-10.el6.centos.1.x86_64                                                                          2/3 
+  Cleanup    : ntpdate-4.2.6p5-5.el6.centos.4.x86_64                                                                       3/3 
+  Verifying  : ntpdate-4.2.6p5-10.el6.centos.1.x86_64                                                                      1/3 
+  Verifying  : ntp-4.2.6p5-10.el6.centos.1.x86_64                                                                          2/3 
+  Verifying  : ntpdate-4.2.6p5-5.el6.centos.4.x86_64                                                                       3/3 
+
+Installed:
+  ntp.x86_64 0:4.2.6p5-10.el6.centos.1                                                                                         
+
+Dependency Updated:
+  ntpdate.x86_64 0:4.2.6p5-10.el6.centos.1                                                                                     
+
+Complete!
+[root@maven ~]# ntpq -p
+ntpq: read: Connection refused
+[root@maven ~]# ntp
+ntpd        ntpdate     ntpdc       ntp-keygen  ntpq        ntpstat     ntptime     
+[root@maven ~]# ntpdate s2m.time.edu.cn
+ 5 Aug 15:13:35 ntpdate[20069]: step time server 202.112.7.13 offset 600.965649 sec
+[root@maven ~]# date
+Fri Aug  5 15:13:39 CST 2016
+
+[root@maven ~]# chkconfig ntpd on
+[root@maven ~]# chkconfig ntpd --list
+ntpd           	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+[root@maven ~]# service ntpd status
+ntpd is stopped
+[root@maven ~]# service ntpd start
+Starting ntpd:                                             [  OK  ]
+[root@maven ~]# ntpq -p
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+*202.118.1.130   202.118.1.46     2 u    7   64    1   13.186    4.490   0.000
+ news.neu.edu.cn 202.118.1.47     2 u    2   64    1   13.209    4.728   0.846
+[root@maven ~]# 

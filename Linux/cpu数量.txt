@@ -1,0 +1,18 @@
+
+一、首先要明确物理cpu个数、核数、逻辑cpu数的概念
+
+1.物理cpu数：主板上实际插入的cpu数量，可以数不重复的 physical id 有几个（physical id）
+
+2.cpu核数：单块CPU上面能处理数据的芯片组的数量，如双核、四核等 （cpu cores）
+
+3.逻辑cpu数：一般情况下，逻辑cpu=物理CPU个数×每颗核数，如果不相等的话，则表示服务器的CPU支持超线程技术（HT：简单来说，它可使处理器中的1 颗内核如2 颗内核那样在操作系统中发挥作用。这样一来，操作系统可使用的执行资源扩大了一倍，大幅提高了系统的整体性能，此时逻辑cpu=物理CPU个数×每颗核数x2）
+
+（processer 0-n）
+
+二、通过查看/proc/cpuinfo来产看cpu相关信息
+
+1.物理cpu数：[XXXX@server ~]$ grep 'physical id' /proc/cpuinfo|sort|uniq|wc -l
+
+2.cpu核数：[XXXX@server ~]$ grep 'cpu cores' /proc/cpuinfo|uniq|awk -F ':' '{print $2}'
+
+3.逻辑cpu：[XXXX@server ~]$ cat /proc/cpuinfo| grep "processor"|wc -l

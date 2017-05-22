@@ -1,0 +1,110 @@
+$ yum --enablerepo=extras install epel-release
+
+$ yum install clustershell vim-clustershell
+
+[root@node137 groups.d]# nodeset -LL
+@adm example0
+@all example[4-6,32-159]
+@compute example[32-159]
+@gpu example[156-159]
+@io example[4-6]
+@mds example6
+@node node[132-133].csdn.net
+@oss example[4-5]
+@racks:new example[4-5,156-159]
+@racks:old example[0,2,32-159]
+@racks:rack1 example[0,2]
+@racks:rack2 example[4-5]
+@racks:rack3 example[32-159]
+@racks:rack4 example[156-159]
+@roles:adm example0
+@roles:all example[2,4-5,32-159]
+@roles:compute example[32-159]
+@roles:gpu example[156-159]
+@roles:io example[2,4-5]
+@cpu:hsw example[64-159]
+@cpu:ivy example[32-63]
+[root@node137 groups.d]# 
+
+[root@node137 ~]# clush -g node -c test.txt 
+[root@node137 ~]# clush -g node ls
+node133.csdn.net: test.txt
+node132.csdn.net: test.txt
+
+
+[root@node137 groups.d]# pwd
+/etc/clustershell/groups.d
+[root@node137 groups.d]# ll
+total 16
+-rw-r--r-- 1 root root 1623 Oct 25 09:38 cluster.yaml
+-rw-r--r-- 1 root root 1623 Mar  1  2016 cluster.yaml.example
+-rw-r--r-- 1 root root  489 Oct 25 09:37 local.cfg
+-rw-r--r-- 1 root root  638 Mar  1  2016 README
+[root@node137 groups.d]# cat local.cfg 
+# ClusterShell groups config local.cfg
+#
+# Replace /etc/clustershell/groups
+#
+# Note: file auto-loaded unless /etc/clustershell/groups is present
+#
+# See also groups.d/cluster.yaml.example for an example of multiple
+# sources single flat file setup using YAML syntax.
+#
+# Feel free to edit to fit your needs.
+adm: example0
+oss: example4 example5
+mds: example6
+io: example[4-6]
+compute: example[32-159]
+gpu: example[156-159]
+all: example[4-6,32-159]
+node: node133.csdn.net node132.csdn.net
+[root@node137 groups.d]# cat cluster.yaml
+# ClusterShell groups config cluster.yaml.example
+#
+# Example of YAML groups config file with multiple sources.
+# ^^^^^^^
+# Here you can describe your cluster nodes and equipments using several
+# group sources.
+#
+# Example of group source use-cases are:
+# - functional info (compute, storage, service nodes, etc.)
+# - location (room, rack position, etc.)
+# - physical attributes (cpu type, gpu types, memory size, etc.)
+# - vendors and hardware models, useful info for firmware update
+# - infrastructure (pdu, network and interco switches)
+# - ownership of nodes and partitions...
+#
+# File will be auto-loaded if renamed to .yaml
+#
+# Break and adapt to fit your own needs. Use nodeset CLI to test config.
+
+# Group source roles:
+# define groups @roles:adm, @roles:io, etc.
+roles:
+    adm: 'example0'
+    io: '@racks:rack2,example2'
+    compute: '@racks:rack[3-4]'
+    gpu: '@racks:rack4'
+    # the 'all' special group is only needed if we don't want all nodes from
+    # this group source included, here we don't want example0 for clush -a
+    all: '@io,@compute'
+
+# Group source racks:
+# define groups @racks:rack[1-4], @racks:old and @racks:new
+racks:
+    rack1: 'example[0,2]'
+    rack2: 'example[4-5]'
+    rack3: 'example[32-159]'
+    rack4: 'example[156-159]'
+    # groups from same source may be referenced without the "source:" prefix
+    # and yes, ranges work for groups too!
+    old: '@rack[1,3]'
+    new: '@rack[2,4]'
+
+# Group source cpu:
+# define groups @cpu:ivy, @cpu:hsw and @cpu:all
+cpu:
+    ivy: 'example[32-63]'
+    # groups from other sources must be prefixed with "source:"
+    hsw: '@roles:compute!@ivy'
