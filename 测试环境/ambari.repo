@@ -1,0 +1,9 @@
+#VERSION_NUMBER=2.4.0.1-1
+
+[Updates-ambari-2.4.0.1]
+name=ambari-2.4.0.1 - Updates
+baseurl=http://ipa01.example.com/hdp/AMBARI-2.4.0.1/centos6/2.4.0.1-1/
+gpgcheck=1
+gpgkey=http://ipa01.example.com/hdp/AMBARI-2.4.0.1/centos6/2.4.0.1-1/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+enabled=1
+priority=1

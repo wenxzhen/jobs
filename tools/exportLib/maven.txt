@@ -1,0 +1,39 @@
+﻿使maven2在下载依赖包的同时下载其源代码包的方法：
+1. 使用maven命令：mvn dependency:sources 下载依赖包的源代码。
+2. 使用参数： -DdownloadSources=true 下载源代码jar。 -DdownloadJavadocs=true 下载javadoc包。
+
+
+mvn dependency:copy-dependencies -DoutputDirectory=src/main/webapp/WEB-INF/lib  -DincludeScope=runtime   
+
+
+
+mvn dependency:copy-dependencies -DoutputDirectory=D:\lib
+
+
+Executing mvn dependency:sources will force maven to download all sources of all jars in the project, 
+if the sources are available (are uploaded in the repository where the artifact is hosted). 
+If you want to download javadoc the command is 
+
+
+	mvn dependency:resolve -Dclassifier=javadoc
+	mvn dependency:sources
+	
+	mvn dependency:sources
+	mvn dependency:resolve -Dclassifier=javadoc
+
+It's also possible to create a profile in your settings.xml file and include the following properties:
+
+<properties>
+  <downloadSources>true</downloadSources>
+  <downloadJavadocs>true</downloadJavadocs>
+</properties>
+
+
+
+Maven内置变量说明：
+${basedir} 项目根目录
+${project.build.directory} 构建目录，缺省为target
+${project.build.outputDirectory} 构建过程输出目录，缺省为target/classes
+${project.build.finalName} 产出物名称，缺省为${project.artifactId}-${project.version}
+${project.packaging} 打包类型，缺省为jar
+${project.xxx} 当前pom文件的任意节点的内容

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+<!-- MR YARN Application properties -->
+
+<property>
+  <name>mapreduce.framework.name</name>
+  <value>yarn</value>
+</property>
+
+<!-- jobhistory properties -->
+<property>
+  <name>mapreduce.jobhistory.address</name>
+  <value>node03.csdn.net:10020</value>
+  <description>MapReduce JobHistory Server IPC host:port</description>
+</property>
+
+<property>
+  <name>mapreduce.jobhistory.webapp.address</name>
+  <value>node03.csdn.net:19888</value>
+  <description>MapReduce JobHistory Server Web UI host:port</description>
+</property>
+
+  <property>
+	<name>mapreduce.jobhistory.keytab</name>
+	<value>/etc/security/keytabs/yarn.service.keytab</value>
+  </property>
+  <property>
+	<name>mapreduce.jobhistory.principal</name>
+	<value>yarn/_HOST@CSDN.NET</value>
+  </property>
+
+</configuration>

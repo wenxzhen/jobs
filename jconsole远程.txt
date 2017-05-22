@@ -1,0 +1,27 @@
+环境】
+
+SUSE linux11 + jdk1.6 + tomcat7
+
+【场景】
+
+最近在做性能测试，想通过我本地（win7）上的jdk来远程监控上述服务器的jvm相关信息。
+
+【配置】
+
+配置上述服务器上tomcat的catalina.sh文件，如果没有JAVA_OPTS这个配置，可以添加上下面一段：
+
+ 
+
+JAVA_OPTS="-Xms1024m -Xmx2048m -XX:MaxPermSize=512m -Dcom.sun.management.jmxremote.port=9998 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=10.xx.xx.xx -agentlib:jprofilerti=port=8849,nowait,id=106,config=/home/user_nm/.jprofiler5/config.xml  -Xbootclasspath/a:/home/user_nm/jprofiler5/bin/agent.jar"
+
+ 
+
+其中Xms1024m等参数配置可参考网上的资料，都比较多，推荐一个：
+
+http://blog.csdn.net/cuker919/article/details/8233821
+
+其中-Dcom.sun.management.jmxremote.port=9998 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=10.xx.xx.xx 在进行远程监控jvm的时候相关的配置，Dcom.sun.management.jmxremote.port是监控端口，Dcom.sun.management.jmxremote.ssl指是不是使用ssl协议，Dcom.sun.management.jmxremote.authenticate指定是否需要鉴权，Djava.rmi.server.hostname是服务器IP。
+
+【使用】
+
+在本地jdk路径下找到jconsole.exe，例如D:\Java\jdk1.6.0_34\bin下的jconsole.exe，双击执行，选择“远程连接”，然后输入服务器的ip以及上面jmx端口，再输入该tomcat所属用户名和密码即可。

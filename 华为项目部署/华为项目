@@ -1,0 +1,59 @@
+ssh-keygen 
+ssh-copy-id master01
+ansible-playbook -i all_hosts playbooks/authorize_keys.yml -e "master_host=master02"
+
+ssh-keygen 
+ssh-copy-id master01
+ansible-playbook -i all_hosts playbooks/authorize_keys.yml -e "master_host=master01"
+
+ansible-playbook -i production playbooks/zookeeper.yml --become-user=root --become-method=sudo -b
+
+//测试环境，用su切换的root用户，需输入密码
+ansible-playbook -i production playbooks/zookeeper.yml --become-user=root --become-method=su -b
+
+ansible-playbook -i production playbooks/hadoop.yml --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+ansible-playbook -i production playbooks/hbase.yml --become-user=root --become-method=sudo -b
+
+ansible-playbook -i production playbooks/hive2.yml --become-user=root --become-method=sudo -b
+
+ansible-playbook -i production playbooks/kylin.yml --become-user=root --become-method=sudo -b
+
+ansible-playbook -i production playbooks/azkaban.yml --become-user=root --become-method=sudo -b
+
+
+ansible -i production zookeeper -m shell -a "zkServer.sh start"
+ansible -i production zookeeper -m shell -a "zkServer.sh status"
+
+
+// 1. 启动journalnode
+ansible -i production JournalNodes -m shell -a "hadoop-daemon.sh start journalnode"
+// 2. 在其中一个NameNode上格式化NameNode
+hdfs namenode -format
+hdfs zkfc -formatZK
+start-dfs.sh
+// 3. 在另一个NameNode上
+hdfs namenode -bootstrapStandby
+hadoop-daemon.sh start namenode
+// 4. 在其中一台ResouceManager上启动Yarn
+start-yarn.sh
+// 5. 在另外一台ResouceManager上启动standby resourcemanager
+yarn-daemon.sh start resourcemanager
+
+yarn-daemon.sh start proxyserver
+mr-jobhistory-daemon.sh start historyserver
+
+
+start-hbase.sh 
+hbase-daemon.sh start master
+
+
+DNS /etc/resolv.conf
+nameserver 114.114.114.114
+nameserver 8.8.8.8
+
+
+ansible  -i all_hosts all -m copy -a "src=/etc/hosts dest=/etc/hosts"
+ansible  -i all_hosts all -m copy -a "src=/etc/sudoers.d/hadoop dest=/etc/sudoers.d/hadoop" --become-user=root --become-method=sudo -b --ask-sudo-pass 
+
+

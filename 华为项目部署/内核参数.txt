@@ -1,0 +1,61 @@
+1、避免使用swap分区
+[root@master01 hadoop]# cat /proc/sys/vm/swappiness
+30
+To set vm.swappiness to 1, run:
+sudo sysctl -w vm.swappiness=1
+
+vi /etc/sysctl.d/swappiness.conf
+vm.swappiness=1
+
+http://www.bubuko.com/infodetail-1933665.html
+[root@localhost yangxy]# find /usr/lib/tuned -name '*.conf' -type f -exec grep "vm.swappiness" {} \+
+/usr/lib/tuned/latency-performance/tuned.conf:vm.swappiness=10
+/usr/lib/tuned/throughput-performance/tuned.conf:vm.swappiness=10
+/usr/lib/tuned/virtual-guest/tuned.conf:vm.swappiness = 30
+
+2、调整ulimit
+[root@master01 hadoop]# ulimit -l
+64
+[root@master01 hadoop]# cat /etc/security/limits.conf
+追加
+*       soft    nofile  65535
+*       hard    nofile  65535
+hadoop       soft    nproc  32000
+hadoop       hard    nproc  32000
+
+或者在 /etc/rc.local 追加 ulimit -SHn 65535
+
+6、关闭THP（Disabling Transparent Hugepage Compaction）
+[root@master01 hadoop]# cat /sys/kernel/mm/transparent_hugepage/defrag 
+[always] madvise never
+
+To disable transparent hugepage compaction, add the following command to /etc/rc.d/rc.local:
+echo never > /sys/kernel/mm/transparent_hugepage/defrag 
+chmod +x /etc/rc.d/rc.local
+
+
+ansible -i all_hosts all -m copy -a "src=/etc/hosts dest=/etc/hosts" --become-user=root --become-method=sudo -b --ask-su-pass
+
+ansible -i all_hosts all -m shell -a "sysctl -w vm.swappiness=1" --become-user=root --become-method=sudo -b --ask-su-pass
+ansible -i all_hosts all -m copy -a "src=/usr/lib/tuned/virtual-guest/tuned.conf dest=/usr/lib/tuned/virtual-guest/tuned.conf" --become-user=root --become-method=sudo -b --ask-su-pass
+
+ansible -i all_hosts all -m copy -a "src=/etc/security/limits.conf dest=/etc/security/limits.conf" --become-user=root --become-method=sudo -b --ask-su-pass
+ansible -i all_hosts all -m shell -a "ulimit -SHn 65535" --become-user=root --become-method=sudo -b --ask-su-pass
+
+ansible -i all_hosts all -m copy -a "src=/etc/rc.d/rc.local dest=/etc/rc.d/rc.local" --become-user=root --become-method=sudo -b --ask-su-pass
+ansible -i all_hosts all -m shell -a "echo never > /sys/kernel/mm/transparent_hugepage/defrag " --become-user=root --become-method=sudo -b --ask-su-pass
+
+
+
+
+
+
+
+
+
+username soft nofile 32768
+username soft nproc 65536
+username hard nofile 1048576
+username hard nproc unlimited
+username hard memlock unlimited
+username soft memlock unlimited

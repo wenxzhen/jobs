@@ -1,0 +1,28 @@
+中文版 Navicat mysql 9.x
+
+下载地址：http://download2.navicat.com/download/navicat091_mysql_cs.exe
+
+下载地址：http://download2.navicat.com/download/navicat091_mysql_cs.tar.gz
+
+注册码：NAVL-KSG4-K8D8-8TV6
+
+
+中文版 Navicat mysql 10.0.x
+
+下载地址：http://download2.navicat.com/download/navicat100_mysql_cs.exe
+
+注册码：NAVK-BPRI-EY6D-AXLK
+
+
+中文版 Navicat premium 10.0.x
+
+下载地址：http://download2.navicat.com/download/navicat100_premium_cs.exe
+
+注册码：NAVE-Q53X-JVQV-GHZ2
+
+
+英文版 Navicat premium 10.0.x
+
+下载地址：http://download2.navicat.com/download/navicat100_premium_en.exe
+
+注册码：NAVI-TKBI-77LR-PJ2Z

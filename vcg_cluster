@@ -1,0 +1,78 @@
+192.168.100.161 VCG-HDP-NN-01
+192.168.100.162 VCG-HDP-NN-02
+
+192.168.100.166 VCG-HDP-DN-01
+192.168.100.167 VCG-HDP-DN-02
+192.168.100.168 VCG-HDP-DN-03
+192.168.100.169 VCG-HDP-DN-04
+
+M9jd72gE24WGT
+
+
+ssh hadoop@192.168.100.161 -p49565
+
+ansible-playbook -i vcg_cluster playbooks/hadoop.yml --become-user=root --become-method=sudo -b
+
+
+ansible --become-user=root --become-method=sudo -b -i vcg_cluster DataNode -m copy -a "src=/etc/hosts dest=/etc/hosts"
+
+ansible --become-user=root --become-method=sudo -b -i vcg_cluster all -m copy -a "src=/etc/resolv.conf dest=/etc/resolv.conf"
+
+
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster zookeeper -m shell -a "service zookeeper status"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster zookeeper -m shell -a "service zookeeper start"
+
+
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster JournalNodes -m shell -a "service journalnode status"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster JournalNodes -m shell -a "service journalnode start"
+
+
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "yum install which -y"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "yum install ntp -y"
+
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "yum install snappy -y"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "chkconfig ntpd on"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "chkconfig ntpd off"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "service ntpd top"
+
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m cron -a  "name='ntpdate' minute='0'  hour='2'  job='/usr/sbin/ntpdate 3.pool.ntp.org'"
+service ntpd start
+chkconfig ntpd on
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "chmod 755 /bin/uname"
+
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "/usr/sbin/ntpdate 3.pool.ntp.org"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "service crond status"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "service crond start"
+
+ansible --become-user=root --become-method=sudo -b -i vcg_cluster all -m copy -a "src=/data/1/usr/local/hbase/conf/hadoop-metrics2-hbase.properties dest=/data/1/usr/local/hbase/conf/hadoop-metrics2-hbase.properties"
+ansible --become-user=root --become-method=sudo -b -i vcg_cluster all -m copy -a "src=/data/1/usr/local/hadoop/etc/hadoop/hadoop-metrics2.properties dest=/data/1/usr/local/hadoop/etc/hadoop/hadoop-metrics2.properties"
+
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "cat /sys/kernel/mm/redhat_transparent_hugepage/enabled"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "cat /proc/sys/vm/swappiness"
+ansible  --become-user=root --become-method=sudo -b -i vcg_cluster all -m shell -a "tail -n 5 /etc/security/limits.conf"
+
+sudo service resourcemanager restart
+sudo service namenode restart
+sudo service hmaster restart
+sudo service datanode restart
+sudo service nodemanager restart
+sudo service hregionserver restart
+
+
+Zeus 
+http://192.168.100.221:8585/zeus-web 
+
+Kylin 
+http://192.168.100.221:7070/kylin/login 
+
+YARN 
+http://192.168.103.162:8088/cluster 
+http://192.168.103.161:8088/cluster 
+
+HBase 
+http://192.168.103.162:16010 
+http://192.168.103.161:16010 
+
+HDFS 
+http://192.168.103.162:50070 
+http://192.168.103.161:50070

@@ -1,0 +1,3 @@
+Debezium is built on top of Apache Kafka and provides Kafka Connect compatible connectors that monitor specific database management systems. Debezium records the history of data changes in Kafka logs, from where your application consumes them. This makes it possible for your application to easily consume all of the events correctly and completely. Even if your application stops (or crashes), upon restart it will start consume the events where it left off so it misses nothing.
+
+Debezium 0.5.0 includes support for monitoring MySQL database servers with its MySQL connector, and this is what we¡¯ll use in this demonstration. Support for other DBMSes will be added in future releases.

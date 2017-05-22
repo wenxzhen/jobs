@@ -1,0 +1,7 @@
+[ambari@client01 ~]$  kinit -kt /etc/security/keytabs/hdfs.headless.keytab  hdfs
+[ambari@client01 ~]$ klist 
+Ticket cache: FILE:/tmp/krb5cc_1040800026_8L9m5S
+Default principal: hdfs@EXAMPLE.COM
+
+Valid starting     Expires            Service principal
+10/12/16 18:02:39  10/13/16 18:02:39  krbtgt/EXAMPLE.COM@EXAMPLE.COM

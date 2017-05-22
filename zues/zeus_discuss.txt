@@ -1,0 +1,19 @@
+
+1. 集成测试。
+   环境准备： 准备两台机器作为集成测试环境。 把现有数据导入到测试环境。 （Guoyue）:09/07
+   部署集成测试环境：（Degao/Guoyue））     10/07开始测试， 15/07结束测试
+   
+2. 新的系统和老系统同时运行一段时间(1 week)。（1 host for old system, 2 hosts for new system ）
+
+3. 老系统完全迁移到新系统。（27/07）.
+
+4. 代码上传(09/07) (Degao/Guoyue) code.csdn.net  
+
+5. 改进报表统计 （Guoyue）
+6. 界面定制 （Degao）
+7. 通知配置 改进 (Degao)
+8. Build process (配置) 文档 （Degao）
+   
+
+
+

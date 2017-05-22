@@ -1,0 +1,70 @@
+
+代码在windows下运行后可以讲192.168.5.150的22端口转发到192.168.88.137的22端口上
+[c:\~]$ netsh interface portproxy add v4tov4 listenaddress=192.168.5.150 listenport=22 connectaddress=192.168.88.137 connectport=22
+
+如果想查看已经配置了哪些端口转发，可以用如下语句：
+
+[c:\~]$ netsh interface portproxy show v4tov4
+
+侦听 ipv4:                 连接到 ipv4:
+
+地址            端口        地址            端口
+--------------- ----------  --------------- ----------
+192.168.5.150   22          192.168.88.137  22
+
+如果要取消上面的端口转发，使用下面的代码
+[c:\~]$ netsh interface portproxy delete v4tov4 listenaddress=192.168.5.150 listenport=22
+
+
+
+
+================================================================================
+[c:\~]$ netsh interface portproxy
+
+下列指令有效:
+
+此上下文中的命令:
+?              - 显示命令列表。
+add            - 在一个表格中添加一个配置项。
+delete         - 从一个表格中删除一个配置项。
+dump           - 显示一个配置脚本。
+help           - 显示命令列表。
+reset          - 重置端口代理配置状态。
+set            - 设置配置信息。
+show           - 显示信息。
+
+若需要命令的更多帮助信息，请键入命令，接着是空格，
+后面跟 ?。
+
+
+[c:\~]$ netsh interface portproxy add
+
+下列指令有效:
+
+此上下文中的命令:
+add v4tov4     - 添加通过 IPv4 的 IPv4 和代理连接到的侦听项目。
+add v4tov6     - 添加通过 IPv6 的 IPv4 和代理连接到的侦听项目。
+add v6tov4     - 添加通过 IPv4 的 IPv6 和代理连接到的侦听项目。
+add v6tov6     - 添加通过 IPv6 的 IPv6 和代理连接到的侦听项目。
+
+[c:\~]$ netsh interface portproxy add v4tov4
+一个或多个重要的参数没有输入。
+请验证需要的参数，然后再次输入。
+此命令提供的语法不正确。请查看帮助以获取正确的语法信息。
+
+用法: add v4tov4 [listenport=]<integer>|<servicename>
+            [connectaddress=]<IPv4 address>|<hostname> 
+            [[connectport=]<integer>|<servicename>]
+            [[listenaddress=]<IPv4 address>|<hostname>]
+            [[protocol=]tcp]
+
+参数:
+
+	标记		值
+	listenport	- IPv4 侦听端口。
+	connectaddress	- IPv4 连接地址。
+	connectport	- IPv4 连接端口。
+	listenaddress	- IPv4 侦听地址。
+	protocol	- 使用的协议。现在只支持 TCP。
+
+说明: 添加通过 IPv4 的 IPv4 和代理连接到的侦听项目。

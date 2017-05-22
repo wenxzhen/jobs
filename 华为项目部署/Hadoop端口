@@ -1,0 +1,82 @@
+NameNode
+8020  
+50070
+
+DataNode
+50010
+50075
+50020
+
+JournalNode
+8485
+8480
+
+Failover Controller
+8019
+
+ResourceManager
+8030
+8031
+8032
+8033
+8088
+
+NodeManager
+8041
+8042
+
+
+JobHistory Server
+10020
+10033
+19888
+
+
+Shuffle HTTP
+13562
+
+
+HMaster
+16000
+16010
+
+RegionServer
+16020
+16030
+
+
+HQuorumPeer
+2181
+2888
+3888
+
+
+Metastore
+9083
+
+
+
+
+ansible -i all_hosts all -m yum -a 'name=firewalld state=latest' --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+http://docs.ansible.com/ansible/firewalld_module.html
+- firewalld:
+    port: 161-162/udp
+    permanent: true
+    state: enabled
+
+ansible -i all_hosts all -m firewalld -a 'port=firewalld state=latest' --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+ansible -i all_hosts all -m shell -a 'systemctl enable firewalld.service' --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+ansible -i all_hosts all -m shell -a 'systemctl start firewalld.service' --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+
+ansible-playbook -i all_hosts playbooks/firewalld.yml --become-user=root --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+
+ansible -i all_hosts all -m shell -a 'firewall-cmd --reload' --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+ansible -i all_hosts all -m shell -a 'firewall-cmd --list-ports' --become-user=root --become-method=sudo -b --ask-sudo-pass
+
+

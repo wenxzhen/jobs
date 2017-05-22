@@ -1,0 +1,48 @@
+
+
+csdn zeus build/deployment process.
+1. Install mysql on your target machine and create 2 database named 'zeus'(utf-8) and 'hive' (latin1). 
+   Create 2 users in mysql: root/test for zeus, hive/mysql for hive
+2. Install hive (0.13.1-cdh5.2.0) on your target machine. Set the jdbc connection to 'hive' database in hive-site.xml
+3. Install hadoop (2.0.0-cdh4.6.0) on your target machine.
+ 
+4. Download source code from git@code.csdn.net:zhoudegao888/csdn_zeus.git
+5. Copy ./web/src/main/filter/antx.properties to your home directory.
+6. Modify corresponding fields in antx.properties according to your building environment.
+   Especially following items:
+   zeus.loggingRoot=/data/zeus/log
+   zeus.loggingLevel=debug
+   
+   zeus.localdata.dir=/data/zeus/job_dir
+   zeus.hdfsLibPath=/data/zeus/hdfs-upload-dir
+   hadoop.home=/opt/hadoop2.0
+   hadoop.conf.dir=/opt/hadoop2.0/etc/hadoop-mapreduce1
+   hive.home=/opt/hive0.13
+   hive.conf.dir=/opt/hive0.13/conf
+
+   email.host=
+   email.port=
+   email.username=
+   email.password=
+   email.sendFrom=
+
+   noc.notifyUrl=
+   noc.accessToken=
+   
+7. Modify zeus database url in ./web/src/main/resources/persistence.xml.
+   Modify the absolute path of highcharts-1.4.0.jar in ./web/pom.xml
+8. Build by following commands:
+   mvn clean:clean
+   mvn package -Dmaven.test.skip=true
+   cd deploy;mvn assembly:assembly (zeus.war will be generated in ./deploy/target)
+  
+9. Install Jetty and JDK1.7 on target machine 
+10. Copy zeus.war to webapps directory of Jetty.
+11. Start Jetty by command: java -jar start.jar
+
+   
+
+
+
+   
+
