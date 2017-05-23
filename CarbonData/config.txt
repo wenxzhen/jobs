@@ -53,4 +53,7 @@ spark.executor.extraJavaOptions		-Dcarbon.properties.filepath=carbon.properties 
 spark.executor.extraClassPath		carbondata.tar.gz/carbonlib/*
 spark.driver.extraClassPath		$SPARK_HOME/carbonlib/carbonlib/* 
 spark.driver.extraJavaOptions		-Dcarbon.properties.filepath=$SPARK_HOME/conf/carbon.properties -Dspark.home=$SPARK_HOME
+
+
+spark.driver.maxResultSize 512m
  
