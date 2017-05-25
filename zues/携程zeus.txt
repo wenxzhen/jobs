@@ -1,0 +1,60 @@
+1、下载携程修改的zeus源码
+
+Git clone https://github.com/ctripcorp/dataworks-zeus.git
+
+2、编译源码
+
+进入工程目录，  编译成eclipse的工程： mvn eclipse:eclipse,，mvn打包命令mvn install
+
+3、编译完成后，有4个工程
+
+zeus-web：页面展示
+zeus-schedule：任务调度
+zeus-client：客户端
+zeus-deploy：配置文件
+4、把zeus-web工程打成war包，放在tomcat下
+
+
+zeus版本
+https://github.com/ctripcorp/dataworks-zeus
+主要配置步骤参见
+https://github.com/alibaba/zeus/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%AF%BC%E6%96%87%E6%A1%A3
+ 
+yum install doc2unix
+修改表
+zeus_user 表添加用户 admin    user_iseffective=1 user_type=1
+zeus_worker 机器添加 admin 用户加入管理员权限
+biadmin         ALL=(ALL)       NOPASSWD:ALL
+sudo：抱歉，您必须拥有一个终端来执行 sudo
+#Defaults    requiretty
+ 
+tomcat log rpc错误忽略  首页默认显示任务ID=15 GWTEnvironment
+补充配置
+1./zeus-web/src/main/resources/antx.properties
+#Hadoop 配置文件路径
+hadoop.home=/usr/lib/hadoop
+hadoop.conf.dir=/etc/hadoop/conf
+#Hive 配置文件路径
+hive.home=//usr/lib/hive
+hive.conf.dir=/etc/hive/conf
+2./zeus-web/src/main/resources/env.sh
+ 
+JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera/
+3. 超级管理员
+ com.taobao.zeus.store.Super 
+在zeus_user 表中添加 biadmin 超级管理员
+4. 主机，工作主机
+ 
+zeus_host_group 主机组
+zeus_host_relation 主机
+zeus_worker 部署集群 （可运行的主机）
+手动维护
+5. 部署启动
+部署启动登陆页面  http://ip:port/zeus/login.html
+登陆后主页 http://ip:port/zeus/platform.html
+6. 相关任务表
+zeus_file 开发中心文档
+zeus_job 调度中心任务
+zeus_action 任务实例列表
+zeus_action_history 任务执行日志
+zeus_debug_history 开发中心执行日志
