@@ -1,31 +1,38 @@
+$ ll conf/
+-rw-r--r-- 1 hadoop hadoop 5717 May 19 12:26 carbon.properties
+-rw-r--r-- 1 hadoop hadoop  256 May 19 13:02 hive-site.xml
+-rw-r--r-- 1 hadoop hadoop 2338 May 19 13:24 log4j.properties
+-rw-r--r-- 1 hadoop hadoop 2224 May 25 17:44 spark-defaults.conf
+-rwxr-xr-x 1 hadoop hadoop 4011 May 19 13:45 spark-env.sh
+
+
+
+$ cat conf/spark-defaults.conf
+
+spark.history.ui.port               18080
+spark.eventLog.enabled              true
+spark.eventLog.dir                  hdfs://csdncluster/apps/spark/eventLog_2.1.1
+spark.history.fs.logDirectory       hdfs://csdncluster/apps/spark/eventLog_2.1.1
+spark.yarn.historyServer.address    CSDN-HDP-CLI-04:18080
+
+spark.yarn.archive                  hdfs://csdncluster/user/spark/spark-2.1.1.jar
+
+spark.yarn.dist.files		        conf/carbon.properties
+spark.yarn.dist.archives	        carbonlib/carbondata.tar.gz
+spark.executor.extraJavaOptions		-Dcarbon.properties.filepath=carbon.properties -Dlog4j.configuration=log4j.properties
+spark.executor.extraClassPath		carbondata.tar.gz/carbonlib/*
+spark.driver.extraClassPath		    /data/1/usr/local/spark/carbonlib/* 
+spark.driver.extraJavaOptions		-Dcarbon.properties.filepath=/data/1/usr/local/spark/conf/carbon.properties
+spark.driver.maxResultSize          256m
 spark.hadoop.yarn.timeline-service.enabled  false
 
 
-spark.yarn.dist.files		        conf/carbon.properties
-spark.yarn.dist.archives		carbonlib/carbondata.tar.gz
-spark.executor.extraJavaOptions		-Dcarbon.properties.filepath=carbon.properties
-spark.executor.extraClassPath		carbondata.tar.gz/carbonlib/*
-spark.driver.extraClassPath		$SPARK_HOME/carbonlib/carbonlib/*
-spark.driver.extraJavaOptions		-Dcarbon.properties.filepath=conf/carbon.properties
-
-
-nohup  ./bin/spark-submit --conf spark.sql.hive.thriftServer.singleSession=true \
---conf spark.yarn.executor.memoryOverhead=512m \
---master yarn \
---num-executors 3 \
---executor-cores 3 \
---queue super \
---executor-memory 5G \
---driver-memory 3G \
---class org.apache.carbondata.spark.thriftserver.CarbonThriftServer $SPARK_HOME/carbonlib/carbondata_2.11-1.1.0-incubating-SNAPSHOT-shade-hadoop2.7.2.jar \
-hdfs://csdncluster/data/CarbonStore >> CarbonThriftServer.out 2>&1 &
-
-
-bin/beeline -u jdbc:hive2://master02:10000 -n hadoop
-
-
+$ cat carbon-thritserver.sh 
+unset HIVE_HOME
+unset HIVE_CONF_DIR
 export HIVE_SERVER2_THRIFT_PORT=10001
-nohup  ./bin/spark-submit --conf spark.sql.hive.thriftServer.singleSession=false \
+export HIVE_SERVER2_THRIFT_BIND_HOST=0.0.0.0
+./sbin/start-thriftserver.sh --conf spark.sql.hive.thriftServer.singleSession=true \
 --master yarn \
 --num-executors 5 \
 --executor-cores 4 \
@@ -33,27 +40,41 @@ nohup  ./bin/spark-submit --conf spark.sql.hive.thriftServer.singleSession=false
 --executor-memory 10G \
 --driver-memory 10G \
 --files hdfs://csdncluster/user/spark/log4j.properties \
---class org.apache.carbondata.spark.thriftserver.CarbonThriftServer $SPARK_HOME/carbonlib/carbondata_2.11-1.1.0-shade-hadoop2.7.3.jar \
-hdfs://csdncluster/carbondata/CarbonStore > ThriftServer.out 2>&1 &
+--class org.apache.carbondata.spark.thriftserver.CarbonThriftServer \
+hdfs://csdncluster/carbondata/CarbonStore
 
 
- cat conf/spark-defaults.conf
-
-spark.history.ui.port             18080
-spark.eventLog.enabled            true
-spark.eventLog.dir                hdfs://csdncluster/apps/spark/eventLog_2.1.1
-spark.history.fs.logDirectory     hdfs://csdncluster/apps/spark/eventLog_2.1.1
-spark.yarn.historyServer.address  CSDN-HDP-CLI-04:18080
-spark.hadoop.yarn.timeline-service.enabled  false
-spark.yarn.archive                  hdfs://csdncluster/user/spark/spark-2.1.1.jar
-
-spark.yarn.dist.files		        conf/carbon.properties
-spark.yarn.dist.archives	        carbonlib/carbondata.tar.gz
-spark.executor.extraJavaOptions		-Dcarbon.properties.filepath=carbon.properties -Dlog4j.configuration=log4j.properties
-spark.executor.extraClassPath		carbondata.tar.gz/carbonlib/*
-spark.driver.extraClassPath		$SPARK_HOME/carbonlib/carbonlib/* 
-spark.driver.extraJavaOptions		-Dcarbon.properties.filepath=$SPARK_HOME/conf/carbon.properties -Dspark.home=$SPARK_HOME
+$ cat start-thriftServer.sh 
+unset HIVE_HOME
+unset HIVE_CONF_DIR
+export HIVE_SERVER2_THRIFT_PORT=10001
+export HIVE_SERVER2_THRIFT_BIND_HOST=0.0.0.0
+sbin/start-thriftserver.sh \
+--master yarn \
+--num-executors 5 \
+--executor-cores 4 \
+--queue super \
+--executor-memory 10G \
+--driver-memory 10G \
+--files hdfs://csdncluster/user/spark/log4j.properties
 
 
-spark.driver.maxResultSize 512m
- 
+
+$ cat log4j.properties 
+# Set everything to be logged to the console
+log4j.rootCategory=INFO, DAILY
+
+# Stock log4j rolling file appender
+# Default log rotation configuration
+log4j.appender.LOGFILE=org.apache.log4j.RollingFileAppender
+log4j.appender.LOGFILE.MaxFileSize=100MB
+log4j.appender.LOGFILE.MaxBackupIndex=10
+log4j.appender.LOGFILE.File=${spark.yarn.app.container.log.dir}/stderr
+log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.LOGFILE.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+
+log4j.appender.DAILY=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.DAILY.DatePattern='.'yyyy-MM-dd
+log4j.appender.DAILY.File=${spark.yarn.app.container.log.dir}/stderr
+log4j.appender.DAILY.layout=org.apache.log4j.PatternLayout
+log4j.appender.DAILY.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
