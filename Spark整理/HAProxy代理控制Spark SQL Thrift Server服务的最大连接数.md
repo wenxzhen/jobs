@@ -16,12 +16,12 @@
 
 　　在haproxy-1.7.5目录下创建文件sparksql.cfg，文件名可以任意。内容如下：
 ```
-　　global
+global
 　　daemon
 　　nbproc 1
 　　pidfile /root/haproxy-1.7.5/haproxy.pid
 　　ulimit-n 65535
-　　defaults
+defaults
 　　mode tcp #mode { tcp|http|health }，因为Spark SQL底层使用tcp
 　　retries 2
 　　option redispatch
@@ -32,7 +32,7 @@
 　　timeout server 1d
 　　timeout check 2000
 　　log 127.0.0.1 local0 err #[err warning info debug]
-　　listen admin_stats
+listen admin_stats
 　　bind 0.0.0.0:1090#管理界面访问IP和端口
 　　mode http
 　　maxconn 10 #管理界面最大连接数
@@ -40,7 +40,7 @@
 　　stats uri / #访问url
 　　stats realm SparkSql Haproxy #验证窗口提示
 　　stats auth admin:123456 #401验证用户名密码
-　　listen SparkSql # SparkSql后端定义
+listen SparkSql # SparkSql后端定义
 　　bind 0.0.0.0:18001 #ha作为proxy所绑定的IP和端口
 　　mode tcp #以4层方式代理，重要
 　　balance leastconn #调度算法 'leastconn' 最少连接数分配，或者 'roundrobin'，轮询分配
@@ -80,3 +80,37 @@
 更改上文配置文件中的listen SparkSql下的maxconn 1024为2，并重启haproxy。
 当在2台客户端的spark目录下使用beeline，均可以连接并操作，当使用第3台客户端的beeline连接时候，会显示连接等待，无法连接。
 查看http://10.43.156.221:1090/页面，可以看到最大连接数设置的为2。
+
+
+
+```
+global
+	daemon
+	nbproc 1
+	pidfile /usr/local/src/haproxy-1.7.5/haproxy.pid
+	ulimit-n 65535
+defaults
+	mode tcp 
+	retries 2
+	option redispatch
+	maxconn 1024
+	timeout connect 1d
+	timeout client 1d
+	timeout server 1d
+	timeout check 2000
+	log     127.0.0.1 local2
+listen admin_stats
+	bind 0.0.0.0:1090
+	mode http
+	maxconn 10
+	stats refresh 30s
+	stats uri /
+	stats realm SparkSql Haproxy
+	stats auth admin:123456
+listen SparkSql
+	bind 0.0.0.0:10000
+	mode tcp
+	balance leastconn
+	maxconn 5
+	server spark1 192.168.25.31:10001 check inter 180000 rise 1 fall 2
+```
