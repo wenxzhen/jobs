@@ -1,3 +1,0 @@
-import org.apache.spark.mllib.stat.Statistics
-
-val data = sc.textFile("/home/spark/mllib/smple_stat.txt")

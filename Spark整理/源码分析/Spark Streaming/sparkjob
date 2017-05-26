@@ -1,8 +1,0 @@
-spark-submit \
-	--master yarn \
-	--deploy-mode cluster \
-	--files file:///home/spark/executor-log4j.properties \
-	--conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=executor-log4j.properties" \
-	--conf "spark.executor.extraJavaOptions=-Dlog4j.configuration=executor-log4j.properties" \
-	--class org.apache.spark.exercise.RecoverableDirectKafkaPageView \
-	/home/spark/sparkJob-1.0-jar-with-dependencies.jar client02.csdn.net:9092 page_visits /user/spark/checkpoint25
