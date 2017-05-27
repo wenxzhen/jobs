@@ -24,6 +24,7 @@ spark.executor.extraClassPath		carbondata.tar.gz/carbonlib/*
 spark.driver.extraClassPath		    /data/1/usr/local/spark/carbonlib/* 
 spark.driver.extraJavaOptions		-Dcarbon.properties.filepath=/data/1/usr/local/spark/conf/carbon.properties
 spark.driver.maxResultSize          256m
+spark.sql.warehouse.dir             hdfs://csdncluster/user/hive/warehouse
 spark.hadoop.yarn.timeline-service.enabled  false
 
 
