@@ -79,3 +79,14 @@ log4j.appender.DAILY.DatePattern='.'yyyy-MM-dd
 log4j.appender.DAILY.File=${spark.yarn.app.container.log.dir}/stderr
 log4j.appender.DAILY.layout=org.apache.log4j.PatternLayout
 log4j.appender.DAILY.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+
+
+
+
+
+
+
+cat beeline-cli.sh 
+#unset HIVE_HOME
+#unset HIVE_CONF_DIR
+bin/beeline -u jdbc:hive2://192.168.103.204:10001 -n hadoop 
