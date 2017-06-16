@@ -1,0 +1,54 @@
+node1: kudu kudu-master kudu-tserver impala-server
+node2: kudu kudu-master kudu-tserver impala-server
+node3: kudu kudu-tserver             impala-server impala-state-store impala-catalog hive-metastore
+
+
+wget http://archive.cloudera.com/kudu/redhat/7/x86_64/kudu/cloudera-kudu.repo
+wget http://archive.cloudera.com/cdh5/redhat/7/x86_64/cdh/cloudera-cdh5.repo
+
+yum install kudu kudu-master kudu-tserver -y
+
+yum install impala-state-store impala-server impala-catalog hive-metastore -y
+yum install impala-server -y
+
+
+
+
+制作本地仓库
+yum install httpd -y
+yum install yum-utils createrepo
+systemctl start httpd.service 
+systemctl enable httpd.service
+
+systemctl stop firewalld.service 
+systemctl disable firewalld.service
+
+wget http://archive.cloudera.com/cdh5/repo-as-tarball/5.11.1/cdh5.11.1-centos7.tar.gz
+
+tar -xzvf cdh5.11.1-centos7.tar.gz -C /var/www/html
+cd /var/www/html/cdh/5
+
+# ll
+total 8
+-rw-rw-r--. 1 1106 592   79 Jun  6 17:58 mirrors
+drwxrwxr-x. 2 1106 592  190 Jun  2 03:23 repodata
+drwxrwxr-x. 4 1106 592   34 Jun  2 01:24 RPMS
+drwxrwxr-x. 2 1106 592 4096 Jun  2 03:22 SRPMS
+# createrepo .
+Spawning worker 0 with 146 pkgs
+Workers Finished
+Saving Primary metadata
+Saving file lists metadata
+Saving other metadata
+Generating sqlite DBs
+Sqlite DBs complete
+
+
+
+# cat /etc/yum.repos.d/cloudera-cdh5.repo 
+[cloudera-cdh5]
+# Packages for Cloudera's Distribution for Hadoop, Version 5, on RedHat	or CentOS 7 x86_64
+name=Cloudera's Distribution for Hadoop, Version 5
+baseurl=http://192.168.76.139/cdh/5/
+#gpgkey =https://archive.cloudera.com/cdh5/redhat/7/x86_64/cdh/RPM-GPG-KEY-cloudera    
+#gpgcheck = 1
