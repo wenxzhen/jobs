@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<configuration>
+
+
+	<property>
+		<name>javax.jdo.option.ConnectionUserName</name>
+		<value>APP</value>
+	</property>
+
+
+	<property>
+		<name>javax.jdo.option.ConnectionPassword</name>
+		<value>mine</value>
+	</property>
+
+
+	<property>
+		<name>javax.jdo.option.ConnectionURL</name>
+		<value>jdbc:derby:;databaseName=/data/bigdata/hive/metastore_db;create=true</value>
+	</property>
+
+
+	<property>
+		<name>javax.jdo.option.ConnectionDriverName</name>
+		<value>org.apache.derby.jdbc.EmbeddedDriver</value>
+	</property>
+
+
+	<property>
+		<name>hive.execution.engine</name>
+		<value>mr</value>
+	</property>
+
+
+	<property>
+		<name>hive.metastore.uris</name>
+		<value>thrift://master01:9083</value>
+	</property>
+
+
+</configuration>

@@ -52,3 +52,85 @@ name=Cloudera's Distribution for Hadoop, Version 5
 baseurl=http://192.168.76.139/cdh/5/
 #gpgkey =https://archive.cloudera.com/cdh5/redhat/7/x86_64/cdh/RPM-GPG-KEY-cloudera    
 #gpgcheck = 1
+===============================================================
+# vi /etc/impala/conf/hive-site.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+<property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://node03:9083</value>
+</property>
+
+<property>
+  <name>javax.jdo.option.ConnectionURL</name>
+  <value>jdbc:derby:;databaseName=/var/lib/hive/metastore/metastore_db;create=true</value>
+  <description>JDBC connect string for a JDBC metastore</description>
+</property>
+
+<property>
+  <name>javax.jdo.option.ConnectionDriverName</name>
+  <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+  <description>Driver class name for a JDBC metastore</description>
+</property>
+</configuration>
+# vi /etc/hive/conf/hive-env.sh
+HADOOP_CONF_DIR=/etc/hadoop/conf
+
+# service hive-metastore start
+
+#vi /etc/impala/conf/hive-site.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+<property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://node03:9083</value>
+</property>
+
+</configuration>
+
+# vi /etc/default/impala
+IMPALA_CATALOG_SERVICE_HOST=node03
+IMPALA_STATE_STORE_HOST=node03
+
+#配置hadoop,不再复述
+impala要求
+hdfs-site.xml添加
+<property>  
+    <name>dfs.client.file-block-storage-locations.timeout.millis</name>  
+    <value>30000</value>  
+</property>  
+<property>  
+  <name>dfs.datanode.hdfs-blocks-metadata.enabled</name>  
+  <value>true</value>  
+</property>   
+
+service impala-state-store start
+service impala-catalog start
+service impala-server start
+
+
+# impala-shell
+[node03:21000] > invalidate metadata;
+Query: invalidate metadata
+Query submitted at: 2017-06-19 13:00:26 (Coordinator: http://node03:25000)
+Query progress can be monitored at: http://node03:25000/query_plan?query_id=77448d2d8b9fa6ef:4f5d16c000000000
+
+Fetched 0 row(s) in 4.79s
+[node03:21000] > show tables;
+Query: show tables
++--------------------------+
+| name                     |
++--------------------------+
+| kylin_cal_dt             |
+| kylin_category_groupings |
+| kylin_country            |
+| kylin_sales              |
++--------------------------+
+Fetched 4 row(s) in 0.01s
+[node03:21000] >
