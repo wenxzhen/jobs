@@ -1,0 +1,13 @@
+
+hive> select unix_timestamp('02/May/2011:00:00:00 +0800','dd/MMMMM/yyyy:HH:mm:ss Z');
+OK
+1304265600
+Time taken: 0.121 seconds, Fetched: 1 row(s)
+hive> select regexp_replace('[02/May/2011:00:00:00 +0800]','\\]|\\[','');
+OK
+02/May/2011:00:00:00 +0800
+Time taken: 0.096 seconds, Fetched: 1 row(s)
+hive> select from_unixtime(unix_timestamp(regexp_replace('[02/May/2011:00:00:00 +0800]','\\]|\\[',''),'dd/MMMMM/yyyy:HH:mm:ss Z'),'yyyyMMdd');
+OK
+20110502
+Time taken: 0.097 seconds, Fetched: 1 row(s)
