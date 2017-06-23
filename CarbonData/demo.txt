@@ -67,6 +67,7 @@ insert into table test.kylin_country_parquet select * from carbondata.kylin_coun
 CREATE TABLE test.kylin_country_parquet (`COUNTRY` STRING, `LATITUDE` DOUBLE, `LONGITUDE` DOUBLE, `NAME` STRING)
 STORED AS PARQUET location '/user/hadoop/output';
 
+CREATE TABLE test.kylin_country_orc (`COUNTRY` STRING, `LATITUDE` DOUBLE, `LONGITUDE` DOUBLE, `NAME` STRING) STORED AS ORC
 
 select COUNTRY,count(1) from kylin_country group by COUNTRY;
 select COUNTRY,count(1) from kylin_country_parquet group by COUNTRY;
