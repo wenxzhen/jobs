@@ -1,0 +1,31 @@
+Streaming + SQL and DataFrames
+DStream内部维护的RDD序列可以被转换成DataFrame（Spark SQL的编程接口），进而可通过SQL语句进行查询操作。
+例如：使用Spark SQL的JDBC server,外部程序可以通过SQL查询stream的状态。
+```
+val hiveContext = new HiveContext(sparkContext)
+...
+wordCountsDStream.foreachRDD { rdd =>
+  // Convert RDD to DataFrame and register it as a SQL table
+  val wordCountsDataFrame = rdd.toDF("word”, “count") 
+  wordCountsDataFrame.registerTempTable("word_counts") 
+}
+...
+// Start the JDBC server
+HiveThriftServer2.startWithContext(hiveContext)
+```
+你可以通过JDBC server使用Spark附带的beeline client或者tableau工具交互查询持续更新的“word_counts”表。
+
+1: jdbc:hive2://localhost:10000> show tables;
++--------------+--------------+
+|  tableName   | isTemporary  |
++--------------+--------------+
+| word_counts  | true         |
++--------------+--------------+
+1 row selected (0.102 seconds)
+1: jdbc:hive2://localhost:10000> select * from word_counts;
++-----------+--------+
+|   word    | count  |
++-----------+--------+
+| 2015      | 264    |
+| PDT       | 264    |
+| 21:45:41  | 27     |
