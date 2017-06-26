@@ -35,3 +35,7 @@
 在新增节点，运行sbin/yarn-daemon.sh start nodemanager即可
 
 在ResourceManager，通过yarn node -list查看集群情况
+
+
+hdfs dfsadmin -refreshNodes
+yarn rmadmin -refreshNodes
