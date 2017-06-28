@@ -1,4 +1,4 @@
-node1: kudu kudu-master kudu-tserver impala-server
+﻿node1: kudu kudu-master kudu-tserver impala-server
 node2: kudu kudu-master kudu-tserver impala-server
 node3: kudu kudu-tserver             impala-server impala-state-store impala-catalog hive-metastore
 
@@ -134,3 +134,12 @@ Query: show tables
 +--------------------------+
 Fetched 4 row(s) in 0.01s
 [node03:21000] >
+
+
+To query kudu table, you must first create an external table within Impala to map the Kudu table into an Impala database:
+
+CREATE EXTERNAL TABLE metrics
+STORED AS KUDU
+TBLPROPERTIES (
+  'kudu.table_name' = 'metrics'
+);
