@@ -1,0 +1,6 @@
+https://issues.apache.org/jira/browse/HIVE-600
+
+https://github.com/databricks/spark-sql-perf
+
+
+https://github.com/kj-ki/tpc-h-impala
