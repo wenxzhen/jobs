@@ -1,0 +1,51 @@
+﻿https://cwiki.apache.org/confluence/display/Hive/Hive+on+Spark%3A+Getting+Started
+
+ln -s /data/1/usr/local/spark-2.2.0-bin-hadoop2-without-hive/jars/spark-core_2.11-2.2.0.jar /data/1/usr/local/apache-hive-2.1.1-bin/lib/
+ln -s /data/1/usr/local/spark-2.2.0-bin-hadoop2-without-hive/jars/scala-library-2.11.8.jar /data/1/usr/local/apache-hive-2.1.1-bin/lib/
+ln -s /data/1/usr/local/spark-2.2.0-bin-hadoop2-without-hive/jars/spark-network-common_2.11-2.2.0.jar /data/1/usr/local/apache-hive-2.1.1-bin/lib/
+
+
+set hive.execution.engine=spark;
+set spark.master=yarn;
+set spark.eventLog.enabled=true;
+set spark.eventLog.dir=hdfs://csdncluster/apps/spark/eventLog;
+set spark.executor.memory=512m;             
+set spark.serializer=org.apache.spark.serializer.KryoSerializer;
+set spark.yarn.archive=/apps/spark/jars-2.2.0-bin-hadoop2.7/jars.zip;
+
+
+
+Tuning Details
+When running Spark on YARN mode, we generally recommend setting spark.executor.cores to be 5, 6 or 7, depending on what the typical node is divisible by. 
+For instance, if yarn.nodemanager.resource.cpu-vcores is 19, then 6 is a better choice (all executors can only have the same number of cores, 
+here if we chose 5, then every executor only gets 3 cores; if we chose 7, then only 2 executors are used, and 5 cores will be wasted). 
+If it’s 20, then 5 is a better choice (since this way you’ll get 4 executors, and no core is wasted).
+
+For spark.executor.memory, 
+we recommend to calculate yarn.nodemanager.resource.memory-mb * (spark.executor.cores / yarn.nodemanager.resource.cpu-vcores) 
+then split that between spark.executor.memory and spark.yarn.executor.memoryOverhead. According to our experiment,
+ we recommend setting spark.yarn.executor.memoryOverhead to be around 15-20% of the total memory.
+ 
+After you’ve decided on how much memory each executor receives, you need to decide how many executors will be allocated to queries. 
+In the GA release Spark dynamic executor allocation will be supported. However for this beta only static resource allocation can be used.
+ Based on the physical memory in each node and the configuration of  spark.executor.memory and spark.yarn.executor.memoryOverhead, 
+ you will need to choose the number of instances and set spark.executor.instances.
+ 
+Now a real world example. Assuming 10 nodes with 64GB of memory per node with 12 virtual cores, 
+e.g., yarn.nodemanager.resource.cpu-vcores=12. One node will be used as the master and as such the cluster will have 9 slave nodes.
+ We’ll configure spark.executor.cores to 6. Given 64GB of ram yarn.nodemanager.resource.memory-mb will be 50GB.
+ We’ll determine the amount of memory for each executor as follows: 50GB * (6/12) = 25GB. We’ll assign 20% to spark.yarn.executor.memoryOverhead, 
+ or 5120, and 80% to spark.executor.memory, or 20GB.
+ (spark.yarn.executor.memoryOverhead=25G * 20%,spark.executor.memory=25G * 80%)
+ 
+On this 9 node cluster we’ll have two executors per host. As such we can configure spark.executor.instances somewhere between 2 and 18. 
+A value of 18 would utilize the entire cluster.
+
+
+
+
+java.lang.NoClassDefFoundError: org/apache/spark/JavaSparkListener
+hive-2.1.1是基于spark1.6.0编译的 
+org.apache.hadoop.hive.ql.exec.spark.status.impl.JobMetricsListener 和
+org.apache.hive.spark.client.RemoteDriver.ClientListener 继承的是org/apache/spark/JavaSparkListener ，而JavaSparkListener在spark2.0以后就不存在了
+需要修改为org.apache.spark.scheduler.SparkListener
