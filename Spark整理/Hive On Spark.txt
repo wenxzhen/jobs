@@ -1,18 +1,31 @@
 ﻿https://cwiki.apache.org/confluence/display/Hive/Hive+on+Spark%3A+Getting+Started
 
+打包需要把hadoop相关jar文件也要打进去，不能使用 hadoop-provided
+./make-distribution.sh --name "hadoop2-without-hive" --tgz "-Pyarn,hadoop-2.7,parquet-provided"
+
+
 ln -s /data/1/usr/local/spark-2.2.0-bin-hadoop2-without-hive/jars/spark-core_2.11-2.2.0.jar /data/1/usr/local/apache-hive-2.1.1-bin/lib/
 ln -s /data/1/usr/local/spark-2.2.0-bin-hadoop2-without-hive/jars/scala-library-2.11.8.jar /data/1/usr/local/apache-hive-2.1.1-bin/lib/
 ln -s /data/1/usr/local/spark-2.2.0-bin-hadoop2-without-hive/jars/spark-network-common_2.11-2.2.0.jar /data/1/usr/local/apache-hive-2.1.1-bin/lib/
 
 
 set hive.execution.engine=spark;
-set spark.master=yarn;
+set spark.master=yarn-client;
 set spark.eventLog.enabled=true;
 set spark.eventLog.dir=hdfs://csdncluster/apps/spark/eventLog;
-set spark.executor.memory=512m;             
+set spark.executor.memory=1G;             
+set hive.spark.job.monitor.timeout=240s;
 set spark.serializer=org.apache.spark.serializer.KryoSerializer;
-set spark.yarn.archive=/apps/spark/jars-2.2.0-bin-hadoop2.7/jars.zip;
+set spark.yarn.jar=hdfs://csdncluster/apps/spark/jars-1.6.3-bin-hadoop2.7/spark-assembly-1.6.3-hadoop2.7.3.jar;
 
+set spark.yarn.archive=hdfs://csdncluster/apps/spark/jars-2.2.0-bin-hadoop2.7/jars.zip;
+
+
+
+<property>
+  <name>spark.yarn.jar</name>
+  <value>hdfs://csdncluster/apps/spark/jars-1.6.3-bin-hadoop2.7/spark-assembly-1.6.3-hadoop2.7.3.jar</value>
+</property>
 
 
 Tuning Details

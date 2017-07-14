@@ -1,0 +1,13 @@
+开启推测机制
+
+推测机制后，如果集群中，某一台机器的几个task特别慢，推测机制会将任务分配到其他机器执行，最后Spark会选取最快的作为最终结果。
+
+在spark-default.conf 中添加：spark.speculation true
+
+推测机制与以下几个参数有关：
+
+1. spark.speculation.interval 100：检测周期，单位毫秒；
+
+2. spark.speculation.quantile 0.75：完成task的百分比时启动推测；
+
+3. spark.speculation.multiplier 1.5：比其他的慢多少倍时启动推测。
