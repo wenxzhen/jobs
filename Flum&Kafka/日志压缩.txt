@@ -1,0 +1,39 @@
+# vi config/server.properties
+delete.topic.enable=true
+log.cleaner.enable=true
+
+bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
+
+bin/kafka-server-start.sh -daemon config/server.properties
+
+bin/kafka-topics.sh --zookeeper localhost:2181 --create \
+ --replication-factor 1 --partitions 1 \
+ --topic compact-topic \
+ --config cleanup.policy=compact \
+ --config min.compaction.lag.ms=600000 \
+ --config delete.retention.ms=86400000
+
+bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic compact-topic \
+ --config min.compaction.lag.ms=600000
+ 
+bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic compact-topic
+
+> Topic:compact-topic	PartitionCount:1	ReplicationFactor:1	Configs:min.compaction.lag.ms=600000,delete.retention.ms=86400000,cleanup.policy=compact
+	Topic: compact-topic	Partition: 0	Leader: 0	Replicas: 0	Isr: 0
+	
+bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic compact-topic --from-beginning
+
+bin/kafka-topics.sh --delete  --zookeeper localhost:2181 --topic compact-topic
+	
+	
+	
+	
+	
+
+
+bin/kafka-topics --create --zookeeper csdn-hdp-dn-22.dataservice.net:2181 --replication-factor 3 --partitions 3 --topic test
+
+
+bin/kafka-topics --describe --zookeeper csdn-hdp-dn-22.dataservice.net:2181  --topic test
+
+86400
