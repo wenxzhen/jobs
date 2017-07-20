@@ -1,1 +1,3 @@
 cat config/server.properties | egrep ^[^#].*
+
+grep -v '^#' config/server.properties
