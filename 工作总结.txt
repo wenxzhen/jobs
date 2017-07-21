@@ -14,4 +14,11 @@
 采用 Canal + Kafka 增量接入 视觉中国的 mysql数据，导入到Hive、然后采用Kylin + Saiku 进行数据的多维分析和展示
 
 
-4、Code华为企业版 GitLog数据分析
+4、Isource(华为定制版的Code) GitLog数据分析
+将 Code 的gitlog 导入Hive，利用Kylin + DataSeee 进行多维分析，主要针对华为内部组织，项目等维度对代码提交的数据分析。
+DataSeee（CSDN自研的数据分析工具，集成了一些Saiku和kylin的一些特性）
+
+
+
+每天将新增的巡检报告上传到HDFS，利用MR将解析巡检报告将设备信息和特性信息保存到HBase,将HBase表映射到Hive表，
+每天定时进行进行各种指标汇总并导出到Mysql，并在WEB页面展示。
