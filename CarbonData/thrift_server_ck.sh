@@ -4,7 +4,7 @@
 
 source /etc/profile
 
-START_SCRIPT=/data/bigdata/spark-2.1.1-bin-hadoop2.7/start-thrift.sh
+START_SCRIPT=start-thrift.sh
 
 pid=`jps -lm | grep 'org.apache.spark.sql.hive.thriftserver.HiveThriftServer2' | awk '{ print $1 }'`
 
@@ -17,5 +17,9 @@ if [ $pid ];then
 fi
 
 echo "Spark ThriftServer is not running !"
+
+echo "cd $SPARK_HOME"
+
+cd $SPARK_HOME
 
 sh $START_SCRIPT
