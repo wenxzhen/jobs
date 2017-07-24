@@ -21,6 +21,8 @@ if [ $pid -a $http_code == '302' ];then
 fi
 
 echo "Spark ThriftServer is not running !"
+echo "HTTP Code: "$http_code
+kill -9 $pid
 
 echo "cd $SPARK_HOME"
 
