@@ -26,4 +26,4 @@ echo "cd $SPARK_HOME"
 
 cd $SPARK_HOME
 
-sh $START_SCRIP
+sh $START_SCRIPT
