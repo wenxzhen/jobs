@@ -1,0 +1,16 @@
+﻿ssh-keygen
+ssh-copy-id HDP-NODE-01
+vi .ssh/id_rsa.pub #删除 username@hostname 部分
+chmod -R 700 /home/hadoop/.ssh
+
+#将 .ssh/* 复制到其他主机
+[hadoop@HDP-NODE-01 ~]$ scp -r .ssh/* hadoop@HDP-NODE-02:/home/hadoop/.ssh/
+hadoop@hdp-node-02's password: 
+authorized_keys                                                                     100%  382     0.4KB/s   00:00    
+id_rsa                                                                              100% 1702     1.7KB/s   00:00    
+id_rsa.pub                                                                          100%  382     0.4KB/s   00:00    
+known_hosts     
+
+scp -r .ssh/* hadoop@HDP-NODE-03:/home/hadoop/.ssh/
+scp -r .ssh/* hadoop@HDP-NODE-04:/home/hadoop/.ssh/
+scp -r .ssh/* hadoop@HDP-CLI-01:/home/hadoop/.ssh/
