@@ -46,16 +46,28 @@ ansible -i all_hosts all -m copy -a "src=/etc/rc.d/rc.local dest=/etc/rc.d/rc.lo
 ansible -i all_hosts all -m shell -a "echo never > /sys/kernel/mm/transparent_hugepage/defrag " --become-user=root --become-method=sudo -b --ask-su-pass
 
 
-
-
-
-
-
-
-
 username soft nofile 32768
 username soft nproc 65536
 username hard nofile 1048576
 username hard nproc unlimited
 username hard memlock unlimited
 username soft memlock unlimited
+
+
+CSDN »·¾³ Centos6.2
+$ /etc/sysctl.conf
+vm.swappiness = 5
+
+$ /etc/rc.local
+# for hadoop , disable thp
+echo never > /sys/kernel/mm/redhat_transparent_hugepage/enabled
+echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag
+
+
+$ /etc/security/limits.conf
+*       soft    nofile  65535
+*       hard    nofile  65535
+hadoop       soft    nproc  32000
+hadoop       hard    nproc  32000
+hadoop       soft    rss    unlimited
+hadoop       hard    rss    unlimited
