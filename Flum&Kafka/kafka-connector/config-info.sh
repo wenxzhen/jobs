@@ -15,4 +15,5 @@ if [ $# -lt 1 ] ; then
    usage
 fi
 
-curl -X DELETE -i ${KAFKA_CONNECTOR}/connectors/$1
+curl -X GET -i  -H "Content-Type: application/json" -H "Accept: application/json" \
+    ${KAFKA_CONNECTOR}/connectors/$1/config

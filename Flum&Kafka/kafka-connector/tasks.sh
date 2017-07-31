@@ -15,4 +15,4 @@ if [ $# -lt 1 ] ; then
    usage
 fi
 
-curl -X DELETE -i ${KAFKA_CONNECTOR}/connectors/$1
+curl -X GET -i ${KAFKA_CONNECTOR}/connectors/$1/tasks
