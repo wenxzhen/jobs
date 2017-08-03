@@ -14,6 +14,7 @@ spark.eventLog.enabled              true
 spark.eventLog.dir                  hdfs://csdncluster/apps/spark/eventLog_2.1.1
 spark.history.fs.logDirectory       hdfs://csdncluster/apps/spark/eventLog_2.1.1
 spark.yarn.historyServer.address    CSDN-HDP-CLI-04:18080
+spark.history.fs.cleaner.enabled	true
 
 spark.yarn.archive                  hdfs://csdncluster/user/spark/spark-2.1.1.jar
 
