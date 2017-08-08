@@ -1,0 +1,13 @@
+CREATE TABLE `kylin_country_hbase`(
+  `country` string, 
+  `latitude` double, 
+  `longitude` double, 
+  `name` string)
+STORED BY
+  'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
+WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,cf1:latitude,cf1:longitude,cf1:name")
+TBLPROPERTIES ("hbase.table.name" = "kylin_country", "hbase.mapred.output.outputtable" = "kylin_country_mapout");
+
+
+INSERT INTO TABLE kylin_country_hbase(country, latitude, longitude, name) SELECT * FROM kylin_country;
+INSERT INTO TABLE kylin_country_hbase  SELECT * FROM kylin_country;
