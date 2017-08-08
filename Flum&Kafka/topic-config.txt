@@ -16,7 +16,7 @@ kafka-topics --zookeeper localhost:2181/kafka --create \
 kafka-topics --zookeeper localhost:2181/kafka  --alter \
  --topic yangxy-test \
  --config retention.ms=604800000 \
- --config retention.bytes=1073741824 \
+ --config retention.bytes=4294967296 \
  --config segment.bytes=1073741824
  
 kafka-topics --describe  --zookeeper localhost:2181/kafka  --topic yangxy-test
