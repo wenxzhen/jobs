@@ -27,6 +27,7 @@ max=`mysql -h$host -u$user  -p$passwd -P$port -e "SELECT max($idcol) FROM  $tabl
 
 for (( i=$min;i<$max;i=i+$step))
 do
-     echo "SELECT * FROM $table where $idcol >=$i limit $step ;"
-     mysql -h$host -u$user  -p$passwd -P$port -e "SELECT * FROM $table where $idcol >=$i limit $step ;" $db | awk 'NR!=1{print $0}' >> $output
+     upperlimit=`expr $i + $step `
+     echo "SELECT * FROM $table where $idcol >=$i and $idcol < $upperlimit ;"
+     mysql -h$host -u$user  -p$passwd -P$port -e "SELECT * FROM $table where $idcol >=$i and $idcol < $upperlimit ;" $db | awk 'NR!=1{print $0}' >> $output
 done 
