@@ -62,3 +62,7 @@ hive-2.1.1是基于spark1.6.0编译的
 org.apache.hadoop.hive.ql.exec.spark.status.impl.JobMetricsListener 和
 org.apache.hive.spark.client.RemoteDriver.ClientListener 继承的是org/apache/spark/JavaSparkListener ，而JavaSparkListener在spark2.0以后就不存在了
 需要修改为org.apache.spark.scheduler.SparkListener
+
+
+
+https://github.com/hortonworks-spark/spark-llap
