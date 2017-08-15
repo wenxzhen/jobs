@@ -34,3 +34,30 @@ ln -s /data/bigdata/hive/lib/tephra-hbase-compat-1.0-0.6.0.jar .
 jar cv0f spark-2.1.0.jar -C jars/ .
 
 复制 hbase-site.xml 到 Spark conf 路径下
+
+
+
+CREATE EXTERNAL TABLE articlecontent_txt(
+`id` int, 
+`Content` string)
+row format delimited fields terminated by '\t'
+LOCATION '/orgs/csdn/data/enterprise/blog/articlecontent';
+
+create 'articlecontent','cf1',{ NUMREGIONS => 10 ,SPLITALGO => 'HexStringSplit' }
+count 'articlecontent'
+truncate 'articlecontent'
+
+CREATE EXTERNAL TABLE `articlecontent`(
+  `id` string, 
+  `Content` string)
+STORED BY
+  'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
+WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,cf1:Content")
+TBLPROPERTIES ("hbase.table.name" = "articlecontent");
+
+
+add jar /data/1/usr/local/hive/lib/hbase-common-1.1.1.jar;
+add jar /home/hadoop/hbase-rowkey-1.0-SNAPSHOT.jar;
+CREATE TEMPORARY FUNCTION HBaseSequenceId AS 'net.csdn.udf.HBaseSequenceIdRowKeyUDF';
+
+insert OVERWRITE table articlecontent select HBaseSequenceId(id) as id,Content from articlecontent_txt;

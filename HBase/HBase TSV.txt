@@ -69,3 +69,17 @@ Other options that may be specified with -D include:
 For performance consider the following options:
   -Dmapreduce.map.speculative=false
   -Dmapreduce.reduce.speculative=false
+
+  
+  
+  
+  
+转换成HFile格式存储
+
+hadoop jar hbase-version.jar importtsv -Dimporttsv.columns=HBASE_ROW_KEY,c1,c2 -Dimporttsv.bulk.output=tmp hbase_table hdfs_file  
+生成HFile文件。其中c1,c2是列名，格式为:列族：列名
+
+然后，导入到HBase中：
+
+hadoop jar hbase-version.jar completebulkload /user/hadoop/tmp/cf hbase_table
+这里的路径都是hdfs的路径。
