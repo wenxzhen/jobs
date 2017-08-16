@@ -1,4 +1,4 @@
- 本文主要从基础准备，添加DataNode和添加NodeManager三个部分详细说明在Hadoop2.6.0环境下，如何动态新增节点到集群中。
+﻿ 本文主要从基础准备，添加DataNode和添加NodeManager三个部分详细说明在Hadoop2.6.0环境下，如何动态新增节点到集群中。
 
 基础准备
 
@@ -37,5 +37,12 @@
 在ResourceManager，通过yarn node -list查看集群情况
 
 
+
+
+
+sbin/hadoop-daemon.sh start datanode
+sbin/yarn-daemon.sh start nodemanager
+
 hdfs dfsadmin -refreshNodes
 yarn rmadmin -refreshNodes
+sbin/start-balancer.sh -threshold 5
