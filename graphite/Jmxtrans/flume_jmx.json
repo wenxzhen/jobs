@@ -1,0 +1,99 @@
+{
+  "servers" : [ {
+    "port" : "5445",
+    "host" : "CSDN-FLUME-01",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "resultAlias": "jvm_memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    } ],
+    "numQueryThreads" : 2
+  },
+  {
+    "port" : "5446",
+    "host" : "CSDN-FLUME-01",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.kafka2hdfs"
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "resultAlias": "jvm_memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    } ],
+    "numQueryThreads" : 2
+  },
+  {
+    "port" : "5445",
+    "host" : "CSDN-FLUME-02",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "resultAlias": "jvm_memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    } ],
+    "numQueryThreads" : 2
+  },
+  {
+    "port" : "5446",
+    "host" : "CSDN-FLUME-02",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.kafka2hdfs"
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "resultAlias": "jvm_memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    } ],
+    "numQueryThreads" : 2
+  },
+  {
+    "port" : "5445",
+    "host" : "CSDN-FLUME-03",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "resultAlias": "jvm_memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    } ],
+    "numQueryThreads" : 2
+  },
+  {
+    "port" : "5446",
+    "host" : "CSDN-FLUME-03",
+    "queries" : [ {
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.kafka2hdfs"
+      } ],
+      "obj" : "java.lang:type=Memory",
+      "resultAlias": "jvm_memory",
+      "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    } ],
+    "numQueryThreads" : 2
+  } 
+  ]
+}
