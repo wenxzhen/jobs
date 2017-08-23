@@ -12,6 +12,26 @@
       "obj" : "java.lang:type=Memory",
       "resultAlias": "jvm_memory",
       "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    },{
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "org.apache.flume.source:type=r0",
+      "resultAlias": "source",
+      "attr" : [ "EventReceivedCount", "EventAcceptedCount","OpenConnectionCount"]
+    },{
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "org.apache.flume.channel:type=c0",
+      "resultAlias": "channel",
+      "attr" : [ "EventPutSuccessCount", "EventTakeSuccessCount","EventTakeAttemptCount","EventPutAttemptCount"]
     } ],
     "numQueryThreads" : 2
   },
@@ -44,6 +64,26 @@
       "obj" : "java.lang:type=Memory",
       "resultAlias": "jvm_memory",
       "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    },{
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "org.apache.flume.source:type=r0",
+      "resultAlias": "source",
+      "attr" : [ "EventReceivedCount", "EventAcceptedCount","OpenConnectionCount"]
+    },{
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "org.apache.flume.channel:type=c0",
+      "resultAlias": "channel",
+      "attr" : [ "EventPutSuccessCount", "EventTakeSuccessCount","EventTakeAttemptCount","EventPutAttemptCount"]
     } ],
     "numQueryThreads" : 2
   },
@@ -76,6 +116,26 @@
       "obj" : "java.lang:type=Memory",
       "resultAlias": "jvm_memory",
       "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
+    },{
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "org.apache.flume.source:type=r0",
+      "resultAlias": "source",
+      "attr" : [ "EventReceivedCount", "EventAcceptedCount","OpenConnectionCount"]
+    },{
+      "outputWriters" : [ {
+        "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriterFactory",
+          "port" : 2003,
+          "host" : "CSDN-HDP-MONITOR",
+          "rootPrefix" : "Jmx.flume.http2kafka"
+      } ],
+      "obj" : "org.apache.flume.channel:type=c0",
+      "resultAlias": "channel",
+      "attr" : [ "EventPutSuccessCount", "EventTakeSuccessCount","EventTakeAttemptCount","EventPutAttemptCount"]
     } ],
     "numQueryThreads" : 2
   },
