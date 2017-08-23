@@ -33,7 +33,7 @@
       "resultAlias": "channel",
       "attr" : [ "EventPutSuccessCount", "EventTakeSuccessCount","EventTakeAttemptCount","EventPutAttemptCount"]
     } ],
-    "numQueryThreads" : 2
+    "numQueryThreads" : 4
   },
   {
     "port" : "5446",
@@ -49,7 +49,7 @@
       "resultAlias": "jvm_memory",
       "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
     } ],
-    "numQueryThreads" : 2
+    "numQueryThreads" : 4
   },
   {
     "port" : "5445",
@@ -85,7 +85,7 @@
       "resultAlias": "channel",
       "attr" : [ "EventPutSuccessCount", "EventTakeSuccessCount","EventTakeAttemptCount","EventPutAttemptCount"]
     } ],
-    "numQueryThreads" : 2
+    "numQueryThreads" : 4
   },
   {
     "port" : "5446",
@@ -101,7 +101,7 @@
       "resultAlias": "jvm_memory",
       "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
     } ],
-    "numQueryThreads" : 2
+    "numQueryThreads" : 4
   },
   {
     "port" : "5445",
@@ -137,7 +137,7 @@
       "resultAlias": "channel",
       "attr" : [ "EventPutSuccessCount", "EventTakeSuccessCount","EventTakeAttemptCount","EventPutAttemptCount"]
     } ],
-    "numQueryThreads" : 2
+    "numQueryThreads" : 4
   },
   {
     "port" : "5446",
@@ -153,7 +153,7 @@
       "resultAlias": "jvm_memory",
       "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage"]
     } ],
-    "numQueryThreads" : 2
+    "numQueryThreads" : 4
   } 
   ]
 }
