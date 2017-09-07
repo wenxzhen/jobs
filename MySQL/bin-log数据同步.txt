@@ -1,0 +1,7 @@
+https://github.com/debezium/debezium
+
+https://github.com/alibaba/canal
+
+https://github.com/shyiko/mysql-binlog-connector-java
+
+https://github.com/shyiko/mysql-binlog-connector-java/issues/156
