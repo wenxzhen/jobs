@@ -1,3 +1,7 @@
+在 Linux 中,使用 noatime选项 挂载磁盘以减少不必要的写入
+https://www.centos.org/docs/5/html/Global_File_System/s2-manage-mountnoatime.html
+
+
 1、避免使用swap分区
 [root@master01 hadoop]# cat /proc/sys/vm/swappiness
 30
