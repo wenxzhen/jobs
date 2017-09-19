@@ -46,3 +46,16 @@ sbin/yarn-daemon.sh start nodemanager
 hdfs dfsadmin -refreshNodes
 yarn rmadmin -refreshNodes
 sbin/start-balancer.sh -threshold 5
+
+
+解雇DataNode
+1. Update excludes files on both ANN and SBN in hdfs-site.xml .
+
+<property>    
+<name>dfs.hosts.exclude</name>
+<value>/etc/hadoop/conf/dfs.exclude</value>
+</property>
+
+2. Run "hdfs dfsadmin -refreshNodes" only on ANN. Wait for it to complete.
+
+接下来就可以在Namenode的UI(http://<namenode_fqdn>:50070)上看到对应Datanode会处在Decommissioning状态。完成后，对应的Datanode会处在Decommissioned状态。
