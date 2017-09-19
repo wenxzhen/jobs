@@ -59,3 +59,12 @@ sbin/start-balancer.sh -threshold 5
 2. Run "hdfs dfsadmin -refreshNodes" only on ANN. Wait for it to complete.
 
 接下来就可以在Namenode的UI(http://<namenode_fqdn>:50070)上看到对应Datanode会处在Decommissioning状态。完成后，对应的Datanode会处在Decommissioned状态。
+
+解雇NodeManager 和 解雇DataNode 步骤相同
+1.
+    <property>
+        <name>yarn.resourcemanager.nodes.exclude-path</name>
+        <value>/data/1/usr/local/hadoop/etc/hadoop/nm_exclude</value>
+    </property>
+2.	
+yarn rmadmin -refreshNodes
