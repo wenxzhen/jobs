@@ -1,0 +1,68 @@
+1.安装配置alluxio
+安装包解压到hadoop集群各个节点：alluxio-1.5.0-hadoop-2.7-bin.tar.gz
+在alluxio-env.sh 文件中添加：
+
+export JAVA_HOME=/opt/jdk1.7.0_79
+export ALLUXIO_HOME=/data/bigData/alluxio-1.5.0-hadoop-2.7
+export ALLUXIO_MASTER_HOSTNAME=hadoop001
+
+
+cd $ALLUXIO_HOME/conf
+ln -s $HADOOP_HOME/etc/hadoop/conf/core-site.xml .
+ln -s $HADOOP_HOME/etc/hadoop/conf/hdfs-site.xml .
+
+添加woker hosts to $ALLUXIO_HOME/conf/workers  
+添加master hosts to $ALLUXIO_HOME/conf/masters
+
+配置alluxio-site.properties
+alluxio.master.hostname=hadoop001
+
+2. 配置Hadoop
+以下信息加到core-site.xml 和hdfs-site.xml  该配置使MapReduce识别Alluxio的URI（如alluxio:// ）
+<property>
+  <name>fs.alluxio.impl</name>
+  <value>alluxio.hadoop.FileSystem</value>
+</description>
+</property>
+<property>
+  <name>fs.alluxio-ft.impl</name>
+  <value>alluxio.hadoop.FaultTolerantFileSystem</value>
+</property>
+<property>
+  <name>fs.AbstractFileSystem.alluxio.impl</name>
+  <value>alluxio.hadoop.AlluxioFileSystem</value>
+</description>
+</property>
+
+以下信息加到hadoop-env.sh
+export HADOOP_CLASSPATH=${HADOOP_CLASSPATH}:$ALLUXIO_HOME/client/default/alluxio-1.5.0-default-client.jar
+
+copy $ALLUXIO_HOME/client/default/alluxio-1.5.0-default-client.jar to $HADOOP_HOME/share/hadoop/common/lib
+
+3. 配置hive
+添加以下配置项到你的Hive安装目下的conf目录里的hive-site.xml中：
+<property>
+   <name>fs.defaultFS</name>
+   <value>alluxio://node1:19998</value>
+</property>
+
+copy $ALLUXIO_HOME/client/default/alluxio-1.5.0-default-client.jar to $HIVE_HOME/lib
+
+4. 重启hadoop  stop-all.sh  start-all.sh
+
+5. 启动alluxio
+alluxio format
+alluxio-start.sh all NoMount
+
+6. 重启hive metastore server  之前没有重启 导致报错： No FileSystem for scheme: alluxio
+
+
+
+http://www.jianshu.com/p/ca75a8adb003?from=timeline&isappinstalled=0
+https://my.oschina.net/guol/blog/912773
+http://blog.csdn.net/martin19870726/article/details/54582338
+
+
+
+
+  
