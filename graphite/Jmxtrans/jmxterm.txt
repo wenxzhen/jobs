@@ -1,0 +1,42 @@
+http://wiki.cyclopsgroup.org/jmxterm/manual.html
+https://github.com/jiaqi/jmxterm
+
+java -jar jmxterm-1.0.0-uber.jar -l CSDN-HDP-CLI-06:9092
+
+$>beans
+#domain = JMImplementation:
+JMImplementation:type=MBeanServerDelegate
+#domain = com.oracle.jdbc:
+com.oracle.jdbc:name=sun.misc.Launcher$AppClassLoader@764c12b6,type=diagnosability
+#domain = com.sun.management:
+com.sun.management:type=DiagnosticCommand
+com.sun.management:type=HotSpotDiagnostic
+#domain = debezium.mysql:
+debezium.mysql:context=binlog,server=csdn_blog_db_cnt,type=connector-metrics
+debezium.mysql:context=binlog,server=csdn_blog_db_connctor,type=connector-metrics
+debezium.mysql:context=snapshot,server=csdn_blog_db_cnt,type=connector-metrics
+#domain = java.lang:
+java.lang:name=Code Cache,type=MemoryPool
+
+$>info -b debezium.mysql:type=connector-metrics,context=binlog,server=csdn_blog_db_cnt
+#mbean = debezium.mysql:type=connector-metrics,context=binlog,server=csdn_blog_db_cnt
+#class name = io.debezium.connector.mysql.BinlogReaderMetrics
+# attributes
+  %0   - BinlogFilename (java.lang.String, r)
+  %1   - BinlogPosition (long, r)
+  %2   - Connected (boolean, r)
+  %3   - GtidSet (java.lang.String, r)
+  %4   - LastEvent (java.lang.String, r)
+  %5   - NumberOfDisconnects (long, r)
+  %6   - NumberOfSkippedEvents (long, r)
+  %7   - SecondsBehindMaster (long, r)
+  %8   - SecondsSinceLastEvent (long, r)
+  %9   - TotalNumberOfEventsSeen (long, r)
+# operations
+  %0   - void reset()
+#there's no notifications
+$>
+
+$>get -b debezium.mysql:type=connector-metrics,context=binlog,server=csdn_blog_db_cnt BinlogPosition
+#mbean = debezium.mysql:type=connector-metrics,context=binlog,server=csdn_blog_db_cnt:
+BinlogPosition = 4;
