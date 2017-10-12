@@ -1,3 +1,5 @@
+﻿http://www.alluxio.org/docs/master/cn/
+
 1.安装配置alluxio
 安装包解压到hadoop集群各个节点：alluxio-1.5.0-hadoop-2.7-bin.tar.gz
 在alluxio-env.sh 文件中添加：
