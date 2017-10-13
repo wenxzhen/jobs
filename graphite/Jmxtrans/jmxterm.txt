@@ -40,3 +40,8 @@ $>
 $>get -b debezium.mysql:type=connector-metrics,context=binlog,server=csdn_blog_db_cnt BinlogPosition
 #mbean = debezium.mysql:type=connector-metrics,context=binlog,server=csdn_blog_db_cnt:
 BinlogPosition = 4;
+
+
+
+$ echo "get -b kafka.consumer:client-id=consumer-1,type=consumer-metrics response-rate" | java -jar /tmp/jmxterm-1.0.0-uber.jar -l CSDN-FLUME-02:5446 -v silent -n
+response-rate = 64.48995702131393;
