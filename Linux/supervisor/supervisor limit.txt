@@ -1,0 +1,48 @@
+http://blog.sina.com.cn/s/blog_7de7916a0101ik1f.html
+
+具体服务是由supervisor管理，查看supervisor的limit，也是1024
+查看supervisor启动方式，是由/etc/rc3.d/S64supervisord，启动顺序为64。
+ulimit的max open files是装机时写到/etc/rc.local里面的：
+ulimit -Hn 3000240
+ulimit -Sn 1500240
+而/etc/rc.local的启动顺序是99，也就是最后一个启动的（默认情况下）
+/etc/rc.local的说明为：
+# This script will be executed *after* all the other init scripts.
+关于fs.file-max和ulimit的描述：
+fs.file-max：This file defines a system-wide limit on the number of open files for all processes.
+ulimit -n：The maximum number of open file descriptors
+也就是说，fs.file-max是系统级别的，我们写在了sysctl.conf里面，在rc.sysinit执行时，就已经设定好了kernel parameters
+而ulimit则是shell级别的（Provides control over the resources available to the shell and to processes started by it）
+可以说只要是init fork出来的进程，都受到ulimit的限制，当然同时受到system-wide级别的fs.file-max限制
+所以，rc.local中设置的ulimit -Sn和ulimit -Hn，对supervisor来说，为时已晚。
+解决方案：
+在rc.local中，或者其他晚于rc.local的脚本中，重启启动supervisor或其他服务管理的进程。
+这样这些服务管理进程fork出来的进程，才能使用rc.local的ulimit关于open files的描述。
+
+vi /etc/rc.local
+....
+#enable max open file for supervisord
+service supervisord restart
+
+
+
+cat /proc/<process id>/limits
+
+cat /proc/5211/limits 
+Limit                     Soft Limit           Hard Limit           Units     
+Max cpu time              unlimited            unlimited            seconds   
+Max file size             unlimited            unlimited            bytes     
+Max data size             unlimited            unlimited            bytes     
+Max stack size            10485760             unlimited            bytes     
+Max core file size        0                    unlimited            bytes     
+Max resident set          unlimited            unlimited            bytes     
+Max processes             65536                65536                processes 
+Max open files            65536                65536                files     
+Max locked memory         65536                65536                bytes     
+Max address space         unlimited            unlimited            bytes     
+Max file locks            unlimited            unlimited            locks     
+Max pending signals       256348               256348               signals   
+Max msgqueue size         819200               819200               bytes     
+Max nice priority         0                    0                    
+Max realtime priority     0                    0                    
+Max realtime timeout      unlimited            unlimited            us 
