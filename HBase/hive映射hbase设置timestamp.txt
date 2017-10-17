@@ -1,0 +1,66 @@
+
+truncate 'blog_extend_attr'
+
+insert OVERWRITE table blog_extend_attr select * from blog_score_class_txt;
+
+
+CREATE EXTERNAL TABLE `blog_score_class_txt` (
+  id string,
+  quality_score string,
+  classname string 
+)row format delimited fields terminated by '\001'
+LOCATION '/orgs/csdn/data/enterprise/blog/blog_score_class_txt';
+
+
+CREATE EXTERNAL TABLE `blog_extend_attr`(
+  `id` string, 
+  `quality_score` string,
+  `classname` string
+)
+STORED BY
+  'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
+WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,f:quality_score,f:classname")
+TBLPROPERTIES ("hbase.table.name" = "blog_extend_attr");
+
+
+
+CREATE EXTERNAL TABLE `blog_extend_attr_timestmp`(
+  `id` string, 
+  `quality_score` string,
+  `classname` string,
+  `ts` timestamp
+)
+STORED BY
+  'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
+WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,f:quality_score,f:classname,:timestamp")
+TBLPROPERTIES ("hbase.table.name" = "blog_extend_attr");
+
+
+
+hive> select * from blog_extend_attr_timestmp limit 10;
+OK
+0	0.0	NULL	2017-09-22 21:01:48.406
+10000	0.799	NULL	2017-09-22 21:14:18.832
+10000003	1.5845	NULL	2017-09-22 21:13:52.761
+10000009	0.31999999999999995	NULL	2017-09-22 21:01:48.406
+10000017	0.49300000000000005	NULL	2017-09-22 21:14:18.832
+10000033	0.9155000000000001	NULL	2017-09-22 20:57:37.073
+10000037	1.6005000000000003	计算机理论与基础	2017-09-22 20:57:37.073
+10000045	1.091	移动开发	2017-09-22 21:01:48.406
+10000049	1.624	前端	2017-09-22 21:01:48.406
+10000051	0.2	NULL	2017-09-22 20:57:37.073
+Time taken: 0.373 seconds, Fetched: 10 row(s)
+
+
+
+hive> select count(1) from blog_extend_attr_timestmp where ts > '2017-09-22 21:01:48' and ts < '2017-09-22 21:14:18';
+
+MapReduce Total cumulative CPU time: 4 minutes 42 seconds 450 msec
+Ended Job = job_1507939165224_0967
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 10  Reduce: 1   Cumulative CPU: 282.45 sec   HDFS Read: 58276 HDFS Write: 108 SUCCESS
+Total MapReduce CPU Time Spent: 4 minutes 42 seconds 450 msec
+OK
+40783619
+Time taken: 222.234 seconds, Fetched: 1 row(s)
+hive>
