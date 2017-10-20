@@ -1,0 +1,35 @@
+配置优化都是修改server.properties文件中参数值 
+1.网络和io操作线程配置优化 
+# broker处理消息的最大线程数 
+num.network.threads=xxx 
+# broker处理磁盘IO的线程数 
+num.io.threads=xxx 
+建议配置： 
+一般num.network.threads主要处理网络io，读写缓冲区数据，基本没有io等待，配置线程数量为cpu核数. 
+num.io.threads主要进行磁盘io操作，高峰期可能有些io等待，因此配置需要大些。配置线程数量为cpu核数2倍，最大不超过3倍. 
+
+
+2.log数据文件刷新策略 
+为了大幅度提高producer写入吞吐量，需要定期批量写文件。 
+建议配置： 
+# 每当producer写入10000条消息时，刷数据到磁盘 
+log.flush.interval.messages=10000 
+# 每间隔1秒钟时间，刷数据到磁盘 
+log.flush.interval.ms=1000 
+
+
+3.日志保留策略配置 
+当kafka server的被写入海量消息后，会生成很多数据文件，且占用大量磁盘空间，如果不及时清理，可能磁盘空间不够用，kafka默认是保留7天。 
+建议配置： 
+# 保留三天，也可以更短  
+log.retention.hours=72 
+# 段文件配置1GB，有利于快速回收磁盘空间，重启kafka加载也会加快(如果文件过小，则文件数量比较多， 
+# kafka启动时是单线程扫描目录(log.dir)下所有数据文件) 
+log.segment.bytes=1073741824 
+
+
+4.配置jmx服务 
+kafka server中默认是不启动jmx端口的，需要用户自己配置 
+vi bin/kafka-run-class.sh 
+#最前面添加一行 
+JMX_PORT=8060
