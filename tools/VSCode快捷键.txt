@@ -1,4 +1,4 @@
-VSCode 快捷键 Windows版
+﻿VSCode 快捷键 Windows版
 发布时间: 2017-01-01 16:51 作者: VSCode中文网
 http://www.vscode.org/html/6.html
 VSCode 快捷键 Windows版

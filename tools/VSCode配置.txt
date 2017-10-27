@@ -1,0 +1,9 @@
+// 将设置放入此文件中以覆盖默认设置
+{
+        "editor.fontSize": 22,
+        "window.zoomLevel": 0,
+        "workbench.activityBar.visible": true,
+        "workbench.statusBar.visible": true,
+        "workbench.sideBar.location": "left",
+        "editor.minimap.enabled": false
+}
