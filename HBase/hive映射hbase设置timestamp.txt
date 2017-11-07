@@ -64,3 +64,8 @@ OK
 40783619
 Time taken: 222.234 seconds, Fetched: 1 row(s)
 hive>
+
+INSERT OVERWRITE TABLE blog_extend_attr_txt PARTITION (pdate='2017-10-30') select id,quality_score,classname FROM blog_extend_attr_ts where ts < unix_timestamp('2017-10-30 00:00:00')
+
+ALTER TABLE blog_extend_attr_txt DROP IF EXISTS PARTITION (pdate='2017-10-29');
+show PARTITIONS blog_extend_attr_txt;
