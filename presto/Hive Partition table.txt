@@ -1,0 +1,25 @@
+https://prestodb.io/docs/current/connector/hive.html
+
+$ cat etc/catalog/hive.properties 
+connector.name=hive-hadoop2
+hive.metastore.uri=thrift://CSDN-HDP-NN-03:9083
+hive.config.resources=/data/1/usr/local/hadoop/etc/hadoop/core-site.xml,/data/1/usr/local/hadoop/etc/hadoop/hdfs-site.xml
+hive.non-managed-table-writes-enabled=true
+hive.immutable-partitions=true
+
+
+CREATE TABLE page_view (
+  view_time varchar,
+  user_id varchar,
+  page_url varchar,
+  ds date
+)
+WITH (
+  format = 'ORC',
+  partitioned_by = ARRAY['ds']
+);
+
+insert into page_view  values('test','test','test',date('2017-11-25'));
+
+
+show partitions from page_view;
