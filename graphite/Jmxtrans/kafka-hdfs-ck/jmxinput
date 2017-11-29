@@ -1,0 +1,1 @@
+get -b kafka.consumer:client-id=consumer-2,type=consumer-metrics response-rate
